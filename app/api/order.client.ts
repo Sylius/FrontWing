@@ -20,7 +20,6 @@ export async function fetchOrderFromAPIClient(token: string, throwOnFail = false
     const API_URL = window?.ENV?.API_URL || "";
 
     const response = await fetch(`${API_URL}/api/v2/shop/orders/${token}`);
-
     if (!response.ok) {
         if (throwOnFail) throw new Error("Failed to fetch order");
         return null;
@@ -40,14 +39,11 @@ export async function updateOrderItemAPIClient({
 }) {
     const API_URL = window?.ENV?.API_URL || "";
 
-    const response = await fetch(
-        `${API_URL}/api/v2/shop/orders/${token}/items/${id}`,
-        {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ quantity }),
-        }
-    );
+    const response = await fetch(`${API_URL}/api/v2/shop/orders/${token}/items/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ quantity }),
+    });
 
     if (!response.ok) throw new Error("Failed to update item");
 
@@ -63,60 +59,33 @@ export async function removeOrderItemAPIClient({
 }) {
     const API_URL = window?.ENV?.API_URL || "";
 
-    const response = await fetch(
-        `${API_URL}/api/v2/shop/orders/${token}/items/${id}`,
-        {
-            method: "DELETE",
-        }
-    );
+    const response = await fetch(`${API_URL}/api/v2/shop/orders/${token}/items/${id}`, {
+        method: "DELETE",
+    });
 
     if (!response.ok) throw new Error("Failed to remove item");
 }
 
-export async function attachCustomerToOrderAPIClient({
-                                                         token,
-                                                         customerIri,
-                                                     }: {
-    token: string;
-    customerIri: string;
-}) {
-    const API_URL = window?.ENV?.API_URL || "";
-
-    const response = await fetch(`${API_URL}/api/v2/shop/orders/${token}`, {
-        method: "PATCH",
-        headers: {
-            "Content-Type": "application/merge-patch+json",
-        },
-        body: JSON.stringify({ customer: customerIri }),
-    });
-
-    if (!response.ok) throw new Error("Failed to attach customer to order");
-
-    return await response.json();
-}
-
-export async function updateOrderBillingAddressEmail({
-                                                         token,
-                                                         email,
-                                                     }: {
+export async function setOrderAddressEmailAndAddressesAPIClient(params: {
     token: string;
     email: string;
+    billingAddress: object;
+    shippingAddress: object;
 }) {
+    const { token, email, billingAddress, shippingAddress } = params;
     const API_URL = window?.ENV?.API_URL || "";
 
-    const response = await fetch(`${API_URL}/api/v2/shop/orders/${token}`, {
+    const res = await fetch(`${API_URL}/api/v2/shop/orders/${token}/address`, {
         method: "PATCH",
-        headers: {
-            "Content-Type": "application/merge-patch+json",
-        },
+        headers: { "Content-Type": "application/merge-patch+json" },
         body: JSON.stringify({
-            billingAddress: {
-                email,
-            },
+            email,
+            billingAddress,
+            shippingAddress,
         }),
     });
 
-    if (!response.ok) throw new Error("Failed to update billing address email");
+    if (!res.ok) throw new Error("Failed to set address and email");
 
-    return await response.json();
+    return await res.json();
 }

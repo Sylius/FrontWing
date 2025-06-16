@@ -5,8 +5,7 @@ import {
     fetchOrderFromAPIClient,
     updateOrderItemAPIClient,
     removeOrderItemAPIClient,
-    attachCustomerToOrderAPIClient,
-    updateOrderBillingAddressEmail,
+    setOrderAddressEmailAndAddressesAPIClient,
 } from "~/api/order.client";
 import type { Order } from "~/types/Order";
 import { useCustomer } from "~/context/CustomerContext";
@@ -32,17 +31,16 @@ const getCookieToken = () => {
     return match ? decodeURIComponent(match[2]) : null;
 };
 
-// tymczasowy typ z customer
-type OrderWithMaybeCustomer = Order & {
-    customer?: string | null;
-};
-
-export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({
+                                                                           children,
+                                                                       }) => {
     const queryClient = useQueryClient();
     const [orderToken, setOrderToken] = useState<string | null>(
         typeof window !== "undefined" ? getCookieToken() : null
     );
-    const [activeCouponCode, setActiveCouponCode] = useState<string | null>(null);
+    const [activeCouponCode, setActiveCouponCode] = useState<string | null>(
+        null
+    );
     const { customer } = useCustomer();
 
     const resetCart = async () => {
@@ -63,7 +61,7 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }
     };
 
-    const orderQuery = useQuery<OrderWithMaybeCustomer, Error>({
+    const orderQuery = useQuery<Order, Error>({
         queryKey: ["order"],
         enabled: !!orderToken,
         queryFn: async () => {
@@ -87,43 +85,36 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     });
 
     useEffect(() => {
-        const tryAttachAndSetEmail = async () => {
+        const trySyncCustomerInfo = async () => {
             if (!orderQuery.data || !customer || !orderToken) return;
 
-            const order = orderQuery.data;
+            const { billingAddress, shippingAddress } = orderQuery.data;
+
+            if (!customer.email || !billingAddress) return;
 
             try {
-                // przypnij klienta do zamówienia
-                if (order.customer === null && customer["@id"]) {
-                    await attachCustomerToOrderAPIClient({
-                        token: orderToken,
-                        customerIri: customer["@id"],
-                    });
-                    console.log("[OrderContext] Customer attached to order");
-                }
+                await setOrderAddressEmailAndAddressesAPIClient({
+                    token: orderToken,
+                    email: customer.email as string,
+                    billingAddress: billingAddress as object,
+                    shippingAddress: (shippingAddress ?? billingAddress) as object,
+                });
 
-                // ustaw e-mail, jeśli brak w billingAddress
-                const billingEmail = order.billingAddress?.email;
-                if (!billingEmail && customer.email) {
-                    await updateOrderBillingAddressEmail({
-                        token: orderToken,
-                        email: customer.email,
-                    });
-                    console.log("[OrderContext] Email set on billing address");
-                }
-
-                await orderQuery.refetch();
+                await queryClient.invalidateQueries({ queryKey: ["order"] });
             } catch (e) {
-                console.warn("[OrderContext] Failed attaching customer or setting email:", e);
+                console.warn("[OrderContext] Failed syncing customer email/address:", e);
             }
         };
 
-        tryAttachAndSetEmail();
+        trySyncCustomerInfo();
     }, [customer, orderQuery.data, orderToken]);
 
     const updateMutation = useMutation({
-        mutationFn: (vars: { id: number; quantity: number; token: string }) =>
-            updateOrderItemAPIClient(vars),
+        mutationFn: (vars: {
+            id: number;
+            quantity: number;
+            token: string;
+        }) => updateOrderItemAPIClient(vars),
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ["order"] }),
     });
 
