@@ -1,60 +1,74 @@
-import React, { useEffect, useState } from 'react';
-import CheckoutLayout from '../../layouts/Checkout';
-import { useOrder } from '../../context/OrderContext';
-import Address from '../../components/Address';
-import PaymentsCard from '../../components/order/PaymentsCard';
-import ShipmentsCard from '../../components/order/ShipmentsCard';
-import ProductRow from '../../components/order/ProductRow';
-import { OrderItem } from '../../types/Order';
-import { formatPrice } from '../../utils/price';
-import { useNavigate } from 'react-router-dom';
-import Steps from '../../components/checkout/Steps';
-
+import React, { useEffect, useState } from "react";
+import CheckoutLayout from "../../layouts/Checkout";
+import { useOrder } from "../../context/OrderContext";
+import Address from "../../components/Address";
+import PaymentsCard from "../../components/order/PaymentsCard";
+import ShipmentsCard from "../../components/order/ShipmentsCard";
+import ProductRow from "../../components/order/ProductRow";
+import { OrderItem } from "../../types/Order";
+import { formatPrice } from "../../utils/price";
+import { useNavigate } from "react-router-dom";
+import Steps from "../../components/checkout/Steps";
 
 const SummaryPage: React.FC = () => {
-  const { order, fetchOrder, setOrderToken } = useOrder();
-
+  const { order, fetchOrder, setOrderToken, resetCart } = useOrder();
   const navigate = useNavigate();
 
-  const [extraNotes, setExtraNotes] = useState<string>('');
+  const [extraNotes, setExtraNotes] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    fetchOrder();
+  }, [fetchOrder]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    const orderToken = localStorage.getItem('orderToken');
+    const orderToken = order?.tokenValue;
+    if (!orderToken) {
+      console.warn("❌ Missing order token");
+      return;
+    }
+
+    // 🔍 Diagnostyczne logi
+    console.log("🔁 Submitting order with token:", orderToken);
+    console.log("💳 Order paymentState:", order?.paymentState);
+    console.log("💰 Order total:", order?.total);
 
     try {
       const response = await fetch(
           `${window.ENV?.API_URL}/api/v2/shop/orders/${orderToken}/complete`,
           {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/merge-patch+json' },
+            method: "PATCH",
+            headers: { "Content-Type": "application/merge-patch+json" },
             body: JSON.stringify({ notes: extraNotes }),
           }
       );
 
       if (!response.ok) {
-        throw new Error('Failed to submit order');
+        const text = await response.text();
+        console.error("❌ Failed to complete order");
+        console.error("🧾 Response status:", response.status);
+        console.error("🧾 Response text:", text);
+        throw new Error("Failed to complete order");
       }
 
+      // 🧹 Wyczyść i zresetuj koszyk
       setOrderToken(null);
-      localStorage.removeItem('orderToken');
-      navigate('/order/thank-you', {
-        state: { tokenValue: order?.tokenValue },
+      localStorage.removeItem("orderToken");
+      await resetCart();
+
+      // ✅ Przenieś na stronę podziękowania
+      navigate("/order/thank-you", {
+        state: { tokenValue: orderToken },
       });
     } catch (error) {
-      console.error('Error submitting order:', error);
+      console.error("🚨 Error submitting order:", error);
     } finally {
       setIsSubmitting(false);
     }
   };
-
-
-  useEffect(() => {
-    fetchOrder();
-  }, [fetchOrder]);
 
   return (
       <CheckoutLayout sidebarOn={false}>
@@ -144,7 +158,9 @@ const SummaryPage: React.FC = () => {
                 </tr>
                 <tr>
                   <td className="h5 text-end border-top pt-4 mt-3">Total:</td>
-                  <td className="h5 text-end border-top pt-4 mt-3">${formatPrice(order?.total ?? 0)}</td>
+                  <td className="h5 text-end border-top pt-4 mt-3">
+                    ${formatPrice(order?.total ?? 0)}
+                  </td>
                 </tr>
                 </tbody>
               </table>

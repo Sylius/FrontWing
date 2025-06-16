@@ -97,4 +97,5 @@ export interface Order {
     items?: OrderItem[];
     localeCode?: string;
     paymentState?: string;
+    checkoutCompletedAt?: string;
 }

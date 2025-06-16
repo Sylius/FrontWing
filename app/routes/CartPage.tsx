@@ -53,22 +53,28 @@ export async function loader({ request }: LoaderFunctionArgs) {
     newToken = true;
   }
 
-  const [order, products] = await Promise.all([
-    fetchOrderFromAPI(token, true),
-    fetchCartSuggestions(),
-  ]);
-
   const flash = await getFlashSession(cookieHeader);
   const rawMessages = flash.get("messages");
   const messages = rawMessages ? JSON.parse(rawMessages) : [];
 
-  const headers: HeadersInit = {};
+  const headers: Record<string, string> = {};
   const cookies: string[] = [];
 
   if (newToken) {
     cookies.push(await orderTokenCookie.serialize(token));
   }
 
+  let order = null;
+  try {
+    order = await fetchOrderFromAPI(token, true);
+  } catch (err) {
+    console.warn("🛒 Failed to fetch order in CartPage loader, resetting cart...", err);
+    token = await pickupCart();
+    cookies.push(await orderTokenCookie.serialize(token));
+    order = await fetchOrderFromAPI(token, true);
+  }
+
+  const products = await fetchCartSuggestions();
   cookies.push(await commitFlashSession(flash));
 
   if (cookies.length > 0) {

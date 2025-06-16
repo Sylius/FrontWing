@@ -1,4 +1,3 @@
-// ~/api/order.client.ts
 export async function pickupCartClient(): Promise<string> {
     const API_URL = window?.ENV?.API_URL || "";
 
@@ -13,7 +12,6 @@ export async function pickupCartClient(): Promise<string> {
     const data = await response.json();
 
     document.cookie = `orderToken=${data.tokenValue}; path=/; max-age=2592000; SameSite=Lax`;
-    localStorage.setItem("orderToken", data.tokenValue);
 
     return data.tokenValue;
 }
@@ -42,11 +40,14 @@ export async function updateOrderItemAPIClient({
 }) {
     const API_URL = window?.ENV?.API_URL || "";
 
-    const response = await fetch(`${API_URL}/api/v2/shop/orders/${token}/items/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ quantity }),
-    });
+    const response = await fetch(
+        `${API_URL}/api/v2/shop/orders/${token}/items/${id}`,
+        {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ quantity }),
+        }
+    );
 
     if (!response.ok) throw new Error("Failed to update item");
 
@@ -62,9 +63,60 @@ export async function removeOrderItemAPIClient({
 }) {
     const API_URL = window?.ENV?.API_URL || "";
 
-    const response = await fetch(`${API_URL}/api/v2/shop/orders/${token}/items/${id}`, {
-        method: "DELETE",
-    });
+    const response = await fetch(
+        `${API_URL}/api/v2/shop/orders/${token}/items/${id}`,
+        {
+            method: "DELETE",
+        }
+    );
 
     if (!response.ok) throw new Error("Failed to remove item");
+}
+
+export async function attachCustomerToOrderAPIClient({
+                                                         token,
+                                                         customerIri,
+                                                     }: {
+    token: string;
+    customerIri: string;
+}) {
+    const API_URL = window?.ENV?.API_URL || "";
+
+    const response = await fetch(`${API_URL}/api/v2/shop/orders/${token}`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/merge-patch+json",
+        },
+        body: JSON.stringify({ customer: customerIri }),
+    });
+
+    if (!response.ok) throw new Error("Failed to attach customer to order");
+
+    return await response.json();
+}
+
+export async function updateOrderBillingAddressEmail({
+                                                         token,
+                                                         email,
+                                                     }: {
+    token: string;
+    email: string;
+}) {
+    const API_URL = window?.ENV?.API_URL || "";
+
+    const response = await fetch(`${API_URL}/api/v2/shop/orders/${token}`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/merge-patch+json",
+        },
+        body: JSON.stringify({
+            billingAddress: {
+                email,
+            },
+        }),
+    });
+
+    if (!response.ok) throw new Error("Failed to update billing address email");
+
+    return await response.json();
 }

@@ -21,8 +21,6 @@ import { FlashMessagesProvider } from "~/context/FlashMessagesContext";
 import bootstrapStylesHref from "bootstrap/dist/css/bootstrap.css?url";
 import mainStylesHref from "./assets/scss/main.scss?url";
 
-import { useEffect } from "react";
-
 const queryClient = new QueryClient();
 
 export const loader: LoaderFunction = async () => {
@@ -60,29 +58,6 @@ export const links: LinksFunction = () => [
 
 export default function App() {
     const data = useLoaderData<{ ENV: Record<string, string> }>();
-
-    useEffect(() => {
-        const token = localStorage.getItem("orderToken");
-        const apiUrl = window.ENV?.API_URL;
-
-        if (!token && apiUrl) {
-            fetch(`${apiUrl}/api/v2/shop/orders`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-            })
-                .then((res) => res.json())
-                .then((data) => {
-                    if (data.tokenValue) {
-                        localStorage.setItem("orderToken", data.tokenValue);
-                    }
-                });
-        } else if (token) {
-            fetch("/api/sync-cart", {
-                method: "POST",
-                body: token,
-            });
-        }
-    }, []);
 
     return (
         <html lang="en">

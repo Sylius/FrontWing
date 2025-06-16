@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useLocation } from '@remix-run/react';
 import Header from './../components/layout/checkout/Header';
 import Sidebar from './../components/layout/checkout/Sidebar';
+import { useOrder } from '~/context/OrderContext';
 
 interface CheckoutLayoutProps {
     children: React.ReactNode;
@@ -8,6 +10,13 @@ interface CheckoutLayoutProps {
 }
 
 const CheckoutLayout: React.FC<CheckoutLayoutProps> = ({ children, sidebarOn = true }) => {
+    const location = useLocation();
+    const { fetchOrder } = useOrder();
+
+    useEffect(() => {
+        fetchOrder(); // refetch on route change to refresh order (shipping cost, totals, etc.)
+    }, [location.pathname]);
+
     return (
         <div className="d-flex flex-column min-vh-100 overflow-hidden">
             <Header />

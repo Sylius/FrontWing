@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import CheckoutLayout from '../../layouts/Checkout';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useOrder } from '../../context/OrderContext';
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
 import Steps from '../../components/checkout/Steps';
 import GooglePay from '../../components/checkout/payments/GooglePay';
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
@@ -16,27 +15,25 @@ interface PaymentMethod {
 }
 
 const PaymentPage: React.FC = () => {
-  const { order, fetchOrder } = useOrder();
+  const { order, fetchOrder, orderToken } = useOrder();
   const navigate = useNavigate();
 
   const fetchPaymentMethodsFromAPI = async (): Promise<PaymentMethod[]> => {
-    const response = await fetch(
-        `${window.ENV?.API_URL}/api/v2/shop/orders/${localStorage.getItem(
-            'orderToken'
-        )}/payments/${order?.payments?.[0]?.id}/methods`
-    );
-    if (!response.ok) {
-      throw new Error('Problem with downloading payment methods');
-    }
+    if (!order || !orderToken || !order.payments?.[0]?.id) throw new Error("Missing order info");
 
+    const response = await fetch(
+        `${window.ENV?.API_URL}/api/v2/shop/orders/${orderToken}/payments/${order.payments[0].id}/methods`
+    );
+
+    if (!response.ok) throw new Error('Problem with downloading payment methods');
     const data = await response.json();
     return data['hydra:member'] || [];
   };
 
   const { data: paymentMethods } = useQuery<PaymentMethod[]>({
-    queryKey: ['payment-methods'],
+    queryKey: ['payment-methods', order?.payments?.[0]?.id],
     queryFn: fetchPaymentMethodsFromAPI,
-    enabled: order !== null,
+    enabled: !!order && !!order.payments?.[0]?.id && !!orderToken,
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,7 +41,7 @@ const PaymentPage: React.FC = () => {
   const [hasErrors, setHasErrors] = useState(false);
 
   useEffect(() => {
-    if (paymentMethods && paymentMethods.length > 0 && !paymentMethod) {
+    if (paymentMethods?.length && !paymentMethod) {
       setPaymentMethod(paymentMethods[0].code);
     }
   }, [paymentMethods, paymentMethod]);
@@ -55,9 +52,7 @@ const PaymentPage: React.FC = () => {
 
     try {
       const response = await fetch(
-          `${window.ENV?.API_URL}/api/v2/shop/orders/${localStorage.getItem(
-              'orderToken'
-          )}/payments/${order?.payments?.[0]?.id}`,
+          `${window.ENV?.API_URL}/api/v2/shop/orders/${orderToken}/payments/${order?.payments?.[0]?.id}`,
           {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/merge-patch+json' },
@@ -69,7 +64,7 @@ const PaymentPage: React.FC = () => {
 
       if (!response.ok) {
         setHasErrors(true);
-        throw new Error('Failed to send payment methods');
+        throw new Error('Failed to send payment method');
       }
 
       await fetchOrder();
@@ -87,20 +82,14 @@ const PaymentPage: React.FC = () => {
           <div className="pe-lg-6">
             <Steps activeStep="payment" />
 
-            <form
-                name="sylius_shop_checkout_select_payment"
-                method="post"
-                onSubmit={handleSubmit}
-                noValidate
-            >
+            <form name="sylius_shop_checkout_select_payment" method="post" onSubmit={handleSubmit} noValidate>
               <input type="hidden" name="_method" value="PUT" />
-
               <h5 className="mb-4">Payment #1</h5>
 
               <div className="mb-5">
                 {hasErrors && (
                     <div className="invalid-feedback d-block">
-                      Please select payment method.
+                      Please select a payment method.
                     </div>
                 )}
 
@@ -108,40 +97,29 @@ const PaymentPage: React.FC = () => {
                     <div className="card bg-body-tertiary border-0 mb-3">
                       <div className="card-body">
                         <h6 className="text-danger mb-1">Warning</h6>
-                        <p className="mb-0">
-                          There are currently no payment methods available for your order.
-                        </p>
+                        <p className="mb-0">No payment methods available for your order.</p>
                       </div>
                     </div>
                 )}
 
                 {paymentMethods?.map((method) => (
-                    <div
-                        className="card bg-body-tertiary border-0 mb-3"
-                        key={method.id}
-                    >
+                    <div key={method.id} className="card bg-body-tertiary border-0 mb-3">
                       <label className="card-body">
-                        <div>
-                          <div className="form-check">
-                            <input
-                                type="radio"
-                                id={`payment-method-${method.id}`}
-                                name="sylius_shop_checkout_select_payment[payments][0][method]"
-                                required
-                                className="form-check-input"
-                                onChange={() => setPaymentMethod(method.code)}
-                                checked={paymentMethod === method.code}
-                                value={method.code}
-                            />
-                            <label
-                                className="form-check-label required"
-                                htmlFor={`payment-method-${method.id}`}
-                            >
-                              {method.name}
-                            </label>
-                          </div>
+                        <div className="form-check">
+                          <input
+                              type="radio"
+                              id={`payment-method-${method.id}`}
+                              name="paymentMethod"
+                              required
+                              className="form-check-input"
+                              onChange={() => setPaymentMethod(method.code)}
+                              checked={paymentMethod === method.code}
+                              value={method.code}
+                          />
+                          <label className="form-check-label required" htmlFor={`payment-method-${method.id}`}>
+                            {method.name}
+                          </label>
                         </div>
-
                         <div className="ps-4">
                           <small className="text-black-50">{method.description}</small>
                         </div>
@@ -158,11 +136,7 @@ const PaymentPage: React.FC = () => {
                   Change shipping method
                 </Link>
 
-                <button
-                    type="submit"
-                    className="btn btn-primary btn-icon"
-                    disabled={isSubmitting}
-                >
+                <button type="submit" className="btn btn-primary btn-icon" disabled={isSubmitting}>
                   Next
                   <IconChevronRight stroke={2} />
                 </button>
