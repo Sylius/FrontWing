@@ -23,7 +23,7 @@ interface OrderContextType {
 
 const OrderContext = createContext<OrderContextType | undefined>(undefined);
 
-const getCookieToken = () => {
+const getCookieToken = (): string | null => {
     if (typeof document === "undefined") return null;
     const match = document.cookie.match(/(^| )orderToken=([^;]+)/);
     return match ? decodeURIComponent(match[2]) : null;
@@ -36,17 +36,16 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     useEffect(() => {
         const token = getCookieToken();
-
         if (token) {
-            console.log("🍪 Found order token in cookie:", token);
             setOrderToken(token);
+            console.log("🍪 Found order token in cookie:", token);
         } else {
             console.warn("⚠️ No order token found in cookie. Creating a new one...");
             (async () => {
                 try {
                     const newToken = await pickupCartClient();
-                    setOrderToken(newToken);
                     document.cookie = `orderToken=${newToken}; path=/; max-age=2592000; SameSite=Lax`;
+                    setOrderToken(newToken);
 
                     await fetch("/api/sync-cart", {
                         method: "POST",
@@ -62,7 +61,7 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }, []);
 
     const orderQuery = useQuery<Order, Error>({
-        queryKey: ["order"],
+        queryKey: ["order", orderToken],
         enabled: !!orderToken,
         queryFn: async () => {
             if (!orderToken) throw new Error("Missing order token");
@@ -107,11 +106,19 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         removeMutation.mutate({ id, token: orderToken });
     };
 
+    const fetchOrder = () => {
+        if (!orderToken) {
+            console.warn("❌ Cannot fetch order: missing orderToken");
+            return;
+        }
+        queryClient.invalidateQueries({ queryKey: ["order", orderToken] });
+    };
+
     const resetCart = () => {
         queryClient.removeQueries({ queryKey: ["order"] });
         setOrderToken(null);
-        // ❗️Jeśli chcesz też usunąć cookie: (opcjonalne)
-        // document.cookie = "orderToken=; path=/; max-age=0";
+        document.cookie = "orderToken=; path=/; max-age=0";
+        setActiveCouponCode(null);
     };
 
     return (
@@ -125,7 +132,7 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 removeOrderItem,
                 activeCouponCode,
                 setActiveCouponCode,
-                fetchOrder: orderQuery.refetch,
+                fetchOrder,
                 resetCart,
             }}
         >

@@ -1,5 +1,3 @@
-// ~/routes/CartPage.tsx
-
 import {
   json,
   redirect,
@@ -60,9 +58,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const headers: Record<string, string> = {};
   const cookies: string[] = [];
 
-  if (newToken) {
-    cookies.push(await orderTokenCookie.serialize(token));
-  }
+  cookies.push(await orderTokenCookie.serialize(token));
 
   let order = null;
   try {
@@ -78,7 +74,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   cookies.push(await commitFlashSession(flash));
 
   if (cookies.length > 0) {
-    headers["Set-Cookie"] = cookies as unknown as string;
+    headers["Set-Cookie"] = cookies.join("; ");
   }
 
   return json({ order, token, products, messages }, { headers });
@@ -190,13 +186,13 @@ export default function CartPage() {
   const { order, products, messages } = useLoaderData<typeof loader>();
   const { fetchOrder } = useOrder();
   const fetcher = useFetcher();
-  const items = order.items ?? [];
+  const items = order?.items ?? [];
 
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const couponFromQuery = searchParams.get("appliedCoupon");
 
-  const couponCode = order.promotionCoupon?.code ?? "";
+  const couponCode = order?.promotionCoupon?.code ?? "";
   const isCouponActive = !!couponCode;
 
   const [flashMessages, setFlashMessages] = useState<FlashMessage[]>(messages || []);
@@ -264,8 +260,8 @@ export default function CartPage() {
                             <div className="d-flex flex-wrap">
                               <span className="me-2">Applied coupon:</span>
                               <span className="badge d-flex align-items-center text-bg-secondary">
-                          {couponCode}
-                        </span>
+                                {couponCode}
+                              </span>
                             </div>
                             <button
                                 type="submit"
