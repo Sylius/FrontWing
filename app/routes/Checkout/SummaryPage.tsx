@@ -1,19 +1,18 @@
 import React, { useEffect, useState } from "react";
 import CheckoutLayout from "../../layouts/Checkout";
 import { useOrder } from "../../context/OrderContext";
+import { useNavigate } from "react-router-dom";
+import Steps from "../../components/checkout/Steps";
 import Address from "../../components/Address";
 import PaymentsCard from "../../components/order/PaymentsCard";
 import ShipmentsCard from "../../components/order/ShipmentsCard";
 import ProductRow from "../../components/order/ProductRow";
 import { OrderItem } from "../../types/Order";
 import { formatPrice } from "../../utils/price";
-import { useNavigate } from "react-router-dom";
-import Steps from "../../components/checkout/Steps";
 
 const SummaryPage: React.FC = () => {
-  const { order, fetchOrder, setOrderToken, resetCart } = useOrder();
+  const { order, fetchOrder, resetCart } = useOrder();
   const navigate = useNavigate();
-
   const [extraNotes, setExtraNotes] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -21,24 +20,67 @@ const SummaryPage: React.FC = () => {
     fetchOrder();
   }, [fetchOrder]);
 
+  const attachCustomerToOrder = async (
+      orderToken: string,
+      jwtToken: string,
+      orderData: any
+  ) => {
+    const apiUrl = window.ENV?.API_URL ?? "";
+
+    // Budujemy payload z adresami
+    const payload: any = {
+      billingAddress: orderData.billingAddress,
+      shippingAddress: orderData.shippingAddress,
+    };
+
+    // Dodajemy email tylko gdy order.customer jest null (czyli gość)
+    if (!orderData.customer) {
+      payload.email = orderData.email ?? "";
+    }
+
+    const response = await fetch(`${apiUrl}/api/v2/shop/orders/${orderToken}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${jwtToken}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`Failed to attach customer: ${text}`);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    const orderToken = order?.tokenValue;
-    if (!orderToken) {
+    if (!order?.tokenValue) {
       console.warn("❌ Missing order token");
+      setIsSubmitting(false);
       return;
     }
 
-    // 🔍 Diagnostyczne logi
-    console.log("🔁 Submitting order with token:", orderToken);
-    console.log("💳 Order paymentState:", order?.paymentState);
-    console.log("💰 Order total:", order?.total);
-
     try {
+      const jwtToken = localStorage.getItem("jwtToken");
+      if (!jwtToken) {
+        throw new Error("User not logged in");
+      }
+
+      if (
+          order.billingAddress &&
+          order.shippingAddress &&
+          order.items &&
+          order.items.length > 0
+      ) {
+        await attachCustomerToOrder(order.tokenValue, jwtToken, order);
+        await fetchOrder(); // odśwież po przypięciu klienta, by mieć aktualny order.customer
+      }
+
       const response = await fetch(
-          `${window.ENV?.API_URL}/api/v2/shop/orders/${orderToken}/complete`,
+          `${window.ENV?.API_URL}/api/v2/shop/orders/${order.tokenValue}/complete`,
           {
             method: "PATCH",
             headers: { "Content-Type": "application/merge-patch+json" },
@@ -54,15 +96,8 @@ const SummaryPage: React.FC = () => {
         throw new Error("Failed to complete order");
       }
 
-      // 🧹 Wyczyść i zresetuj koszyk
-      setOrderToken(null);
-      localStorage.removeItem("orderToken");
-      await resetCart();
-
-      // ✅ Przenieś na stronę podziękowania
-      navigate("/order/thank-you", {
-        state: { tokenValue: orderToken },
-      });
+      resetCart();
+      navigate("/order/thank-you", { state: { tokenValue: order.tokenValue } });
     } catch (error) {
       console.error("🚨 Error submitting order:", error);
     } finally {

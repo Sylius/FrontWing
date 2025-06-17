@@ -5,10 +5,8 @@ import {
     fetchOrderFromAPIClient,
     updateOrderItemAPIClient,
     removeOrderItemAPIClient,
-    setOrderAddressEmailAndAddressesAPIClient,
 } from "~/api/order.client";
 import type { Order } from "~/types/Order";
-import { useCustomer } from "~/context/CustomerContext";
 
 interface OrderContextType {
     order: Order | null;
@@ -20,7 +18,7 @@ interface OrderContextType {
     activeCouponCode: string | null;
     setActiveCouponCode: (code: string | null) => void;
     fetchOrder: () => void;
-    resetCart: () => Promise<void>;
+    resetCart: () => void;
 }
 
 const OrderContext = createContext<OrderContextType | undefined>(undefined);
@@ -31,90 +29,52 @@ const getCookieToken = () => {
     return match ? decodeURIComponent(match[2]) : null;
 };
 
-export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({
-                                                                           children,
-                                                                       }) => {
+export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const queryClient = useQueryClient();
-    const [orderToken, setOrderToken] = useState<string | null>(
-        typeof window !== "undefined" ? getCookieToken() : null
-    );
-    const [activeCouponCode, setActiveCouponCode] = useState<string | null>(
-        null
-    );
-    const { customer } = useCustomer();
+    const [orderToken, setOrderToken] = useState<string | null>(null);
+    const [activeCouponCode, setActiveCouponCode] = useState<string | null>(null);
 
-    const resetCart = async () => {
-        try {
-            localStorage.removeItem("orderToken");
-            document.cookie = "orderToken=; Max-Age=0; path=/";
-            setOrderToken(null);
+    useEffect(() => {
+        const token = getCookieToken();
 
-            const newToken = await pickupCartClient();
-            if (newToken) {
-                setOrderToken(newToken);
-                localStorage.setItem("orderToken", newToken);
-                document.cookie = `orderToken=${newToken}; path=/; max-age=2592000; SameSite=Lax`;
-                await queryClient.invalidateQueries({ queryKey: ["order"] });
-            }
-        } catch (err) {
-            console.error("[resetCart] Failed to reset cart:", err);
+        if (token) {
+            console.log("🍪 Found order token in cookie:", token);
+            setOrderToken(token);
+        } else {
+            console.warn("⚠️ No order token found in cookie. Creating a new one...");
+            (async () => {
+                try {
+                    const newToken = await pickupCartClient();
+                    setOrderToken(newToken);
+                    document.cookie = `orderToken=${newToken}; path=/; max-age=2592000; SameSite=Lax`;
+
+                    await fetch("/api/sync-cart", {
+                        method: "POST",
+                        body: newToken,
+                    });
+
+                    console.log("✅ New order token created and synced:", newToken);
+                } catch (e) {
+                    console.error("❌ Failed to create order token on startup:", e);
+                }
+            })();
         }
-    };
+    }, []);
 
     const orderQuery = useQuery<Order, Error>({
         queryKey: ["order"],
         enabled: !!orderToken,
         queryFn: async () => {
-            let token = orderToken;
-
-            if (!token) {
-                token = await pickupCartClient();
-                setOrderToken(token);
-                document.cookie = `orderToken=${token}; path=/; max-age=2592000; SameSite=Lax`;
-            }
-
-            try {
-                return await fetchOrderFromAPIClient(token, true);
-            } catch (error) {
-                console.warn("[OrderContext] Failed to fetch order, resetting cart...");
-                await resetCart();
-                throw error;
-            }
+            if (!orderToken) throw new Error("Missing order token");
+            console.log("📦 Fetching order with token:", orderToken);
+            return await fetchOrderFromAPIClient(orderToken, true);
         },
         refetchOnWindowFocus: false,
     });
 
-    useEffect(() => {
-        const trySyncCustomerInfo = async () => {
-            if (!orderQuery.data || !customer || !orderToken) return;
-
-            const { billingAddress, shippingAddress } = orderQuery.data;
-
-            if (!customer.email || !billingAddress) return;
-
-            try {
-                await setOrderAddressEmailAndAddressesAPIClient({
-                    token: orderToken,
-                    email: customer.email as string,
-                    billingAddress: billingAddress as object,
-                    shippingAddress: (shippingAddress ?? billingAddress) as object,
-                });
-
-                await queryClient.invalidateQueries({ queryKey: ["order"] });
-            } catch (e) {
-                console.warn("[OrderContext] Failed syncing customer email/address:", e);
-            }
-        };
-
-        trySyncCustomerInfo();
-    }, [customer, orderQuery.data, orderToken]);
-
     const updateMutation = useMutation({
-        mutationFn: (vars: {
-            id: number;
-            quantity: number;
-            token: string;
-        }) => updateOrderItemAPIClient(vars),
+        mutationFn: (vars: { id: number; quantity: number; token: string }) =>
+            updateOrderItemAPIClient(vars),
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ["order"] }),
     });
 
@@ -145,6 +105,13 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({
     const removeOrderItem = (id: number) => {
         if (!orderToken) return;
         removeMutation.mutate({ id, token: orderToken });
+    };
+
+    const resetCart = () => {
+        queryClient.removeQueries({ queryKey: ["order"] });
+        setOrderToken(null);
+        // ❗️Jeśli chcesz też usunąć cookie: (opcjonalne)
+        // document.cookie = "orderToken=; path=/; max-age=0";
     };
 
     return (

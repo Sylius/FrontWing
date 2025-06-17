@@ -281,26 +281,6 @@ const ProductPage: React.FC = () => {
         if (code) fetchProduct();
     }, [code]);
 
-    useEffect(() => {
-        if (!orderToken) {
-            (async () => {
-                try {
-                    const token = await pickupCartClient();
-                    console.log("🛒 Created cart token (client):", token);
-                    setOrderToken(token); // z OrderContext
-
-                    // 🆕 sync z serwerem Remix (cookie)
-                    await fetch("/api/sync-cart", {
-                        method: "POST",
-                        body: token,
-                    });
-                } catch (e) {
-                    console.error("❌ Failed to pickup cart on product page", e);
-                }
-            })();
-        }
-    }, [orderToken]);
-
     const handleOptionChange = (opt: string, val: string) => {
         const upd = { ...selectedValues, [opt]: val };
         setSelectedValues(upd);

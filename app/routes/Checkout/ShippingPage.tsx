@@ -16,6 +16,7 @@ import { formatPrice } from "~/utils/price";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import { orderTokenCookie } from "~/utils/cookies.server"; // ✅ POPRAWNY dla loadera i action
 import { fetchOrderFromAPI } from "~/api/order.server";
+import { Link } from "@remix-run/react";
 
 interface ShippingMethod {
   id: number;
@@ -134,10 +135,10 @@ export default function ShippingPage() {
             </div>
 
             <div className="d-flex justify-content-between flex-column flex-sm-row gap-2">
-              <a className="btn btn-light btn-icon" href="/checkout/address">
+              <Link className="btn btn-light btn-icon" to="/checkout/address">
                 <IconChevronLeft stroke={2} />
                 Change address
-              </a>
+              </Link>
 
               <button
                   type="submit"

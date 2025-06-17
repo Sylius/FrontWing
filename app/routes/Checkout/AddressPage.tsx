@@ -39,8 +39,12 @@ const emptyAddress: AddressInterface = {
 
 export async function loader({ request }: LoaderFunctionArgs) {
     const cookie = request.headers.get("Cookie");
+    console.log("🍪 Cookie in AddressPage loader:", cookie);
     const token = await orderTokenCookie.parse(cookie);
-    if (!token) return redirect("/cart");
+    if (!token) {
+        console.warn("🚫 No token parsed in loader");
+        return redirect("/cart");
+    }
 
     const order = await fetchOrderFromAPI(token, true);
     return json({ order, token });
