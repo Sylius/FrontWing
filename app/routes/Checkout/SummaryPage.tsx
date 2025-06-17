@@ -20,39 +20,6 @@ const SummaryPage: React.FC = () => {
     fetchOrder();
   }, [fetchOrder]);
 
-  const attachCustomerToOrder = async (
-      orderToken: string,
-      jwtToken: string,
-      orderData: any
-  ) => {
-    const apiUrl = window.ENV?.API_URL ?? "";
-
-    // Budujemy payload z adresami
-    const payload: any = {
-      billingAddress: orderData.billingAddress,
-      shippingAddress: orderData.shippingAddress,
-    };
-
-    // Dodajemy email tylko gdy order.customer jest null (czyli gość)
-    if (!orderData.customer) {
-      payload.email = orderData.email ?? "";
-    }
-
-    const response = await fetch(`${apiUrl}/api/v2/shop/orders/${orderToken}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${jwtToken}`,
-      },
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      const text = await response.text();
-      throw new Error(`Failed to attach customer: ${text}`);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -64,21 +31,6 @@ const SummaryPage: React.FC = () => {
     }
 
     try {
-      const jwtToken = localStorage.getItem("jwtToken");
-      if (!jwtToken) {
-        throw new Error("User not logged in");
-      }
-
-      if (
-          order.billingAddress &&
-          order.shippingAddress &&
-          order.items &&
-          order.items.length > 0
-      ) {
-        await attachCustomerToOrder(order.tokenValue, jwtToken, order);
-        await fetchOrder(); // odśwież po przypięciu klienta, by mieć aktualny order.customer
-      }
-
       const response = await fetch(
           `${window.ENV?.API_URL}/api/v2/shop/orders/${order.tokenValue}/complete`,
           {
@@ -88,13 +40,18 @@ const SummaryPage: React.FC = () => {
           }
       );
 
+      const responseText = await response.text();
+
       if (!response.ok) {
-        const text = await response.text();
         console.error("❌ Failed to complete order");
-        console.error("🧾 Response status:", response.status);
-        console.error("🧾 Response text:", text);
+        console.error("📛 Status:", response.status);
+        console.error("📄 Response text:", responseText);
+        alert("❌ Błąd składania zamówienia:\n" + responseText);
         throw new Error("Failed to complete order");
       }
+
+      console.log("✅ Order completed successfully");
+      console.log("📦 Response:", responseText);
 
       resetCart();
       navigate("/order/thank-you", { state: { tokenValue: order.tokenValue } });
@@ -111,21 +68,6 @@ const SummaryPage: React.FC = () => {
           <div className="mx-auto">
             <Steps activeStep="complete" />
             <h1 className="h5 mb-4">Order #{order?.number}</h1>
-
-            {order && (
-                <div className="card border-0 bg-body-tertiary mb-3">
-                  <div className="card-body d-flex flex-column gap-1">
-                    <div className="row">
-                      <div className="col-12 col-sm-4">Currency</div>
-                      <div className="col">{order.currencyCode}</div>
-                    </div>
-                    <div className="row">
-                      <div className="col-12 col-sm-4">Locale</div>
-                      <div className="col">{order.localeCode}</div>
-                    </div>
-                  </div>
-                </div>
-            )}
 
             <form onSubmit={handleSubmit} noValidate>
               <div className="row">
@@ -214,7 +156,7 @@ const SummaryPage: React.FC = () => {
 
               <div className="text-center">
                 <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
-                  Place order
+                  {isSubmitting ? "Placing order..." : "Place order"}
                 </button>
               </div>
             </form>

@@ -72,10 +72,24 @@ export default function LoginPage() {
 
             localStorage.setItem("jwtToken", data.token);
             localStorage.setItem("userUrl", data.customer);
-
             console.log("✅ Login success. JWT token and userUrl stored.");
 
             await refetchCustomer();
+
+            // ✅ Tworzymy nowe zamówienie po loginie
+            const orderRes = await fetch(`${apiUrl}/api/v2/shop/orders`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${data.token}`,
+                },
+            });
+
+            const order = await orderRes.json();
+            if (order.tokenValue) {
+                document.cookie = `orderToken=${order.tokenValue}; path=/;`;
+                console.log("🛒 New order created for logged in customer:", order.tokenValue);
+            }
 
             navigate("/account/dashboard", { replace: true });
         } catch (err) {
