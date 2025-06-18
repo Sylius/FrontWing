@@ -1,3 +1,5 @@
+// ~/routes/checkout/AddressPage.tsx
+
 import {
     json,
     type LoaderFunctionArgs,
@@ -16,7 +18,7 @@ import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import { useCustomer } from "~/context/CustomerContext";
 import { useOrder } from "~/context/OrderContext";
 import { Link } from "@remix-run/react";
-import { orderTokenCookie } from "~/utils/cookies.server"; // ✅ POPRAWNY dla loadera i action
+import { orderTokenCookie } from "~/utils/cookies.server";
 import { fetchOrderFromAPI } from "~/api/order.server";
 import type { AddressInterface, Order } from "~/types/Order";
 import type { Customer } from "~/types/Customer";
@@ -39,12 +41,8 @@ const emptyAddress: AddressInterface = {
 
 export async function loader({ request }: LoaderFunctionArgs) {
     const cookie = request.headers.get("Cookie");
-    console.log("🍪 Cookie in AddressPage loader:", cookie);
     const token = await orderTokenCookie.parse(cookie);
-    if (!token) {
-        console.warn("🚫 No token parsed in loader");
-        return redirect("/cart");
-    }
+    if (!token) return redirect("/cart");
 
     const order = await fetchOrderFromAPI(token, true);
     return json({ order, token });
@@ -85,7 +83,7 @@ export async function action({ request }: ActionFunctionArgs) {
     });
 
     if (!res.ok) {
-        console.error("Failed to update order");
+        console.error("❌ Failed to update order");
         return redirect("/checkout/address?error=1");
     }
 
@@ -142,49 +140,10 @@ export default function AddressPage() {
     }, [order]);
 
     useEffect(() => {
-        if (
-            typeof window === "undefined" ||
-            !customer ||
-            !customer["@id"] ||
-            localStorage.getItem("defaultAddressLoaded") === "1"
-        ) {
-            return;
+        if (customer && customer.email) {
+            setEmail(customer.email);
         }
-
-        const customerId = customer["@id"].split("/").pop();
-        if (!customerId) return;
-
-        fetch(`${API_URL}/api/v2/shop/customers/${customerId}`, {
-            headers: {
-                Authorization: `Bearer ${JWT}`,
-            },
-        })
-            .then((res) => res.json())
-            .then(async (data: Customer) => {
-                if (!data.defaultAddress) return;
-
-                const defaultAddressId =
-                    typeof data.defaultAddress === "string"
-                        ? data.defaultAddress.split("/").pop()
-                        : data.defaultAddress["@id"]?.split("/").pop();
-
-                if (!defaultAddressId) return;
-
-                const addressRes = await fetch(`${API_URL}/api/v2/shop/addresses/${defaultAddressId}`, {
-                    headers: {
-                        Authorization: `Bearer ${JWT}`,
-                    },
-                });
-
-                if (!addressRes.ok) return;
-
-                const address = await addressRes.json();
-                setBillingAddress(address);
-                setShippingAddress(address);
-                localStorage.setItem("defaultAddressLoaded", "1");
-            })
-            .catch((err) => console.error("Could not load default customer address", err));
-    }, [customer, API_URL, JWT]);
+    }, [customer]);
 
     const handleChange =
         (setter: React.Dispatch<React.SetStateAction<AddressInterface>>) =>
@@ -192,18 +151,6 @@ export default function AddressPage() {
                 const { name, value } = e.target;
                 setter((prev) => ({ ...prev, [name.split("_")[1]]: value }));
             };
-
-    const handleSelectAddress = (
-        id: string,
-        setter: React.Dispatch<React.SetStateAction<AddressInterface>>,
-        setSelected: React.Dispatch<React.SetStateAction<number | null>>
-    ) => {
-        const found = addressBook.find((a) => String(a.id) === id);
-        if (found) {
-            setter(found);
-            setSelected(Number(id));
-        }
-    };
 
     const renderAddressForm = (
         prefix: string,
@@ -218,7 +165,13 @@ export default function AddressPage() {
                     <select
                         className="form-select"
                         value={selectedId ?? ""}
-                        onChange={(e) => handleSelectAddress(e.target.value, setAddress, setSelectedId)}
+                        onChange={(e) => {
+                            const found = addressBook.find((a) => String(a.id) === e.target.value);
+                            if (found) {
+                                setAddress(found);
+                                setSelectedId(Number(e.target.value));
+                            }
+                        }}
                     >
                         <option value="">Select address from my book</option>
                         {addressBook.map((a) => (
@@ -229,57 +182,28 @@ export default function AddressPage() {
                     </select>
                 </div>
             )}
-            {/* pola formularza jak wcześniej */}
+            {/* pola formularza */}
             <div className="row">
                 <div className="col-md-6 mb-3">
                     <label className="form-label">First name</label>
-                    <input
-                        name={`${prefix}_firstName`}
-                        className="form-control"
-                        required
-                        value={address.firstName}
-                        onChange={handleChange(setAddress)}
-                    />
+                    <input name={`${prefix}_firstName`} className="form-control" required value={address.firstName} onChange={handleChange(setAddress)} />
                 </div>
                 <div className="col-md-6 mb-3">
                     <label className="form-label">Last name</label>
-                    <input
-                        name={`${prefix}_lastName`}
-                        className="form-control"
-                        required
-                        value={address.lastName}
-                        onChange={handleChange(setAddress)}
-                    />
+                    <input name={`${prefix}_lastName`} className="form-control" required value={address.lastName} onChange={handleChange(setAddress)} />
                 </div>
             </div>
             <div className="mb-3">
                 <label className="form-label">Company</label>
-                <input
-                    name={`${prefix}_company`}
-                    className="form-control"
-                    value={address.company ?? ""}
-                    onChange={handleChange(setAddress)}
-                />
+                <input name={`${prefix}_company`} className="form-control" value={address.company ?? ""} onChange={handleChange(setAddress)} />
             </div>
             <div className="mb-3">
                 <label className="form-label">Street</label>
-                <input
-                    name={`${prefix}_street`}
-                    className="form-control"
-                    required
-                    value={address.street}
-                    onChange={handleChange(setAddress)}
-                />
+                <input name={`${prefix}_street`} className="form-control" required value={address.street} onChange={handleChange(setAddress)} />
             </div>
             <div className="mb-3">
                 <label className="form-label">Country</label>
-                <select
-                    name={`${prefix}_countryCode`}
-                    className="form-select"
-                    required
-                    value={address.countryCode}
-                    onChange={handleChange(setAddress)}
-                >
+                <select name={`${prefix}_countryCode`} className="form-select" required value={address.countryCode} onChange={handleChange(setAddress)}>
                     <option value="">Select</option>
                     {countries.map((c) => (
                         <option key={c.code} value={c.code}>
@@ -290,32 +214,15 @@ export default function AddressPage() {
             </div>
             <div className="mb-3">
                 <label className="form-label">City</label>
-                <input
-                    name={`${prefix}_city`}
-                    className="form-control"
-                    required
-                    value={address.city}
-                    onChange={handleChange(setAddress)}
-                />
+                <input name={`${prefix}_city`} className="form-control" required value={address.city} onChange={handleChange(setAddress)} />
             </div>
             <div className="mb-3">
                 <label className="form-label">Postcode</label>
-                <input
-                    name={`${prefix}_postcode`}
-                    className="form-control"
-                    required
-                    value={address.postcode}
-                    onChange={handleChange(setAddress)}
-                />
+                <input name={`${prefix}_postcode`} className="form-control" required value={address.postcode} onChange={handleChange(setAddress)} />
             </div>
             <div className="mb-4">
                 <label className="form-label">Phone</label>
-                <input
-                    name={`${prefix}_phoneNumber`}
-                    className="form-control"
-                    value={address.phoneNumber ?? ""}
-                    onChange={handleChange(setAddress)}
-                />
+                <input name={`${prefix}_phoneNumber`} className="form-control" value={address.phoneNumber ?? ""} onChange={handleChange(setAddress)} />
             </div>
         </>
     );
@@ -330,6 +237,7 @@ export default function AddressPage() {
                     <Form method="post" replace={false}>
                         <input type="hidden" name="token" value={token} />
                         <input type="hidden" name="couponCode" value={activeCouponCode ?? ""} />
+                        <input type="hidden" name="email" value={email} />
 
                         <div className="mb-4 h2">Address</div>
 
@@ -349,13 +257,7 @@ export default function AddressPage() {
 
                         <div className="mb-4">
                             <div className="h4 mb-4">Billing address</div>
-                            {renderAddressForm(
-                                "billing",
-                                billingAddress,
-                                setBillingAddress,
-                                selectedBillingId,
-                                setSelectedBillingId
-                            )}
+                            {renderAddressForm("billing", billingAddress, setBillingAddress, selectedBillingId, setSelectedBillingId)}
                         </div>
 
                         <div className="form-check form-switch mb-4">
@@ -364,15 +266,13 @@ export default function AddressPage() {
                                 type="checkbox"
                                 name="useDifferentShipping"
                                 checked={useDifferentShipping}
-                                onChange={() =>
-                                    setUseDifferentShipping((prev) => {
-                                        const next = !prev;
-                                        if (next && !shippingAddress.firstName) {
-                                            setShippingAddress({ ...billingAddress });
-                                        }
-                                        return next;
-                                    })
-                                }
+                                onChange={() => {
+                                    const next = !useDifferentShipping;
+                                    setUseDifferentShipping(next);
+                                    if (next && !shippingAddress.firstName) {
+                                        setShippingAddress({ ...billingAddress });
+                                    }
+                                }}
                                 id="differentShipping"
                             />
                             <label className="form-check-label" htmlFor="differentShipping">
@@ -383,13 +283,7 @@ export default function AddressPage() {
                         {useDifferentShipping && (
                             <div className="mb-4">
                                 <div className="h4 mb-4">Shipping address</div>
-                                {renderAddressForm(
-                                    "shipping",
-                                    shippingAddress,
-                                    setShippingAddress,
-                                    selectedShippingId,
-                                    setSelectedShippingId
-                                )}
+                                {renderAddressForm("shipping", shippingAddress, setShippingAddress, selectedShippingId, setSelectedShippingId)}
                             </div>
                         )}
 
@@ -398,11 +292,7 @@ export default function AddressPage() {
                                 <IconChevronLeft stroke={2} />
                                 Back to cart
                             </Link>
-                            <button
-                                type="submit"
-                                className="btn btn-primary btn-icon"
-                                disabled={isSubmitting}
-                            >
+                            <button type="submit" className="btn btn-primary btn-icon" disabled={isSubmitting}>
                                 Next
                                 <IconChevronRight stroke={2} />
                             </button>

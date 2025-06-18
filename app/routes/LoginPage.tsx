@@ -29,10 +29,7 @@ export default function LoginPage() {
     useEffect(() => {
         if (!resetRequestedShown.current && searchParams.get("resetRequested")) {
             resetRequestedShown.current = true;
-            addMessage(
-                "success",
-                "If the email you specified exists, instructions to reset your password have been sent."
-            );
+            addMessage("success", "If the email you specified exists, instructions to reset your password have been sent.");
             navigate("/login", { replace: true });
         }
     }, [searchParams, addMessage, navigate]);
@@ -40,10 +37,7 @@ export default function LoginPage() {
     useEffect(() => {
         if (!resetSuccessShown.current && searchParams.get("resetSuccessful")) {
             resetSuccessShown.current = true;
-            addMessage(
-                "success",
-                "Your password has been reset successfully! You can now log in."
-            );
+            addMessage("success", "Your password has been reset successfully! You can now log in.");
             navigate("/login", { replace: true });
         }
     }, [searchParams, addMessage, navigate]);
@@ -63,8 +57,7 @@ export default function LoginPage() {
                 body: JSON.stringify({ email, password }),
             });
 
-            const data: { token: string; customer: string; message?: string } =
-                await response.json();
+            const data: { token: string; customer: string; message?: string } = await response.json();
 
             if (!response.ok) {
                 throw new Error(data.message || "Invalid credentials");
@@ -76,21 +69,7 @@ export default function LoginPage() {
 
             await refetchCustomer();
 
-            // ✅ Tworzymy nowe zamówienie po loginie
-            const orderRes = await fetch(`${apiUrl}/api/v2/shop/orders`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${data.token}`,
-                },
-            });
-
-            const order = await orderRes.json();
-            if (order.tokenValue) {
-                document.cookie = `orderToken=${order.tokenValue}; path=/;`;
-                console.log("🛒 New order created for logged in customer:", order.tokenValue);
-            }
-
+            // ✅ NIE tworzymy nowego ordera – zachowujemy stare ciasteczko z orderToken
             navigate("/account/dashboard", { replace: true });
         } catch (err) {
             setError(err instanceof Error ? err.message : "Unexpected error occurred");
