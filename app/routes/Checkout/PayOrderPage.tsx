@@ -4,6 +4,7 @@ import { useLoaderData, Form, useNavigation } from "@remix-run/react";
 import Default from "~/layouts/Default";
 import { IconCreditCard } from "@tabler/icons-react";
 import Skeleton from "react-loading-skeleton";
+import { jwtTokenCookie } from "~/utils/cookies";
 
 interface PaymentMethod {
     id: number;
@@ -40,7 +41,8 @@ export const loader: LoaderFunction = async ({ params, request }) => {
         throw new Response("Missing order token", { status: 400 });
     }
 
-    const jwt = request.headers.get("Cookie")?.match(/jwtToken=([^;]+)/)?.[1] || "";
+    const cookie = request.headers.get("Cookie");
+    const jwt = await jwtTokenCookie.parse(cookie) || "";
     const headers: Record<string, string> = {};
     if (jwt) headers.Authorization = `Bearer ${jwt}`;
 
@@ -81,7 +83,8 @@ export const action: ActionFunction = async ({ request, params }) => {
         throw new Response("Invalid form submission", { status: 400 });
     }
 
-    const jwt = request.headers.get("Cookie")?.match(/jwtToken=([^;]+)/)?.[1] || "";
+    const cookie = request.headers.get("Cookie");
+    const jwt = await jwtTokenCookie.parse(cookie) || "";
     const headers: Record<string, string> = { "Content-Type": "application/merge-patch+json" };
     if (jwt) headers.Authorization = `Bearer ${jwt}`;
 

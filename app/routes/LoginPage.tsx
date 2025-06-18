@@ -4,6 +4,7 @@ import Default from "~/layouts/Default";
 import { useCustomer } from "~/context/CustomerContext";
 import { useFlashMessages } from "~/context/FlashMessagesContext";
 import AuthLeftPanel from "~/components/account/AuthLeftPanel";
+import { useOrder } from "~/context/OrderContext";
 
 const getApiUrl = (): string => {
     if (typeof window !== "undefined" && window.ENV?.API_URL) {
@@ -17,6 +18,8 @@ export default function LoginPage() {
     const navigate = useNavigate();
     const { addMessage } = useFlashMessages();
     const { refetchCustomer } = useCustomer();
+    const { order, orderToken, fetchOrder } = useOrder();
+
     const resetRequestedShown = useRef(false);
     const resetSuccessShown = useRef(false);
 
@@ -70,6 +73,23 @@ export default function LoginPage() {
 
             localStorage.setItem("jwtToken", data.token);
             localStorage.setItem("userUrl", data.customer);
+
+            // ✅ Przypnij istniejące zamówienie do klienta po zalogowaniu
+            if (orderToken && Array.isArray(order?.items) && order.items.length > 0) {
+                await fetch(`${apiUrl}/api/v2/shop/orders/${orderToken}`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${data.token}`,
+                    },
+                    body: JSON.stringify({
+                        email, // lub można pobrać z customer, jeśli potrzebne
+                        billingAddress: order.billingAddress ?? {},
+                        shippingAddress: order.shippingAddress ?? {},
+                    }),
+                });
+                await fetchOrder(); // odśwież dane zamówienia
+            }
 
             await refetchCustomer();
             navigate("/account/dashboard", { replace: true });
@@ -151,12 +171,6 @@ export default function LoginPage() {
                                             {loading ? "Logging in..." : "Login"}
                                         </button>
                                     </div>
-
-                                    <input
-                                        type="hidden"
-                                        name="_csrf_shop_security_token"
-                                        value="dummy"
-                                    />
                                 </form>
 
                                 <div className="d-grid">
