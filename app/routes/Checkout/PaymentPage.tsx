@@ -5,7 +5,6 @@ import { useOrder } from '../../context/OrderContext';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import Steps from '../../components/checkout/Steps';
-import GooglePay from '../../components/checkout/payments/GooglePay';
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
 
 interface PaymentMethod {
@@ -148,8 +147,6 @@ const PaymentPage: React.FC = () => {
                       </label>
                     </div>
                 ))}
-
-                <GooglePay submitFunction={handleSubmit} />
               </div>
 
               <div className="d-flex justify-content-between flex-column flex-sm-row gap-2">
