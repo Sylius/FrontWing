@@ -117,8 +117,8 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const resetCart = () => {
         queryClient.removeQueries({ queryKey: ["order"] });
         setOrderToken(null);
-        document.cookie = "orderToken=; path=/; max-age=0";
         setActiveCouponCode(null);
+        document.cookie = "orderToken=; path=/; max-age=0; SameSite=Lax";
     };
 
     return (

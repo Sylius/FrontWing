@@ -8,7 +8,7 @@ export default function ThankYouPage() {
     const [searchParams] = useSearchParams();
     const location = useLocation();
 
-    const tokenFromQuery = searchParams.get("token");
+    const tokenFromQuery = searchParams.get("token") || searchParams.get("completed");
     const tokenFromState = (location.state as any)?.tokenValue;
     const token =
         tokenFromState ||

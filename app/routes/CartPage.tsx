@@ -45,10 +45,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
   let token = await orderTokenCookie.parse(cookieHeader);
   if (typeof token !== "string") token = token?.token ?? token ?? "";
 
-  let newToken = false;
   if (!token) {
     token = await pickupCart();
-    newToken = true;
   }
 
   const flash = await getFlashSession(cookieHeader);
@@ -64,7 +62,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
   try {
     order = await fetchOrderFromAPI(token, true);
   } catch (err) {
-    console.warn("🛒 Failed to fetch order in CartPage loader, resetting cart...", err);
     token = await pickupCart();
     cookies.push(await orderTokenCookie.serialize(token));
     order = await fetchOrderFromAPI(token, true);
@@ -105,32 +102,18 @@ export async function action({ request }: ActionFunctionArgs) {
     if (intent === "coupon:add" && couponCode) {
       try {
         await applyCouponCode(token, couponCode);
-        flash.flash(
-            "messages",
-            JSON.stringify([
-              {
-                id: "coupon-success",
-                type: "success",
-                content: "Coupon applied successfully",
-              },
-            ])
-        );
+        flash.flash("messages", JSON.stringify([
+          { id: "coupon-success", type: "success", content: "Coupon applied successfully" },
+        ]));
         return redirect(`/cart?appliedCoupon=${encodeURIComponent(couponCode)}`, {
           headers: {
             "Set-Cookie": await commitFlashSession(flash),
           },
         });
       } catch (e) {
-        flash.flash(
-            "messages",
-            JSON.stringify([
-              {
-                id: "coupon-error",
-                type: "error",
-                content: "Invalid coupon code",
-              },
-            ])
-        );
+        flash.flash("messages", JSON.stringify([
+          { id: "coupon-error", type: "error", content: "Invalid coupon code" },
+        ]));
         return redirect("/cart", {
           headers: {
             "Set-Cookie": await commitFlashSession(flash),
@@ -141,16 +124,9 @@ export async function action({ request }: ActionFunctionArgs) {
 
     if (intent === "coupon:remove") {
       await removeCouponCode(token);
-      flash.flash(
-          "messages",
-          JSON.stringify([
-            {
-              id: "coupon-removed",
-              type: "info",
-              content: "Coupon has been removed.",
-            },
-          ])
-      );
+      flash.flash("messages", JSON.stringify([
+        { id: "coupon-removed", type: "info", content: "Coupon has been removed." },
+      ]));
       return redirect("/cart", {
         headers: {
           "Set-Cookie": await commitFlashSession(flash),
@@ -158,16 +134,9 @@ export async function action({ request }: ActionFunctionArgs) {
       });
     }
   } catch (e) {
-    flash.flash(
-        "messages",
-        JSON.stringify([
-          {
-            id: "cart-error",
-            type: "error",
-            content: "An unexpected error occurred",
-          },
-        ])
-    );
+    flash.flash("messages", JSON.stringify([
+      { id: "cart-error", type: "error", content: "An unexpected error occurred" },
+    ]));
     return redirect("/cart", {
       headers: {
         "Set-Cookie": await commitFlashSession(flash),
@@ -183,29 +152,41 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function CartPage() {
-  const { order, products, messages } = useLoaderData<typeof loader>();
-  const { fetchOrder } = useOrder();
+  const { order: contextOrder, orderToken, fetchOrder } = useOrder();
+  const { order: loaderOrder, token: loaderToken, products, messages } = useLoaderData<typeof loader>();
   const fetcher = useFetcher();
-  const items = order?.items ?? [];
+  const [flashMessages, setFlashMessages] = useState<FlashMessage[]>(messages || []);
+
+  const orderMismatch = loaderToken !== orderToken;
+  const currentOrder = orderMismatch ? contextOrder : loaderOrder;
+
+  const items = currentOrder?.items ?? [];
+  const couponCode = currentOrder?.promotionCoupon?.code ?? "";
+  const isCouponActive = !!couponCode;
 
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const couponFromQuery = searchParams.get("appliedCoupon");
 
-  const couponCode = order?.promotionCoupon?.code ?? "";
-  const isCouponActive = !!couponCode;
-
-  const [flashMessages, setFlashMessages] = useState<FlashMessage[]>(messages || []);
+  useEffect(() => {
+    if (!orderToken) return; // 🛑 zabezpieczenie
+    if (orderMismatch) {
+      fetchOrder();
+    }
+  }, [orderMismatch, orderToken]);
 
   useEffect(() => {
+    if (!orderToken) return; // 🛑 zabezpieczenie
     if (couponFromQuery || !couponCode) {
       fetchOrder();
     }
-  }, [couponFromQuery, couponCode]);
+  }, [couponFromQuery, couponCode, orderToken]);
 
   useEffect(() => {
     setFlashMessages(messages || []);
   }, [messages]);
+
+  if (!orderToken) return null; // lub loader, np. <div>Loading...</div>
 
   return (
       <Layout>
@@ -260,8 +241,8 @@ export default function CartPage() {
                             <div className="d-flex flex-wrap">
                               <span className="me-2">Applied coupon:</span>
                               <span className="badge d-flex align-items-center text-bg-secondary">
-                                {couponCode}
-                              </span>
+                          {couponCode}
+                        </span>
                             </div>
                             <button
                                 type="submit"
@@ -318,25 +299,25 @@ export default function CartPage() {
                     <h3 className="mb-4">Summary</h3>
                     <div className="hstack gap-2 mb-2">
                       <div>Items total:</div>
-                      <div className="ms-auto text-end">${formatPrice(order.itemsSubtotal)}</div>
+                      <div className="ms-auto text-end">${formatPrice(currentOrder?.itemsSubtotal ?? 0)}</div>
                     </div>
-                    {!!order.orderPromotionTotal && (
+                    {!!currentOrder?.orderPromotionTotal && (
                         <div className="hstack gap-2 mb-2">
                           <div>Discount:</div>
-                          <div className="ms-auto text-end">${formatPrice(order.orderPromotionTotal)}</div>
+                          <div className="ms-auto text-end">${formatPrice(currentOrder.orderPromotionTotal)}</div>
                         </div>
                     )}
                     <div className="hstack gap-2 mb-2">
                       <div>Estimated shipping cost:</div>
-                      <div className="ms-auto text-end">${formatPrice(order.shippingTotal)}</div>
+                      <div className="ms-auto text-end">${formatPrice(currentOrder?.shippingTotal ?? 0)}</div>
                     </div>
                     <div className="hstack gap-2 mb-2">
                       <div>Taxes total:</div>
-                      <div className="ms-auto text-end">${formatPrice(order.taxTotal)}</div>
+                      <div className="ms-auto text-end">${formatPrice(currentOrder?.taxTotal ?? 0)}</div>
                     </div>
                     <div className="hstack gap-2 border-top pt-4 mt-4">
                       <div className="h5">Order total:</div>
-                      <div className="ms-auto h5 text-end">${formatPrice(order.total)}</div>
+                      <div className="ms-auto h5 text-end">${formatPrice(currentOrder?.total ?? 0)}</div>
                     </div>
                   </div>
                   <div className="d-flex">

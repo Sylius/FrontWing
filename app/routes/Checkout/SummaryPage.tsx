@@ -1,3 +1,4 @@
+// SummaryPage.tsx
 import React, { useEffect, useState } from "react";
 import CheckoutLayout from "../../layouts/Checkout";
 import { useOrder } from "../../context/OrderContext";
@@ -9,9 +10,10 @@ import ShipmentsCard from "../../components/order/ShipmentsCard";
 import ProductRow from "../../components/order/ProductRow";
 import { OrderItem } from "../../types/Order";
 import { formatPrice } from "../../utils/price";
+import { pickupCartClient } from "../../api/order.client";
 
 const SummaryPage: React.FC = () => {
-  const { order, fetchOrder, resetCart } = useOrder();
+  const { order, fetchOrder, resetCart, setOrderToken } = useOrder();
   const navigate = useNavigate();
   const [extraNotes, setExtraNotes] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -54,6 +56,13 @@ const SummaryPage: React.FC = () => {
       console.log("📦 Response:", responseText);
 
       resetCart();
+
+      // 🔄 Create a new cart and update cookie
+      const newToken = await pickupCartClient();
+      document.cookie = `orderToken=${newToken}; path=/; max-age=2592000; SameSite=Lax`;
+      setOrderToken(newToken);
+      console.log("🆕 New cart created with token:", newToken);
+
       navigate("/order/thank-you", { state: { tokenValue: order.tokenValue } });
     } catch (error) {
       console.error("🚨 Error submitting order:", error);
