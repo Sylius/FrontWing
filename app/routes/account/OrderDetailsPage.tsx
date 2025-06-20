@@ -127,10 +127,10 @@ export default function OrderDetailsPage() {
                                 <div className="col">{order.state}</div>
                             </div>
                             <div className="row">
-                                <div className="col-12 col-sm-4">Created at</div>
+                                <div className="col-12 col-sm-4">Completed at</div>
                                 <div className="col">
-                                    {order.createdAt
-                                        ? new Date(order.createdAt).toLocaleString("en-GB", {
+                                    {order.checkoutCompletedAt
+                                        ? new Date(order.checkoutCompletedAt).toLocaleString("en-GB", {
                                             year: "numeric",
                                             month: "2-digit",
                                             day: "2-digit",

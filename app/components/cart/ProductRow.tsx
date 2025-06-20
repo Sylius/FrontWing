@@ -1,128 +1,126 @@
-import React, { useState } from 'react';
-import { OrderItem } from '../../types/Order';
-import { formatPrice } from '../../utils/price';
-import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
-import { IconX } from '@tabler/icons-react';
+import React, { useState, useEffect } from "react";
+import type { OrderItem, ProductVariantDetails, ProductData } from "~/types/Order";
+import { formatPrice } from "~/utils/price";
+import { useFetcher, Link } from "@remix-run/react";
+import { IconX } from "@tabler/icons-react";
 
-interface ProductRowProps {
-  orderItem: OrderItem;
-  onRemove: any;
-  onUpdate: any;
+interface Props {
+    item: OrderItem;
+    fetcher: ReturnType<typeof useFetcher>;
+    fetchOrder: () => void;
 }
 
-const ProductRow: React.FC<ProductRowProps> = ({
-  orderItem,
-  onRemove,
-  onUpdate,
-}) => {
-  const [localQuantity, setLocalQuantity] = useState<string>(
-    orderItem.quantity?.toString() || '1'
-  );
+export default function ProductRow({ item, fetcher, fetchOrder }: Props) {
+    const [qty, setQty] = useState(item.quantity ?? 1);
+    const [product, setProduct] = useState<ProductData | null>(null);
+    const [imageKey] = useState(() => Date.now());
 
-  const fetchVariant = async (): Promise<any> => {
-    const response = await fetch(
-      `${window.ENV?.API_URL}${orderItem.variant}`
-    );
-    if (!response.ok) {
-      throw new Error('Problem z pobieraniem wariantu');
-    }
+    const variant = typeof item.variant === "object" ? item.variant as ProductVariantDetails : null;
 
-    return await response.json();
-  };
+    const productUrl = product?.code ? `/product/${product.code}` : "#";
+    const image = product?.images?.[0]?.path ?? "";
 
-  const { data: variant } = useQuery<any, Error>({
-    queryKey: ['variant', orderItem.id],
-    queryFn: fetchVariant,
-  });
+    useEffect(() => {
+        const fetchProductData = async () => {
+            if (typeof variant?.product === "string") {
+                try {
+                    const response = await fetch(variant.product);
+                    if (response.ok) {
+                        const data = await response.json();
+                        setProduct(data);
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch product data:", error);
+                }
+            } else {
+                setProduct(variant?.product ?? null);
+            }
+        };
 
-  const fetchProduct = async (): Promise<any> => {
-    const response = await fetch(
-      `${window.ENV?.API_URL}${variant.product}`
-    );
-    if (!response.ok) {
-      throw new Error('Problem z pobieraniem produktu');
-    }
+        fetchProductData();
+    }, [variant?.product]);
 
-    return await response.json();
-  };
+    const handleRemove = () => {
+        fetcher.submit(
+            new URLSearchParams({ id: String(item.id), _intent: "remove" }),
+            { method: "post" }
+        );
+        setTimeout(fetchOrder, 50);
+    };
 
-  const { data: product } = useQuery<any, Error>({
-    queryKey: ['product', orderItem.id],
-    queryFn: fetchProduct,
-    enabled: !!variant?.product,
-  });
+    const handleQtyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newQty = Number(e.target.value);
+        setQty(newQty);
+        fetcher.submit(
+            new URLSearchParams({
+                id: String(item.id),
+                quantity: String(newQty),
+                _intent: "update",
+            }),
+            { method: "post" }
+        );
+        setTimeout(fetchOrder, 50);
+    };
 
-  return (
-    <tr>
-      <td>
-        <button
-          className="btn btn-sm btn-transparent px-2"
-          type="button"
-          onClick={() => onRemove(orderItem.id)}
-        >
-          <IconX stroke={2} />
-        </button>
-      </td>
-      <td>
-        <div className="d-flex align-items-center gap-4">
-          <div style={{ width: '6rem' }}>
-            <div
-              className="overflow-auto bg-light rounded-3"
-              style={{ aspectRatio: '3/4' }}
-            >
-              {product?.images?.[0]?.path && (
-                <img
-                  className="img-fluid w-100 h-100 object-fit-cover"
-                  src={product.images[0].path}
-                  alt={variant?.code}
-                />
-              )}
-            </div>
-          </div>
-          <div>
-            <div className="h6">
-              {product?.code ? (
-                <Link
-                  className="link-reset text-break"
-                  to={`/product/${product.code}`}
+    return (
+        <tr>
+            <td>
+                <button
+                    className="btn btn-sm btn-transparent px-2"
+                    type="button"
+                    onClick={handleRemove}
                 >
-                  {orderItem?.productName}
-                </Link>
-              ) : (
-                orderItem?.productName
-              )}
-            </div>
-            <small className="text-body-tertiary">{variant?.code}</small>
-          </div>
-        </div>
-      </td>
-      <td className="text-black-50 text-end">
-        <span>${formatPrice(orderItem.unitPrice)}</span>
-      </td>
-      <td>
-        <div className="mt-3 field mb-3 required">
-          <input
-            type="number"
-            className="form-control"
-            min={1}
-            onChange={(e) => {
-              const newQuantity = e.target.value;
-              setLocalQuantity(newQuantity);
-              const parsedQuantity = parseInt(newQuantity, 10);
-              if (!isNaN(parsedQuantity) && parsedQuantity > 0) {
-                onUpdate(orderItem.id, parsedQuantity);
-              }
-            }}
-            value={localQuantity}
-          />
-        </div>
-      </td>
-      <td className="text-end">
-        <span>${formatPrice(orderItem.subtotal)}</span>
-      </td>
-    </tr>
-  );
-};
+                    <IconX stroke={2} />
+                </button>
+            </td>
 
-export default ProductRow;
+            <td>
+                <div className="d-flex align-items-center gap-3 w-100">
+                    {image && (
+                        <div style={{ width: "8rem" }}>
+                            <img
+                                src={`${image}?v=${imageKey}`}
+                                alt={variant?.code ?? ""}
+                                className="img-fluid rounded"
+                                loading="lazy"
+                            />
+                        </div>
+                    )}
+                    <div className="w-100">
+                        <div className="link-reset text-break">
+                            <Link to={productUrl} className="text-decoration-none">
+                                {item.productName ?? "Unnamed Product"}
+                            </Link>
+                        </div>
+                        {variant?.code && (
+                            <div className="text-body-tertiary small">{variant.code}</div>
+                        )}
+                        {variant?.optionValues?.map((o: any, i: number) => (
+                            <div key={i} className="text-body-tertiary small">
+                                {o.option?.name ?? o.option?.code}: {o.value}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </td>
+
+            <td className="text-black-50 text-end" style={{ width: "90px" }}>
+                ${formatPrice(item.unitPrice)}
+            </td>
+
+            <td className="text-end" style={{ width: "110px" }}>
+                <input
+                    type="number"
+                    className="form-control text-end"
+                    min={1}
+                    value={qty}
+                    onChange={handleQtyChange}
+                />
+            </td>
+
+            <td className="text-end" style={{ width: "90px" }}>
+                ${formatPrice(item.subtotal)}
+            </td>
+        </tr>
+    );
+}

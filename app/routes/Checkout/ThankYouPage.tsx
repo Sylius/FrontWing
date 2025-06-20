@@ -8,9 +8,17 @@ export default function ThankYouPage() {
     const [searchParams] = useSearchParams();
     const location = useLocation();
 
-    const tokenFromQuery = searchParams.get("token");
+    const tokenFromQuery = searchParams.get("token") || searchParams.get("completed");
     const tokenFromState = (location.state as any)?.tokenValue;
-    const token = tokenFromQuery ?? tokenFromState;
+    const token =
+        tokenFromState ||
+        tokenFromQuery ||
+        (typeof document !== "undefined"
+            ? document.cookie
+                .split("; ")
+                .find((row) => row.startsWith("orderToken="))
+                ?.split("=")[1]
+            : null);
 
     return (
         <Layout>
@@ -27,7 +35,10 @@ export default function ThankYouPage() {
                         ) : (
                             <>
                                 {token && (
-                                    <Link to={`/account/orders/${token}/pay`} className="btn btn-primary">
+                                    <Link
+                                        to={`/account/orders/${token}/pay`}
+                                        className="btn btn-primary"
+                                    >
                                         Change payment method
                                     </Link>
                                 )}
