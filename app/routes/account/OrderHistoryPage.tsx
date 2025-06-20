@@ -99,8 +99,8 @@ export default function OrderHistoryPage() {
                                             <tr key={order.tokenValue}>
                                                 <td>#{order.number}</td>
                                                 <td>
-                                                    {order.createdAt
-                                                        ? new Date(order.createdAt).toLocaleDateString('en-GB')
+                                                    {order.checkoutCompletedAt
+                                                        ? new Date(order.checkoutCompletedAt).toLocaleDateString('en-GB')
                                                         : '-'}
                                                 </td>
                                                 <td>
