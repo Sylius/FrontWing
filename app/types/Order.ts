@@ -7,17 +7,19 @@ export interface ProductData {
     images?: ProductImage[];
 }
 
+export interface OptionValue {
+    code: string;
+    value: string;
+    option?: {
+        code: string;
+        name: string;
+    };
+}
+
 export interface ProductVariantDetails {
     code: string;
     name?: string;
-    optionValues?: {
-        code: string;
-        value: string;
-        option?: {
-            code: string;
-            name: string;
-        };
-    }[];
+    optionValues?: OptionValue[];
     product?: ProductData;
 }
 
@@ -68,11 +70,6 @@ export interface Shipment {
     "@id"?: string;
     "@type"?: string;
     method?: string;
-}
-
-export interface ShippingAddress {
-    firstName?: string;
-    lastName?: string;
 }
 
 export interface Order {

@@ -1,4 +1,3 @@
-// app/utils/cookies.server.ts
 import { createCookie } from "@remix-run/node";
 
 export const orderTokenCookie = createCookie("orderToken", {

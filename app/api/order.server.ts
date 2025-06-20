@@ -11,7 +11,7 @@ export const pickupCart = async (): Promise<string> => {
     });
     if (!response.ok) {
         const msg = await response.text();
-        console.error("❌ pickupCart failed:", response.status, msg);
+        console.error("pickupCart failed:", response.status, msg);
         throw new Error("Failed to create a new cart");
     }
     const data = await response.json();
@@ -20,18 +20,15 @@ export const pickupCart = async (): Promise<string> => {
 
 export const fetchOrderFromAPI = async (token: string, withDetails = false): Promise<Order> => {
     const url = `${API_URL}/api/v2/shop/orders/${token}`;
-    console.log("🛒 Fetching order from:", url);
-
     const response = await fetch(url);
 
     if (!response.ok) {
         const msg = await response.text();
-        console.error("❌ fetchOrderFromAPI FAILED:", response.status, msg);
+        console.error("fetchOrderFromAPI failed:", response.status, msg);
         throw new Error("Failed to fetch order");
     }
 
     const order: Order = await response.json();
-
     if (!withDetails || !order.items) return order;
 
     const enrichedItems = await Promise.all(
@@ -56,7 +53,6 @@ export const fetchOrderFromAPI = async (token: string, withDetails = false): Pro
 
                             return { ...val, option };
                         } catch {
-                            console.warn("⚠️ Failed to resolve optionValue:", ov);
                             return null;
                         }
                     })
@@ -75,7 +71,7 @@ export const fetchOrderFromAPI = async (token: string, withDetails = false): Pro
                     },
                 };
             } catch (err) {
-                console.error("❌ Failed to enrich item:", item.id, err);
+                console.error("Failed to enrich item:", item.id, err);
                 return item;
             }
         })
@@ -100,7 +96,7 @@ export const updateOrderItemAPI = async ({
     });
     if (!response.ok) {
         const msg = await response.text();
-        console.error("❌ updateOrderItemAPI failed:", response.status, msg);
+        console.error("updateOrderItemAPI failed:", response.status, msg);
         throw new Error("Failed to update item quantity");
     }
 };
@@ -117,7 +113,7 @@ export const removeOrderItemAPI = async ({
     });
     if (!response.ok) {
         const msg = await response.text();
-        console.error("❌ removeOrderItemAPI failed:", response.status, msg);
+        console.error("removeOrderItemAPI failed:", response.status, msg);
         throw new Error("Failed to remove item from cart");
     }
 };
@@ -126,7 +122,7 @@ export const fetchCartSuggestions = async () => {
     const res = await fetch(`${API_URL}/api/v2/shop/products?itemsPerPage=4`);
     if (!res.ok) {
         const msg = await res.text();
-        console.error("❌ fetchCartSuggestions failed:", res.status, msg);
+        console.error("fetchCartSuggestions failed:", res.status, msg);
         throw new Error("Failed to fetch cart suggestions");
     }
     const data = await res.json();
@@ -141,7 +137,7 @@ export const applyCouponCode = async (token: string, code: string): Promise<void
     });
     if (!res.ok) {
         const msg = await res.text();
-        console.error("❌ applyCouponCode failed:", res.status, msg);
+        console.error("applyCouponCode failed:", res.status, msg);
         throw new Error("Failed to apply coupon code");
     }
 };
@@ -154,7 +150,7 @@ export const removeCouponCode = async (token: string): Promise<void> => {
     });
     if (!res.ok) {
         const msg = await res.text();
-        console.error("❌ removeCouponCode failed:", res.status, msg);
+        console.error("removeCouponCode failed:", res.status, msg);
         throw new Error("Failed to remove coupon code");
     }
 };

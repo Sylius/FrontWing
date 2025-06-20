@@ -303,11 +303,11 @@ const ProductPage: React.FC = () => {
                 }
             );
             if (!resp.ok) throw new Error("add to cart failed");
-            fetchOrder(); // 🔄 odświeżenie danych zamówienia
-            addMessage("success", "Product added to cart"); // ✅ sukces
+            fetchOrder();
+            addMessage("success", "Product added to cart");
         } catch (e) {
             console.error("add to cart error", e);
-            addMessage("error", "Failed to add product to cart"); // ❌ błąd
+            addMessage("error", "Failed to add product to cart");
         } finally {
             setIsAddToCartLoading(false);
         }

@@ -1,5 +1,3 @@
-// ~/routes/checkout/AddressPage.tsx
-
 import {
     json,
     type LoaderFunctionArgs,
@@ -182,7 +180,6 @@ export default function AddressPage() {
                     </select>
                 </div>
             )}
-            {/* pola formularza */}
             <div className="row">
                 <div className="col-md-6 mb-3">
                     <label className="form-label">First name</label>

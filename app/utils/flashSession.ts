@@ -1,4 +1,3 @@
-// utils/flashSession.ts
 import { createCookieSessionStorage } from "@remix-run/node";
 
 const flashCookie = createCookieSessionStorage({

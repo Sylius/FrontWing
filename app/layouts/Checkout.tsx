@@ -14,7 +14,7 @@ const CheckoutLayout: React.FC<CheckoutLayoutProps> = ({ children, sidebarOn = t
     const { fetchOrder } = useOrder();
 
     useEffect(() => {
-        fetchOrder(); // refetch on route change to refresh order (shipping cost, totals, etc.)
+        fetchOrder();
     }, [location.pathname]);
 
     return (

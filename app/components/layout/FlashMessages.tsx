@@ -1,4 +1,3 @@
-// components/layout/FlashMessages.tsx
 import React, { useEffect } from "react";
 import { IconX } from "@tabler/icons-react";
 

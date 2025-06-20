@@ -35,12 +35,17 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const [activeCouponCode, setActiveCouponCode] = useState<string | null>(null);
 
     useEffect(() => {
-        const token = getCookieToken();
-        if (token) {
-            setOrderToken(token);
-            console.log("🍪 Found order token in cookie:", token);
+        const remixToken =
+            typeof window !== "undefined" && (window as any).__remixOrderToken;
+        const cookieToken = getCookieToken();
+
+        const initialToken = remixToken || cookieToken;
+
+        if (initialToken) {
+            setOrderToken(initialToken);
+            console.log("✅ Using initial order token:", initialToken);
         } else {
-            console.warn("⚠️ No order token found in cookie. Creating a new one...");
+            console.warn("⚠️ No order token found. Creating a new one...");
             (async () => {
                 try {
                     const newToken = await pickupCartClient();
@@ -52,7 +57,7 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                         body: newToken,
                     });
 
-                    console.log("✅ New order token created and synced:", newToken);
+                    console.log("🆕 New order token created and synced:", newToken);
                 } catch (e) {
                     console.error("❌ Failed to create order token on startup:", e);
                 }

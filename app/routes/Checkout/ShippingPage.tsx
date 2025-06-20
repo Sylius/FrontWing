@@ -72,7 +72,6 @@ export async function action({ request }: ActionFunctionArgs) {
       }
   );
 
-  // ✅ poprawiony redirect
   return redirect("/checkout/select-payment");
 }
 

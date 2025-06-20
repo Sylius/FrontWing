@@ -21,13 +21,20 @@ import { FlashMessagesProvider } from "~/context/FlashMessagesContext";
 import bootstrapStylesHref from "bootstrap/dist/css/bootstrap.css?url";
 import mainStylesHref from "./assets/scss/main.scss?url";
 
+import { orderTokenCookie } from "~/utils/cookies.server";
+
 const queryClient = new QueryClient();
 
-export const loader: LoaderFunction = async () => {
+export const loader: LoaderFunction = async ({ request }) => {
+    const cookieHeader = request.headers.get("Cookie");
+    const parsed = await orderTokenCookie.parse(cookieHeader);
+    const token = typeof parsed === "string" ? parsed : parsed?.token ?? "";
+
     return json({
         ENV: {
             API_URL: process.env.PUBLIC_API_URL,
         },
+        orderToken: token || null,
     });
 };
 
@@ -36,6 +43,17 @@ function EnvironmentScript({ env }: { env: Record<string, string | undefined> })
         <script
             dangerouslySetInnerHTML={{
                 __html: `window.ENV = ${JSON.stringify(env)};`,
+            }}
+        />
+    );
+}
+
+function RemixOrderTokenScript({ token }: { token: string | null }) {
+    if (!token) return null;
+    return (
+        <script
+            dangerouslySetInnerHTML={{
+                __html: `window.__remixOrderToken = "${token}";`,
             }}
         />
     );
@@ -57,7 +75,10 @@ export const links: LinksFunction = () => [
 ];
 
 export default function App() {
-    const data = useLoaderData<{ ENV: Record<string, string> }>();
+    const data = useLoaderData<{
+        ENV: Record<string, string>;
+        orderToken: string | null;
+    }>();
 
     return (
         <html lang="en">
@@ -81,6 +102,7 @@ export default function App() {
         <ScrollRestoration />
         <Scripts />
         <EnvironmentScript env={data.ENV} />
+        <RemixOrderTokenScript token={data.orderToken} />
         </body>
         </html>
     );

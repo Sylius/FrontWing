@@ -65,11 +65,9 @@ export default function LoginPage() {
 
             localStorage.setItem("jwtToken", data.token);
             localStorage.setItem("userUrl", data.customer);
-            console.log("✅ Login success. JWT token and userUrl stored.");
 
             await refetchCustomer();
 
-            // ✅ NIE tworzymy nowego ordera – zachowujemy stare ciasteczko z orderToken
             navigate("/account/dashboard", { replace: true });
         } catch (err) {
             setError(err instanceof Error ? err.message : "Unexpected error occurred");
