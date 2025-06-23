@@ -429,3 +429,11 @@ input.form-check-input:checked {
   }
 }
 
+.product-image-blurred {
+  filter: blur(3px);
+  opacity: 0.6;
+}
+
+.product-main-image-wrapper img {
+  transition: filter 0.3s ease, opacity 0.3s ease;
+}

@@ -41,6 +41,11 @@ interface Association {
     products: Product[];
 }
 
+const getImageUrl = (path?: string, filter = 'sylius_original') => {
+    if (!path) return '';
+    return `${path}?imageFilter=${filter}`;
+};
+
 const AssociationsSection: React.FC<{
     associations: Association[];
     loading: boolean;
@@ -97,7 +102,7 @@ const AssociationsSection: React.FC<{
 
 const ProductPage: React.FC = () => {
     const { code } = useParams<{ code: string }>();
-    const { orderToken, fetchOrder, setOrderToken } = useOrder();
+    const { orderToken, fetchOrder } = useOrder();
     const { addMessage } = useFlashMessages();
 
     const [product, setProduct] = useState<ApiProduct | null>(null);
@@ -218,7 +223,6 @@ const ProductPage: React.FC = () => {
             const data: ApiProduct = await res.json();
             setProduct(data);
 
-            // breadcrumbs
             const bc = [{ label: 'Home', url: '/' }];
             if (data.productTaxons?.length) {
                 const visited = new Set<string>();
@@ -246,10 +250,8 @@ const ProductPage: React.FC = () => {
             bc.push({ label: data.name, url: `/product/${data.code}` });
             setBreadcrumbs(bc);
 
-            // images
             if (data.images?.length) setActiveImage(data.images[0].path);
 
-            // options / default
             if (data.options?.length) {
                 const opts = await Promise.all(data.options.map(fetchOption));
                 setOptions(opts);
@@ -368,7 +370,26 @@ const ProductPage: React.FC = () => {
         ];
     }, [product, attributes, reviews, allReviewCount, code]);
 
-    const lightboxSlides = product?.images?.map((img) => ({ src: img.path })) ?? [];
+    const [loadedFullImage, setLoadedFullImage] = useState<string | null>(null);
+
+    const baseImage = activeImage ?? product?.images?.[0]?.path;
+
+    useEffect(() => {
+        if (baseImage) {
+            setLoadedFullImage(null); // resetujemy miniaturkę
+            const full = new Image();
+            full.src = getImageUrl(baseImage, 'sylius_original');
+
+            full.onload = () => {
+                console.log('✅ Full-size image loaded:', full.src);
+                setLoadedFullImage(full.src);
+            };
+
+            console.log('🕓 Starting to load full-size image:', full.src);
+        }
+    }, [baseImage]);
+
+    const lightboxSlides = product?.images?.map((img) => ({ src: getImageUrl(img.path) })) ?? [];
     const lightboxIndex =
         product?.images?.findIndex((img) => img.path === activeImage) ?? 0;
 
@@ -393,7 +414,7 @@ const ProductPage: React.FC = () => {
                                                 }`}
                                             >
                                                 <img
-                                                    src={img.path}
+                                                    src={getImageUrl(img.path, 'sylius_shop_product_small_thumbnail')}
                                                     alt="thumbnail"
                                                     className="w-100 h-100 object-fit-cover"
                                                 />
@@ -407,29 +428,33 @@ const ProductPage: React.FC = () => {
                                     className="product-main-image-wrapper overflow-hidden bg-light rounded-3"
                                     onClick={() => setLightboxOpen(true)}
                                 >
-                                    {loading ? (
-                                        <Skeleton style={{ width: '100%', height: '100%' }} />
-                                    ) : (
-                                        product && (
-                                            <img
-                                                src={
-                                                    activeImage ?? product.images[0].path
-                                                }
-                                                alt={product.name}
-                                                className="img-fluid w-100 h-100 object-fit-cover"
-                                            />
-                                        )
-                                    )}
+                                    <img
+                                        src={
+                                            loadedFullImage ??
+                                            getImageUrl(baseImage, 'sylius_shop_product_small_thumbnail')
+                                        }
+                                        alt={product?.name}
+                                        loading="lazy"
+                                        className={`img-fluid w-100 h-100 object-fit-cover ${
+                                            !loadedFullImage ? 'product-image-blurred' : ''
+                                        }`}
+                                        onLoad={() =>
+                                            console.log(
+                                                '📷 IMG tag rendered with:',
+                                                loadedFullImage ? 'FULL IMAGE' : 'THUMBNAIL'
+                                            )
+                                        }
+                                    />
                                 </div>
                             </div>
                         </div>
-                        {!loading && <BootstrapAccordion items={accordionItems} />}
+                        {!loading && <BootstrapAccordion items={accordionItems}/>}
                     </div>
                     <div className="col-12 col-lg-5 col-xl-4 order-lg-1">
                         <div className="sticky-top pt-2">
                             <h1 className="h2 text-wrap mb-4">{product?.name}</h1>
                             {loading ? (
-                                <ReviewSummarySkeleton />
+                                <ReviewSummarySkeleton/>
                             ) : (
                                 product && (
                                     <ReviewSummary
@@ -441,7 +466,7 @@ const ProductPage: React.FC = () => {
                             )}
                             <div className="fs-3 mb-3">
                                 {loading ? (
-                                    <Skeleton width={100} />
+                                    <Skeleton width={100}/>
                                 ) : variant?.price != null ? (
                                     `$${formatPrice(variant.price)}`
                                 ) : (
