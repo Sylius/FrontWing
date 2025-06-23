@@ -17,6 +17,7 @@ export default function LoginPage() {
     const navigate = useNavigate();
     const { addMessage } = useFlashMessages();
     const { refetchCustomer } = useCustomer();
+
     const resetRequestedShown = useRef(false);
     const resetSuccessShown = useRef(false);
 
@@ -28,10 +29,7 @@ export default function LoginPage() {
     useEffect(() => {
         if (!resetRequestedShown.current && searchParams.get("resetRequested")) {
             resetRequestedShown.current = true;
-            addMessage(
-                "success",
-                "If the email you specified exists, instructions to reset your password have been sent."
-            );
+            addMessage("success", "If the email you specified exists, instructions to reset your password have been sent.");
             navigate("/login", { replace: true });
         }
     }, [searchParams, addMessage, navigate]);
@@ -39,10 +37,7 @@ export default function LoginPage() {
     useEffect(() => {
         if (!resetSuccessShown.current && searchParams.get("resetSuccessful")) {
             resetSuccessShown.current = true;
-            addMessage(
-                "success",
-                "Your password has been reset successfully! You can now log in."
-            );
+            addMessage("success", "Your password has been reset successfully! You can now log in.");
             navigate("/login", { replace: true });
         }
     }, [searchParams, addMessage, navigate]);
@@ -72,6 +67,7 @@ export default function LoginPage() {
             localStorage.setItem("userUrl", data.customer);
 
             await refetchCustomer();
+
             navigate("/account/dashboard", { replace: true });
         } catch (err) {
             setError(err instanceof Error ? err.message : "Unexpected error occurred");
@@ -151,12 +147,6 @@ export default function LoginPage() {
                                             {loading ? "Logging in..." : "Login"}
                                         </button>
                                     </div>
-
-                                    <input
-                                        type="hidden"
-                                        name="_csrf_shop_security_token"
-                                        value="dummy"
-                                    />
                                 </form>
 
                                 <div className="d-grid">

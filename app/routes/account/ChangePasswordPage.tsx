@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import Default from "../../layouts/Default.tsx";
-import AccountLayout from "../../layouts/Account.tsx";
-import { useCustomer } from "../../context/CustomerContext.tsx";
+import Default from "../../layouts/Default";
+import AccountLayout from "../../layouts/Account";
+import { useCustomer } from "../../context/CustomerContext";
 import { useNavigate } from "react-router-dom";
-import Loader from "../../components/layout/Loader.tsx";
-import { useFlashMessages } from "../../context/FlashMessagesContext.tsx";
+import Loader from "../../components/layout/Loader";
+import { useFlashMessages } from "../../context/FlashMessagesContext";
 
 const ChangePasswordPage: React.FC = () => {
   const { customer } = useCustomer();

@@ -31,6 +31,15 @@ export interface ProductVariantDetails {
     price: number;
     code: string;
     name?: string;
+    optionValues?: {
+        code: string;
+        value: string;
+        option?: {
+            code: string;
+            name: string;
+        };
+    }[];
+    product?: Product;
 }
 
 export interface Image {
@@ -53,4 +62,34 @@ export interface ProductReview {
     author?: {
         firstName: string | null;
     };
+}
+
+export interface Order {
+    id?: number;
+    tokenValue?: string;
+    items?: OrderItem[];
+    itemsTotal?: number;
+    itemsSubtotal?: number;
+    total?: number;
+    shippingTotal?: number;
+    taxTotal?: number;
+    shippingTaxTotal?: number;
+    shippingState?: string;
+    paymentState?: string;
+    checkoutState?: string;
+    state?: string;
+    orderPromotionTotal?: number;
+    shippingPromotionTotal?: number;
+    promotionCoupon?: {
+        code: string;
+    };
+}
+
+export interface OrderItem {
+    id?: number;
+    productName?: string | null;
+    quantity?: number;
+    unitPrice?: number;
+    subtotal?: number;
+    variant?: string | ProductVariantDetails;
 }

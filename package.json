@@ -23,6 +23,7 @@
     "react-loading-skeleton": "^3.5.0",
     "react-slick": "^0.30.3",
     "slick-carousel": "^1.8.1",
+    "uuid": "^11.1.0",
     "yet-another-react-lightbox": "^3.23.2"
   },
   "devDependencies": {
@@ -30,6 +31,8 @@
     "@types/bootstrap": "^5.2.10",
     "@types/react": "^18.2.20",
     "@types/react-dom": "^18.2.7",
+    "@types/react-slick": "^0.23.13",
+    "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^6.7.4",
     "@typescript-eslint/parser": "^6.7.4",
     "autoprefixer": "^10.4.19",
@@ -48,5 +51,6 @@
   },
   "engines": {
     "node": ">=20.0.0"
-  }
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

@@ -1,5 +1,30 @@
+export interface ProductImage {
+    path: string;
+}
+
+export interface ProductData {
+    code: string;
+    images?: ProductImage[];
+}
+
+export interface OptionValue {
+    code: string;
+    value: string;
+    option?: {
+        code: string;
+        name: string;
+    };
+}
+
+export interface ProductVariantDetails {
+    code: string;
+    name?: string;
+    optionValues?: OptionValue[];
+    product?: ProductData;
+}
+
 export interface OrderItem {
-    variant: string;
+    variant: string | ProductVariantDetails;
     productName?: string | null;
     id?: number;
     quantity?: number;
@@ -47,11 +72,6 @@ export interface Shipment {
     method?: string;
 }
 
-export interface ShippingAddress {
-    firstName?: string;
-    lastName?: string;
-}
-
 export interface Order {
     id?: number;
     number: string;
@@ -68,7 +88,11 @@ export interface Order {
     taxTotal?: number;
     orderPromotionTotal?: number;
     shippingTotal?: number;
+    promotionCoupon?: {
+        code: string;
+    };
     items?: OrderItem[];
     localeCode?: string;
     paymentState?: string;
+    checkoutCompletedAt?: string;
 }

@@ -4,19 +4,13 @@ import { useLoaderData, Form, useNavigation } from "@remix-run/react";
 import Default from "~/layouts/Default";
 import { IconCreditCard } from "@tabler/icons-react";
 import Skeleton from "react-loading-skeleton";
+import type { Order } from "~/types/Order"; // 🟢 używamy Twojego globalnego typu
 
 interface PaymentMethod {
     id: number;
     code: string;
     name: string;
     description?: string;
-}
-
-interface Order {
-    number: string;
-    total: number;
-    items: any[];
-    payments?: ({ id: number; "@id": string } & any)[];
 }
 
 interface LoaderData {
@@ -34,15 +28,13 @@ if (!API_URL) {
     throw new Error("API_URL not defined in window.ENV or process.env.PUBLIC_API_URL");
 }
 
-export const loader: LoaderFunction = async ({ params, request }) => {
+export const loader: LoaderFunction = async ({ params }) => {
     const token = params.token;
     if (!token) {
         throw new Response("Missing order token", { status: 400 });
     }
 
-    const jwt = request.headers.get("Cookie")?.match(/jwtToken=([^;]+)/)?.[1] || "";
     const headers: Record<string, string> = {};
-    if (jwt) headers.Authorization = `Bearer ${jwt}`;
 
     const orderRes = await fetch(`${API_URL}/api/v2/shop/orders/${token}`, { headers });
     if (!orderRes.ok) throw new Response("Failed to load order", { status: 500 });
@@ -60,6 +52,7 @@ export const loader: LoaderFunction = async ({ params, request }) => {
             list = data["hydra:member"] || [];
         }
     }
+
     if (list.length === 0) {
         const fallbackRes = await fetch(`${API_URL}/api/v2/shop/payment-methods`, { headers });
         if (fallbackRes.ok) {
@@ -81,9 +74,9 @@ export const action: ActionFunction = async ({ request, params }) => {
         throw new Response("Invalid form submission", { status: 400 });
     }
 
-    const jwt = request.headers.get("Cookie")?.match(/jwtToken=([^;]+)/)?.[1] || "";
-    const headers: Record<string, string> = { "Content-Type": "application/merge-patch+json" };
-    if (jwt) headers.Authorization = `Bearer ${jwt}`;
+    const headers: Record<string, string> = {
+        "Content-Type": "application/merge-patch+json",
+    };
 
     const orderRes = await fetch(`${API_URL}/api/v2/shop/orders/${token}`, { headers });
     if (!orderRes.ok) throw new Response("Failed to load order for patch", { status: 500 });
@@ -114,9 +107,12 @@ export const action: ActionFunction = async ({ request, params }) => {
 };
 
 export default function PayOrderPage() {
-    const { order, paymentMethods, token } = useLoaderData<LoaderData>();
+    const { order, paymentMethods } = useLoaderData<LoaderData>();
     const navigation = useNavigation();
     const busy = navigation.state !== "idle";
+
+    const total = (order.total ?? 0) / 100;
+    const itemCount = order.items?.length ?? 0;
 
     return (
         <Default>
@@ -126,7 +122,18 @@ export default function PayOrderPage() {
                         {order.number ? `Summary of your order #${order.number}` : <Skeleton width={300} />}
                     </h1>
                     <p className="text-muted mb-4">
-                        {(order.total / 100).toFixed(2)} USD • {order.items.length} items
+                        {total.toFixed(2)} {order.currencyCode} • {itemCount} {itemCount === 1 ? "item" : "items"}
+                        {order.checkoutCompletedAt && (
+                            <>
+                                {" "}
+                                •{" "}
+                                {new Date(order.checkoutCompletedAt).toLocaleDateString(undefined, {
+                                    year: "numeric",
+                                    month: "short",
+                                    day: "numeric",
+                                })}
+                            </>
+                        )}
                     </p>
 
                     <Form method="post">
@@ -148,7 +155,9 @@ export default function PayOrderPage() {
                                             />
                                             <label className="form-check-label">{m.name}</label>
                                         </div>
-                                        {m.description && <small className="text-muted ps-4">{m.description}</small>}
+                                        {m.description && (
+                                            <small className="text-muted ps-4">{m.description}</small>
+                                        )}
                                     </label>
                                 </div>
                             ))
