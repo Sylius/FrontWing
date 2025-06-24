@@ -29,7 +29,6 @@ export default function VerificationPage() {
 
             const API_URL = window.ENV?.API_URL;
             if (!API_URL) {
-                console.error("API_URL is not defined in window.ENV");
                 setStatus("error");
                 setMessage("Configuration error: API URL not set.");
                 return;

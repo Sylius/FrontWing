@@ -81,7 +81,6 @@ export async function action({ request }: ActionFunctionArgs) {
     });
 
     if (!res.ok) {
-        console.error("❌ Failed to update order");
         return redirect("/checkout/address?error=1");
     }
 

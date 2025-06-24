@@ -169,14 +169,14 @@ export default function CartPage() {
   const couponFromQuery = searchParams.get("appliedCoupon");
 
   useEffect(() => {
-    if (!orderToken) return; // 🛑 zabezpieczenie
+    if (!orderToken) return;
     if (orderMismatch) {
       fetchOrder();
     }
   }, [orderMismatch, orderToken]);
 
   useEffect(() => {
-    if (!orderToken) return; // 🛑 zabezpieczenie
+    if (!orderToken) return;
     if (couponFromQuery || !couponCode) {
       fetchOrder();
     }
@@ -186,7 +186,7 @@ export default function CartPage() {
     setFlashMessages(messages || []);
   }, [messages]);
 
-  if (!orderToken) return null; // lub loader, np. <div>Loading...</div>
+  if (!orderToken) return null;
 
   return (
       <Layout>

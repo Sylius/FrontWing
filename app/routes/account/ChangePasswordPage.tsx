@@ -58,7 +58,7 @@ const ChangePasswordPage: React.FC = () => {
       navigate("/account/dashboard");
       addMessage("success", "Password changed successfully");
     } catch (err) {
-      console.log(err);
+      console.error(err);
     } finally {
       setLoading(false);
     }

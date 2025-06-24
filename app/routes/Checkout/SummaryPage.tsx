@@ -1,4 +1,3 @@
-// SummaryPage.tsx
 import React, { useEffect, useState } from "react";
 import CheckoutLayout from "../../layouts/Checkout";
 import { useOrder } from "../../context/OrderContext";
@@ -27,7 +26,7 @@ const SummaryPage: React.FC = () => {
     setIsSubmitting(true);
 
     if (!order?.tokenValue) {
-      console.warn("❌ Missing order token");
+      console.warn(" Missing order token");
       setIsSubmitting(false);
       return;
     }
@@ -45,27 +44,19 @@ const SummaryPage: React.FC = () => {
       const responseText = await response.text();
 
       if (!response.ok) {
-        console.error("❌ Failed to complete order");
-        console.error("📛 Status:", response.status);
-        console.error("📄 Response text:", responseText);
-        alert("❌ Błąd składania zamówienia:\n" + responseText);
+        alert("Order checkout error:\n" + responseText);
         throw new Error("Failed to complete order");
       }
 
-      console.log("✅ Order completed successfully");
-      console.log("📦 Response:", responseText);
-
       resetCart();
 
-      // 🔄 Create a new cart and update cookie
       const newToken = await pickupCartClient();
       document.cookie = `orderToken=${newToken}; path=/; max-age=2592000; SameSite=Lax`;
       setOrderToken(newToken);
-      console.log("🆕 New cart created with token:", newToken);
 
       navigate("/order/thank-you", { state: { tokenValue: order.tokenValue } });
     } catch (error) {
-      console.error("🚨 Error submitting order:", error);
+      console.error("Error submitting order:", error);
     } finally {
       setIsSubmitting(false);
     }

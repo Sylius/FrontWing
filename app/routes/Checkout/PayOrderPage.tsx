@@ -4,7 +4,7 @@ import { useLoaderData, Form, useNavigation } from "@remix-run/react";
 import Default from "~/layouts/Default";
 import { IconCreditCard } from "@tabler/icons-react";
 import Skeleton from "react-loading-skeleton";
-import type { Order } from "~/types/Order"; // 🟢 używamy Twojego globalnego typu
+import type { Order } from "~/types/Order";
 
 interface PaymentMethod {
     id: number;
@@ -23,10 +23,6 @@ const API_URL =
     typeof window !== "undefined"
         ? window.ENV?.API_URL
         : process.env.PUBLIC_API_URL;
-
-if (!API_URL) {
-    throw new Error("API_URL not defined in window.ENV or process.env.PUBLIC_API_URL");
-}
 
 export const loader: LoaderFunction = async ({ params }) => {
     const token = params.token;

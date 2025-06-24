@@ -43,9 +43,7 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
         if (initialToken) {
             setOrderToken(initialToken);
-            console.log("✅ Using initial order token:", initialToken);
         } else {
-            console.warn("⚠️ No order token found. Creating a new one...");
             (async () => {
                 try {
                     const newToken = await pickupCartClient();
@@ -57,9 +55,8 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                         body: newToken,
                     });
 
-                    console.log("🆕 New order token created and synced:", newToken);
                 } catch (e) {
-                    console.error("❌ Failed to create order token on startup:", e);
+                    console.error("Failed to create order token on startup:", e);
                 }
             })();
         }
@@ -70,7 +67,6 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         enabled: !!orderToken,
         queryFn: async () => {
             if (!orderToken) throw new Error("Missing order token");
-            console.log("📦 Fetching order with token:", orderToken);
             return await fetchOrderFromAPIClient(orderToken, true);
         },
         refetchOnWindowFocus: false,
@@ -113,7 +109,6 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     const fetchOrder = () => {
         if (!orderToken) {
-            console.warn("❌ Cannot fetch order: missing orderToken");
             return;
         }
         queryClient.invalidateQueries({ queryKey: ["order", orderToken] });
