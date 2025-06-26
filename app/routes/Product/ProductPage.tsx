@@ -2,6 +2,14 @@
 import { json, type LoaderFunctionArgs } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
 import ProductPage from '~/components/ProductPage';
+import type {
+    Product,
+    ProductOption,
+    ProductOptionValue,
+    ProductVariantDetails,
+    ProductAttribute,
+    ProductReview,
+} from '~/types/Product';
 
 export async function loader({ params }: LoaderFunctionArgs) {
     const code = params.code!;
@@ -9,12 +17,80 @@ export async function loader({ params }: LoaderFunctionArgs) {
 
     const res = await fetch(`${API_URL}/api/v2/shop/products/${code}`);
     if (!res.ok) throw new Response('Product not found', { status: 404 });
+    const product: Product = await res.json();
 
-    const product = await res.json();
-    return json({ product });
+    const variant = product.defaultVariantData ?? null;
+
+    const attributes: ProductAttribute[] = await fetch(`${API_URL}/api/v2/shop/products/${code}/attributes`)
+        .then((r) => r.json())
+        .then((d) => d['hydra:member'] ?? []);
+
+    const reviews: ProductReview[] = product.reviews?.length
+        ? await Promise.all(
+            product.reviews.map((r) => fetch(`${API_URL}${r['@id']}`).then((res) => res.json()))
+        ).then((list) =>
+            list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5)
+        )
+        : [];
+
+    const associations = product.associations?.length
+        ? await Promise.all(
+            product.associations.map(async (url: string) => {
+                const assoc = await fetch(`${API_URL}${url}`).then((r) => r.json());
+                const assocType = await fetch(`${API_URL}${assoc.type}`).then((r) => r.json());
+                const assocProducts = await Promise.all(
+                    assoc.associatedProducts.map((url: string) =>
+                        fetch(`${API_URL}${url}`).then((r) => r.json())
+                    )
+                );
+                return { title: assocType.name, products: assocProducts };
+            })
+        )
+        : [];
+
+    const options: ProductOption[] = product.options?.length
+        ? await Promise.all(
+            product.options.map(async (url: string) => {
+                const opt = await fetch(`${API_URL}${url}`).then((r) => r.json());
+                const values: ProductOptionValue[] = await Promise.all(
+                    opt.values.map((vUrl: string) => fetch(`${API_URL}${vUrl}`).then((r) => r.json()))
+                );
+                return { code: opt.code, name: opt.name, values };
+            })
+        )
+        : [];
+
+    const variants: ProductVariantDetails[] = product.variants?.length
+        ? await Promise.all(
+            product.variants.map(async (url: string) => {
+                const v = await fetch(`${API_URL}${url}`).then((r) => r.json());
+                const optionValues = v.optionValues?.length
+                    ? await Promise.all(
+                        v.optionValues.map((vUrl: string) => fetch(`${API_URL}${vUrl}`).then((r) => r.json()))
+                    )
+                    : [];
+                return {
+                    id: v.id,
+                    code: v.code,
+                    name: v.name,
+                    price: v.price,
+                    optionValues: optionValues.map((ov) => ({
+                        code: ov.code,
+                        value: ov.value,
+                        option: {
+                            code: ov.option.split('/').pop(),
+                            name: '',
+                        },
+                    })),
+                };
+            })
+        )
+        : [];
+
+    return json({ product, variant, attributes, reviews, associations, options, variants });
 }
 
 export default function ProductPageRoute() {
-    const { product } = useLoaderData<typeof loader>();
-    return <ProductPage product={product} />;
+    const data = useLoaderData<typeof loader>();
+    return <ProductPage {...data} />;
 }
