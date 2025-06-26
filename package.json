@@ -27,6 +27,7 @@
     "yet-another-react-lightbox": "^3.23.2"
   },
   "devDependencies": {
+    "@remix-run/css-bundle": "^2.16.8",
     "@remix-run/dev": "^2.16.7",
     "@types/bootstrap": "^5.2.10",
     "@types/react": "^18.2.20",

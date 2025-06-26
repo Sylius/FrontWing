@@ -22,6 +22,7 @@ import bootstrapStylesHref from "bootstrap/dist/css/bootstrap.css?url";
 import mainStylesHref from "./assets/scss/main.scss?url";
 
 import { orderTokenCookie } from "~/utils/cookies.server";
+import { cssBundleHref } from "@remix-run/css-bundle";
 
 const queryClient = new QueryClient();
 
@@ -60,6 +61,7 @@ function RemixOrderTokenScript({ token }: { token: string | null }) {
 }
 
 export const links: LinksFunction = () => [
+    ...(cssBundleHref ? [{ rel: "stylesheet", href: cssBundleHref }] : []),
     { rel: "stylesheet", href: bootstrapStylesHref },
     { rel: "stylesheet", href: mainStylesHref },
     { rel: "preconnect", href: "https://fonts.googleapis.com" },
