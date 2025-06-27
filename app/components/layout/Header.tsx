@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useOrder } from "../../context/OrderContext";
 import { formatPrice } from "../../utils/price";
@@ -9,6 +9,10 @@ import 'react-loading-skeleton/dist/skeleton.css';
 
 const Header: React.FC = () => {
     const { order, isFetching } = useOrder();
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
 
     const displayTotal = !isFetching && order && order.items?.length && typeof order.total === 'number' && order.total > 0
         ? order.total

@@ -1,6 +1,5 @@
-// components/ProductPage.tsx
-import React, { useState, useMemo } from 'react';
-import { useParams } from '@remix-run/react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useParams, useNavigationType } from '@remix-run/react';
 import { useOrder } from '~/context/OrderContext';
 import { useFlashMessages } from '~/context/FlashMessagesContext';
 import Layout from '~/layouts/Default';
@@ -110,6 +109,7 @@ const ProductPage: React.FC<Props> = ({
     const { code } = useParams();
     const { orderToken, fetchOrder } = useOrder();
     const { addMessage } = useFlashMessages();
+    const navigationType = useNavigationType();
 
     const API_URL = typeof window !== 'undefined' ? window.ENV?.API_URL : '';
 
@@ -129,6 +129,36 @@ const ProductPage: React.FC<Props> = ({
     const [lightboxOpen, setLightboxOpen] = useState(false);
     const [isAddToCartLoading, setIsAddToCartLoading] = useState(false);
     const [quantity, setQuantity] = useState(1);
+
+    useEffect(() => {
+        const path = product.images?.[0]?.path ?? null;
+        setActiveImage(path);
+
+        if (path) {
+            const img = new Image();
+            img.src = getImageUrl(path, 'sylius_original');
+            if (img.complete) {
+                setLoadedFullImageMap((prev) => ({ ...prev, [path]: true }));
+            }
+        }
+    }, [product.code]);
+
+    useEffect(() => {
+        if (navigationType === 'PUSH') {
+            if ('scrollRestoration' in window.history) {
+                window.history.scrollRestoration = 'manual';
+            }
+            const timeout = setTimeout(() => {
+                window.scrollTo({ top: 0, behavior: 'instant' });
+            }, 50);
+            return () => {
+                clearTimeout(timeout);
+                if ('scrollRestoration' in window.history) {
+                    window.history.scrollRestoration = 'auto';
+                }
+            };
+        }
+    }, [navigationType]);
 
     const currentVariant: ProductVariantDetails | null = useMemo(() => {
         const selectedKeys = Object.values(selectedValues).sort().join('|');
@@ -170,13 +200,48 @@ const ProductPage: React.FC<Props> = ({
 
     const lightboxIndex = product?.images?.findIndex((img) => img.path === activeImage) ?? 0;
 
-    const breadcrumbs = useMemo(
-        () => [
-            { label: 'Home', url: '/' },
-            { label: product.name, url: `/product/${product.code}` },
-        ],
-        [product]
-    );
+    const [breadcrumbs, setBreadcrumbs] = useState<{ label: string; url: string }[]>([]);
+
+    useEffect(() => {
+        const buildBreadcrumbs = async () => {
+            if (!API_URL) return;
+
+            const breadcrumbPaths: { label: string; url: string }[] = [
+                { label: 'Home', url: '/' },
+                { label: 'Category', url: '#' },
+            ];
+
+            const visited = new Set<string>();
+
+            for (const productTaxonUrl of product.productTaxons ?? []) {
+                const taxonRes = await fetch(`${API_URL}${productTaxonUrl}`);
+                const taxonData = await taxonRes.json();
+                const taxon = await fetch(`${API_URL}${taxonData.taxon}`).then((r) => r.json());
+
+                const parents: { name: string; code: string }[] = [];
+
+                if (taxon.parent) {
+                    const parentRes = await fetch(`${API_URL}${taxon.parent}`);
+                    const parent = await parentRes.json();
+                    parents.push({ name: parent.name, code: parent.code });
+                }
+
+                parents.push({ name: taxon.name, code: taxon.code });
+
+                for (const p of parents) {
+                    if (!visited.has(p.code)) {
+                        visited.add(p.code);
+                        breadcrumbPaths.push({ label: p.name, url: `/${p.code}` });
+                    }
+                }
+            }
+
+            breadcrumbPaths.push({ label: product.name, url: `/product/${product.code}` });
+            setBreadcrumbs(breadcrumbPaths);
+        };
+
+        buildBreadcrumbs();
+    }, [product, API_URL]);
 
     const accordionItems = useMemo(() => {
         return [
@@ -239,7 +304,15 @@ const ProductPage: React.FC<Props> = ({
                                         {product.images.map((img) => (
                                             <button
                                                 key={img.id}
-                                                onClick={() => setActiveImage(img.path)}
+                                                onClick={() => {
+                                                    setActiveImage(img.path);
+                                                    const imageUrl = getImageUrl(img.path, 'sylius_original');
+                                                    const preloaded = new Image();
+                                                    preloaded.src = imageUrl;
+                                                    if (preloaded.complete) {
+                                                        setLoadedFullImageMap((prev) => ({ ...prev, [img.path]: true }));
+                                                    }
+                                                }}
                                                 className={`border-0 p-0 bg-transparent rounded overflow-hidden ${
                                                     activeImage === img.path ? 'opacity-100' : 'opacity-50'
                                                 }`}
@@ -262,8 +335,8 @@ const ProductPage: React.FC<Props> = ({
                                     <img
                                         src={
                                             loadedFullImageMap[activeImage ?? ''] === true
-                                                ? getImageUrl(activeImage, 'sylius_original')
-                                                : getImageUrl(activeImage, 'sylius_shop_product_small_thumbnail')
+                                                ? getImageUrl(activeImage ?? undefined, 'sylius_original')
+                                                : getImageUrl(activeImage ?? undefined, 'sylius_shop_product_small_thumbnail')
                                         }
                                         alt={product?.name}
                                         loading="lazy"

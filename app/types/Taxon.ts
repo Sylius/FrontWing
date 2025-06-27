@@ -7,10 +7,12 @@ export interface Taxon {
     code: string;
     slug: string;
     name: string;
-    description: string;
-    children: string[];
-    parent?: string;
+    description?: string;
+    level?: number;
+    children?: string[];
+    parent?: string; // może być URL np. "/api/v2/shop/taxons/t_shirts"
 }
+
 export interface TaxonChild {
     id: number;
     name: string;
