@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
+import { pickupCartClient } from '~/api/order.client';
 import Slider, { Settings } from 'react-slick';
 import { PrevArrow, NextArrow } from '~/components/Arrow';
 import Layout from '~/layouts/Default';
@@ -96,7 +97,7 @@ const AssociationsSection: React.FC<{
 
 const ProductPage: React.FC = () => {
     const { code } = useParams<{ code: string }>();
-    const { fetchOrder } = useOrder();
+    const { orderToken, fetchOrder, setOrderToken } = useOrder();
     const { addMessage } = useFlashMessages();
 
     const [product, setProduct] = useState<ApiProduct | null>(null);
@@ -289,25 +290,24 @@ const ProductPage: React.FC = () => {
     const handleAddToCart = async () => {
         const API_URL = window.ENV?.API_URL;
 
-        if (!variant) return;
+        if (!variant || !orderToken) return;
+
         setIsAddToCartLoading(true);
         try {
             const resp = await fetch(
-                `${API_URL}/api/v2/shop/orders/${localStorage.getItem(
-                    'orderToken'
-                )}/items`,
+                `${API_URL}/api/v2/shop/orders/${orderToken}/items`,
                 {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ productVariant: variant.code, quantity }),
                 }
             );
-            if (!resp.ok) throw new Error('add to cart failed');
+            if (!resp.ok) throw new Error("add to cart failed");
             fetchOrder();
-            addMessage('success', 'Product added to cart');
+            addMessage("success", "Product added to cart");
         } catch (e) {
-            console.error('add to cart error', e);
-            addMessage('error', 'Failed to add product to cart');
+            console.error("add to cart error", e);
+            addMessage("error", "Failed to add product to cart");
         } finally {
             setIsAddToCartLoading(false);
         }

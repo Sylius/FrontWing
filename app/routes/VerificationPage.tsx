@@ -27,10 +27,8 @@ export default function VerificationPage() {
             setStatus("pending");
             setMessage("Verifying your email address...");
 
-            const jwtToken = typeof window !== "undefined" ? localStorage.getItem("jwtToken") || "" : "";
             const API_URL = window.ENV?.API_URL;
             if (!API_URL) {
-                console.error("API_URL is not defined in window.ENV");
                 setStatus("error");
                 setMessage("Configuration error: API URL not set.");
                 return;
@@ -40,9 +38,6 @@ export default function VerificationPage() {
                 const headers: HeadersInit = {
                     "Content-Type": "application/merge-patch+json",
                 };
-                if (jwtToken) {
-                    headers.Authorization = `Bearer ${jwtToken}`;
-                }
 
                 const response = await fetch(
                     `${API_URL}/api/v2/shop/customers/verify/${token}`,

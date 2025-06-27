@@ -10,8 +10,7 @@ const Header = () => {
             <div className="container">
                 <div className="row align-items-center">
                     <div className="col">
-                        <Link to="/" className="d-inline-block py-lg-2" style={{ width: '10rem' }}
-                              aria-label="sylius logo">
+                        <Link to="/" className="d-inline-block py-lg-2" style={{ width: '10rem' }} aria-label="sylius logo">
                             <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 3512 1033"
                                  fillRule="evenodd" strokeLinejoin="round" strokeMiterlimit="2">
                                 <path
@@ -30,9 +29,11 @@ const Header = () => {
                     </div>
                     <div className="col-12 col-md-auto d-flex align-items-center gap-2">
                         {customer ? (
-                            <>
-                                Checking out as <strong>{customer.firstName} {customer.lastName}</strong>
-                            </>
+                            customer.firstName && customer.lastName ? (
+                                <>
+                                    Checking out as <strong>{customer.firstName} {customer.lastName}</strong>
+                                </>
+                            ) : null
                         ) : (
                             <Link to="/login" className="d-flex align-items-center text-decoration-none gap-2">
                                 <IconUser stroke={2} size={16} />

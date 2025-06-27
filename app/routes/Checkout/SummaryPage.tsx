@@ -1,60 +1,66 @@
-import React, { useEffect, useState } from 'react';
-import CheckoutLayout from '../../layouts/Checkout';
-import { useOrder } from '../../context/OrderContext';
-import Address from '../../components/Address';
-import PaymentsCard from '../../components/order/PaymentsCard';
-import ShipmentsCard from '../../components/order/ShipmentsCard';
-import ProductRow from '../../components/order/ProductRow';
-import { OrderItem } from '../../types/Order';
-import { formatPrice } from '../../utils/price';
-import { useNavigate } from 'react-router-dom';
-import Steps from '../../components/checkout/Steps';
-
+import React, { useEffect, useState } from "react";
+import CheckoutLayout from "../../layouts/Checkout";
+import { useOrder } from "../../context/OrderContext";
+import { useNavigate } from "react-router-dom";
+import Steps from "../../components/checkout/Steps";
+import Address from "../../components/Address";
+import PaymentsCard from "../../components/order/PaymentsCard";
+import ShipmentsCard from "../../components/order/ShipmentsCard";
+import ProductRow from "../../components/order/ProductRow";
+import { OrderItem } from "../../types/Order";
+import { formatPrice } from "../../utils/price";
+import { pickupCartClient } from "../../api/order.client";
 
 const SummaryPage: React.FC = () => {
-  const { order, fetchOrder, setOrderToken } = useOrder();
-
+  const { order, fetchOrder, resetCart, setOrderToken } = useOrder();
   const navigate = useNavigate();
-
-  const [extraNotes, setExtraNotes] = useState<string>('');
+  const [extraNotes, setExtraNotes] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    fetchOrder();
+  }, [fetchOrder]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    const orderToken = localStorage.getItem('orderToken');
+    if (!order?.tokenValue) {
+      console.warn(" Missing order token");
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       const response = await fetch(
-          `${window.ENV?.API_URL}/api/v2/shop/orders/${orderToken}/complete`,
+          `${window.ENV?.API_URL}/api/v2/shop/orders/${order.tokenValue}/complete`,
           {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/merge-patch+json' },
+            method: "PATCH",
+            headers: { "Content-Type": "application/merge-patch+json" },
             body: JSON.stringify({ notes: extraNotes }),
           }
       );
 
+      const responseText = await response.text();
+
       if (!response.ok) {
-        throw new Error('Failed to submit order');
+        alert("Order checkout error:\n" + responseText);
+        throw new Error("Failed to complete order");
       }
 
-      setOrderToken(null);
-      localStorage.removeItem('orderToken');
-      navigate('/order/thank-you', {
-        state: { tokenValue: order?.tokenValue },
-      });
+      resetCart();
+
+      const newToken = await pickupCartClient();
+      document.cookie = `orderToken=${newToken}; path=/; max-age=2592000; SameSite=Lax`;
+      setOrderToken(newToken);
+
+      navigate("/order/thank-you", { state: { tokenValue: order.tokenValue } });
     } catch (error) {
-      console.error('Error submitting order:', error);
+      console.error("Error submitting order:", error);
     } finally {
       setIsSubmitting(false);
     }
   };
-
-
-  useEffect(() => {
-    fetchOrder();
-  }, [fetchOrder]);
 
   return (
       <CheckoutLayout sidebarOn={false}>
@@ -62,21 +68,6 @@ const SummaryPage: React.FC = () => {
           <div className="mx-auto">
             <Steps activeStep="complete" />
             <h1 className="h5 mb-4">Order #{order?.number}</h1>
-
-            {order && (
-                <div className="card border-0 bg-body-tertiary mb-3">
-                  <div className="card-body d-flex flex-column gap-1">
-                    <div className="row">
-                      <div className="col-12 col-sm-4">Currency</div>
-                      <div className="col">{order.currencyCode}</div>
-                    </div>
-                    <div className="row">
-                      <div className="col-12 col-sm-4">Locale</div>
-                      <div className="col">{order.localeCode}</div>
-                    </div>
-                  </div>
-                </div>
-            )}
 
             <form onSubmit={handleSubmit} noValidate>
               <div className="row">
@@ -144,7 +135,9 @@ const SummaryPage: React.FC = () => {
                 </tr>
                 <tr>
                   <td className="h5 text-end border-top pt-4 mt-3">Total:</td>
-                  <td className="h5 text-end border-top pt-4 mt-3">${formatPrice(order?.total ?? 0)}</td>
+                  <td className="h5 text-end border-top pt-4 mt-3">
+                    ${formatPrice(order?.total ?? 0)}
+                  </td>
                 </tr>
                 </tbody>
               </table>
@@ -163,7 +156,7 @@ const SummaryPage: React.FC = () => {
 
               <div className="text-center">
                 <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
-                  Place order
+                  {isSubmitting ? "Placing order..." : "Place order"}
                 </button>
               </div>
             </form>
