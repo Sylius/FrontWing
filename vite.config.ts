@@ -34,16 +34,27 @@ export default defineConfig({
           // Product
           route("/product/:code/review/new", "routes/Product/AddReviewPage.tsx");
           route("/product/:code/reviews", "routes/Product/ReviewsListPage.tsx");
-          route("/:parentCode", "routes/Product/ProductListSingleUrl.tsx");
-          route("/:parentCode/:childCode", "routes/Product/ProductList.tsx");
           route("/product/:code", "routes/Product/ProductPage.tsx");
+
+          // ✅ Taxon routes (nowa struktura)
+          route("/category/:code", "routes/Product/ProductList.tsx");
+          route("/category/:parentCode/:childCode", "routes/Product/ProductList.tsx", {
+            id: "routes/Product/ProductListChild",
+          });
+
+          // ✅ Fallback dla starych URL-i (np. /caps/simple_caps)
+          route("/:parentCode/:childCode", "routes/Product/ProductList.tsx", {
+            id: "routes/Product/ProductListLegacy",
+          });
+          route("/:code", "routes/Product/ProductList.tsx", {
+            id: "routes/Product/ProductListRootLegacy",
+          });
 
           // Checkout
           route("/checkout/address", "routes/Checkout/AddressPage.tsx");
           route("/checkout/select-shipping", "routes/Checkout/ShippingPage.tsx");
           route("/checkout/select-payment", "routes/Checkout/PaymentPage.tsx");
           route("/checkout/complete", "routes/Checkout/SummaryPage.tsx");
-
           route("/order/thank-you", "routes/Checkout/ThankYouPage.tsx");
 
           // Account

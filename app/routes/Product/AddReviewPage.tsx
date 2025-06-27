@@ -9,8 +9,6 @@ import { Product } from '~/types/Product';
 import { IconStar } from '@tabler/icons-react';
 
 const AddReviewPage: React.FC = () => {
-    const API_URL = window.ENV?.API_URL;
-
     const { code } = useParams<{ code: string }>();
     const navigate = useNavigate();
     const { addMessage } = useFlashMessages();
@@ -18,14 +16,24 @@ const AddReviewPage: React.FC = () => {
     const [product, setProduct] = useState<Product | null>(null);
     const [loading, setLoading] = useState(true);
     const [breadcrumbs, setBreadcrumbs] = useState<{ label: string; url: string }[]>([]);
+    const [loadedImageMap, setLoadedImageMap] = useState<Record<string, boolean>>({});
 
     const [title, setTitle] = useState('');
     const [rating, setRating] = useState(5);
     const [comment, setComment] = useState('');
     const [email, setEmail] = useState('');
 
+    const API_URL = typeof window !== 'undefined' ? window.ENV?.API_URL : '';
+
+    const getImageUrl = (path?: string, filter = 'sylius_original') => {
+        if (!path) return '';
+        return `${path}?imageFilter=${filter}`;
+    };
+
     useEffect(() => {
         const fetchProduct = async () => {
+            if (!API_URL || !code) return;
+
             try {
                 const res = await fetch(`${API_URL}/api/v2/shop/products/${code}`);
                 const data: Product = await res.json();
@@ -61,12 +69,11 @@ const AddReviewPage: React.FC = () => {
                             }
                         }
                     }
-
-                    breadcrumbPaths.push({ label: data.name, url: `/product/${data.code}` });
-                    breadcrumbPaths.push({ label: 'Reviews', url: `/product/${data.code}/reviews` });
-                    breadcrumbPaths.push({ label: 'Add', url: '#' });
                 }
 
+                breadcrumbPaths.push({ label: data.name, url: `/product/${data.code}` });
+                breadcrumbPaths.push({ label: 'Reviews', url: `/product/${data.code}/reviews` });
+                breadcrumbPaths.push({ label: 'Add', url: '#' });
                 setBreadcrumbs(breadcrumbPaths);
             } catch (err) {
                 console.error('Error loading product:', err);
@@ -75,11 +82,13 @@ const AddReviewPage: React.FC = () => {
             }
         };
 
-        if (code) fetchProduct();
-    }, [code]);
+        fetchProduct();
+    }, [API_URL, code]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!API_URL || !code) return;
+
         try {
             const res = await fetch(`${API_URL}/api/v2/shop/product-reviews`, {
                 method: 'POST',
@@ -110,10 +119,31 @@ const AddReviewPage: React.FC = () => {
                     <Breadcrumbs paths={breadcrumbs} />
 
                     <div className="col-12 col-md-5 col-lg-4">
-                        {loading ? (
+                        {loading || !product ? (
                             <Skeleton height={400} />
                         ) : (
-                            product && <ProductCard product={product} />
+                            <div className="overflow-hidden bg-light rounded-3">
+                                <img
+                                    src={
+                                        loadedImageMap[product.images?.[0]?.path ?? '']
+                                            ? getImageUrl(product.images?.[0]?.path, 'sylius_original')
+                                            : getImageUrl(product.images?.[0]?.path, 'sylius_shop_product_small_thumbnail')
+                                    }
+                                    alt={product.name}
+                                    loading="lazy"
+                                    className={`img-fluid w-100 h-auto ${
+                                        loadedImageMap[product.images?.[0]?.path ?? '']
+                                            ? ''
+                                            : 'product-image-blurred'
+                                    }`}
+                                    onLoad={() =>
+                                        setLoadedImageMap((prev) => ({
+                                            ...prev,
+                                            [product.images?.[0]?.path ?? '']: true,
+                                        }))
+                                    }
+                                />
+                            </div>
                         )}
                     </div>
 
