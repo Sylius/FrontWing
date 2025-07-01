@@ -111,8 +111,6 @@ const ProductList: React.FC = () => {
                 setTaxon(taxonData);
                 setBreadcrumbPath(path);
                 setCurrentPage(1);
-                console.log('[taxon]', taxonData);
-                console.log('[breadcrumbPath]', path);
             } catch (err) {
                 setError('Failed to load category');
                 console.error('[load error]', err);
@@ -175,8 +173,6 @@ const ProductList: React.FC = () => {
         breadcrumbPath.length >= 2
             ? `/category/${breadcrumbPath[breadcrumbPath.length - 2].code}`
             : undefined;
-
-    console.log('[isInLeaf]', isInLeaf, 'children:', taxon?.children, 'breadcrumbPath:', breadcrumbPath);
 
     return (
         <Layout>

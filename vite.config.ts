@@ -36,13 +36,12 @@ export default defineConfig({
           route("/product/:code/reviews", "routes/Product/ReviewsListPage.tsx");
           route("/product/:code", "routes/Product/ProductPage.tsx");
 
-          // ✅ Taxon routes (nowa struktura)
+          // Taxon routes
           route("/category/:code", "routes/Product/ProductList.tsx");
           route("/category/:parentCode/:childCode", "routes/Product/ProductList.tsx", {
             id: "routes/Product/ProductListChild",
           });
 
-          // ✅ Fallback dla starych URL-i (np. /caps/simple_caps)
           route("/:parentCode/:childCode", "routes/Product/ProductList.tsx", {
             id: "routes/Product/ProductListLegacy",
           });
