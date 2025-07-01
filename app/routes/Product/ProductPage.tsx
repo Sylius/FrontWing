@@ -27,7 +27,7 @@ type Props = {
 
 export async function loader({ params }: LoaderFunctionArgs) {
     const code = params.code!;
-    const API_URL = process.env.API_URL;
+    const API_URL = process.env.API_URL || 'http://localhost:8000';
 
     const res = await fetch(`${API_URL}/api/v2/shop/products/${code}`);
     if (!res.ok) throw new Response('Product not found', { status: 404 });

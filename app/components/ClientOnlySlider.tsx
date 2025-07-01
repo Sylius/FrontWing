@@ -1,3 +1,4 @@
+// components/ClientOnlySlider.tsx
 import React, { useEffect, useState } from 'react';
 
 export default function ClientOnlySlider(props: any) {

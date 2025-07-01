@@ -10,7 +10,7 @@ export interface Taxon {
     description?: string;
     level?: number;
     children?: string[];
-    parent?: string;
+    parent?: string; // może być URL np. "/api/v2/shop/taxons/t_shirts"
 }
 
 export interface TaxonChild {

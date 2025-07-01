@@ -35,7 +35,7 @@ const Navbar: React.FC = () => {
 
         setChildrenMap(map);
       } catch (err) {
-        console.error('Loading category error:', err);
+        console.error('Błąd ładowania kategorii:', err);
       }
     };
 
