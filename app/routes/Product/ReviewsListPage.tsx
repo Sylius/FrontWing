@@ -2,19 +2,24 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Layout from '~/layouts/Default';
 import Breadcrumbs from '~/components/Breadcrumbs';
-import ProductCard from '~/components/ProductCard';
 import Reviews from '~/components/product/Reviews';
-import { Product, ProductReview } from '~/types/Product';
 import Skeleton from 'react-loading-skeleton';
+import { Product, ProductReview } from '~/types/Product';
 
 const ReviewsListPage: React.FC = () => {
-    const API_URL = window.ENV?.API_URL;
-
+    const API_URL = typeof window !== 'undefined' ? window.ENV?.API_URL : '';
     const { code } = useParams<{ code: string }>();
+
     const [product, setProduct] = useState<Product | null>(null);
     const [reviews, setReviews] = useState<ProductReview[]>([]);
     const [loading, setLoading] = useState(true);
     const [breadcrumbs, setBreadcrumbs] = useState<{ label: string; url: string }[]>([]);
+    const [loadedImageMap, setLoadedImageMap] = useState<Record<string, boolean>>({});
+
+    const getImageUrl = (path?: string, filter = 'sylius_original') => {
+        if (!path) return '';
+        return `${path}?imageFilter=${filter}`;
+    };
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -31,8 +36,8 @@ const ReviewsListPage: React.FC = () => {
                         })
                     );
 
-                    const sorted = detailed.sort((a, b) =>
-                        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+                    const sorted = detailed.sort(
+                        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
                     );
 
                     setReviews(sorted);
@@ -87,13 +92,33 @@ const ReviewsListPage: React.FC = () => {
         <Layout>
             <div className="container mt-4 mb-5">
                 <Breadcrumbs paths={breadcrumbs} />
-
                 <div className="row">
                     <div className="col-12 col-md-5 col-lg-4">
-                        {loading ? (
+                        {loading || !product ? (
                             <Skeleton height={400} />
                         ) : (
-                            product && <ProductCard product={product} />
+                            <div className="overflow-hidden bg-light rounded-3">
+                                <img
+                                    src={
+                                        loadedImageMap[product.images?.[0]?.path ?? '']
+                                            ? getImageUrl(product.images?.[0]?.path, 'sylius_original')
+                                            : getImageUrl(product.images?.[0]?.path, 'sylius_shop_product_small_thumbnail')
+                                    }
+                                    alt={product.name}
+                                    loading="lazy"
+                                    className={`img-fluid w-100 h-auto ${
+                                        loadedImageMap[product.images?.[0]?.path ?? '']
+                                            ? ''
+                                            : 'product-image-blurred'
+                                    }`}
+                                    onLoad={() =>
+                                        setLoadedImageMap((prev) => ({
+                                            ...prev,
+                                            [product.images?.[0]?.path ?? '']: true,
+                                        }))
+                                    }
+                                />
+                            </div>
                         )}
                     </div>
 

@@ -7,10 +7,12 @@ export interface Taxon {
     code: string;
     slug: string;
     name: string;
-    description: string;
-    children: string[];
+    description?: string;
+    level?: number;
+    children?: string[];
     parent?: string;
 }
+
 export interface TaxonChild {
     id: number;
     name: string;
