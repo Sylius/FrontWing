@@ -1,4 +1,4 @@
-import  React, {useEffect} from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Product, ProductVariantDetails } from '~/types/Product';
 import { formatPrice } from '~/utils/price';
@@ -15,7 +15,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   useEffect(() => {
     const fetchVariant = async () => {
       try {
-        if (!product.variants.length) return;
+        if (!product.variants.length) {
+          return;
+        }
+
         const response = await fetch(
             `${window.ENV?.API_URL}${product.variants[0]}`
         );
@@ -31,6 +34,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     fetchVariant();
   }, [product]);
 
+  const getImageUrl = (path?: string, filter = 'sylius_shop_product_small_thumbnail') => {
+    console.log('Generating image URL with filter:', filter);
+    if (!path) return '';
+    return `${path}?imageFilter=${filter}`;
+  };
+
   return (
       <div>
         <Link to={`/product/${product.code}`} className="link-reset">
@@ -45,9 +54,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                   />
               ) : (
                   <img
-                      src={product.images[0]?.path}
+                      src={getImageUrl(product.images[0]?.path, 'sylius_shop_product_small_thumbnail')}
                       alt={product.name}
                       className="img-fluid w-100 h-100 object-fit-cover"
+                      loading="lazy"
                   />
               )}
             </div>
