@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, Suspense } from 'react';
+import React, { useState, useMemo, useEffect, Suspense, lazy } from 'react';
 import { useParams, useNavigationType } from '@remix-run/react';
 import { useOrder } from '~/context/OrderContext';
 import { useFlashMessages } from '~/context/FlashMessagesContext';
@@ -12,7 +12,6 @@ import AssociationsSection from '~/components/product/AssociationsSection';
 
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
-import { lazy } from 'react';
 
 const Lightbox = lazy(() => import('yet-another-react-lightbox'));
 
@@ -73,13 +72,14 @@ const ProductPage: React.FC<Props> = ({
     const [quantity, setQuantity] = useState(1);
 
     const [loadedAssociations, setLoadedAssociations] = useState<{ title: string; products: Product[] }[]>([]);
-    const [associationsLoading, setAssociationsLoading] = useState(true); // Flag to track if associations are still loading
+    const [associationsLoading, setAssociationsLoading] = useState(true);
 
     useEffect(() => {
-        setTimeout(() => {
+        const timeout = setTimeout(() => {
             setLoadedAssociations(associations.slice(0, 5));
             setAssociationsLoading(false);
         }, 500);
+        return () => clearTimeout(timeout);
     }, [associations]);
 
     useEffect(() => {
@@ -110,28 +110,21 @@ const ProductPage: React.FC<Props> = ({
         }
     }, [navigationType]);
 
-    const currentVariant: ProductVariantDetails | null = useMemo(() => {
-        const selectedKeys = Object.values(selectedValues).sort().join('|');
-        return (
-            variants.find((v) => {
-                const variantKeys = (v.optionValues ?? []).map((ov) => ov.code).sort().join('|');
-                return variantKeys === selectedKeys;
-            }) ?? variant
-        );
-    }, [selectedValues, variants, variant]);
+    const defaultVariant = product.defaultVariantData; // Assuming this is the correct field
+    const currentPrice = defaultVariant?.price ? (defaultVariant.price / 100).toFixed(2) : 'No price available';
 
     const handleOptionChange = (opt: string, val: string) => {
         setSelectedValues((prev) => ({ ...prev, [opt]: val }));
     };
 
     const handleAddToCart = async () => {
-        if (!currentVariant || !orderToken) return;
+        if (!defaultVariant || !orderToken) return;
         setIsAddToCartLoading(true);
         try {
             const resp = await fetch(`${API_URL}/api/v2/shop/orders/${orderToken}/items`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ productVariant: currentVariant.code, quantity }),
+                body: JSON.stringify({ productVariant: defaultVariant.code, quantity }),
             });
             if (!resp.ok) throw new Error('add to cart failed');
             fetchOrder();
@@ -290,9 +283,7 @@ const ProductPage: React.FC<Props> = ({
                             <h1 className="h2 text-wrap mb-4">{product?.name}</h1>
                             <ReviewSummary reviews={reviews} productCode={product.code} allReviewCount={reviews.length} />
                             <div className="fs-3 mb-3">
-                                {currentVariant?.price != null
-                                    ? `$${(currentVariant.price / 100).toFixed(2)}`
-                                    : 'No price available'}
+                                {currentPrice !== 'No price available' ? `$${currentPrice}` : currentPrice}
                             </div>
                             {options.map((opt) => (
                                 <div className="mb-3" key={opt.code}>

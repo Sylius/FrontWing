@@ -12,6 +12,7 @@ export interface Product {
     mainTaxon?: string;
     productTaxons?: string[];
     defaultVariant?: string;
+    defaultVariantData?: ProductVariantDetails;
     associations?: string[];
 }
 
