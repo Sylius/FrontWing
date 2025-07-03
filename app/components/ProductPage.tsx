@@ -110,7 +110,7 @@ const ProductPage: React.FC<Props> = ({
         }
     }, [navigationType]);
 
-    const defaultVariant = product.defaultVariantData; // Assuming this is the correct field
+    const defaultVariant = product.defaultVariantData;
     const currentPrice = defaultVariant?.price ? (defaultVariant.price / 100).toFixed(2) : 'No price available';
 
     const handleOptionChange = (opt: string, val: string) => {
