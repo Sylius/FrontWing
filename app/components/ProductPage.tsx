@@ -1,22 +1,19 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, Suspense, lazy } from 'react';
 import { useParams, useNavigationType } from '@remix-run/react';
 import { useOrder } from '~/context/OrderContext';
 import { useFlashMessages } from '~/context/FlashMessagesContext';
 import Layout from '~/layouts/Default';
 import Breadcrumbs from '~/components/Breadcrumbs';
 import BootstrapAccordion from '~/components/Accordion';
-import ProductCard from '~/components/ProductCard';
 import Skeleton from 'react-loading-skeleton';
 import ReviewList from '~/components/product/Reviews';
 import ReviewSummary from '~/components/product/ReviewSummary';
-import Lightbox from 'yet-another-react-lightbox';
-import { PrevArrow, NextArrow } from '~/components/Arrow';
-import Slider from '~/components/ClientOnlySlider';
-import type { Settings } from 'react-slick';
+import AssociationsSection from '~/components/product/AssociationsSection';
 
-import 'yet-another-react-lightbox/styles.css';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
+
+const Lightbox = lazy(() => import('yet-another-react-lightbox'));
 
 import {
     Product,
@@ -39,62 +36,6 @@ interface Props {
 const getImageUrl = (path?: string, filter = 'sylius_original') => {
     if (!path) return '';
     return `${path}?imageFilter=${filter}`;
-};
-
-const AssociationsSection: React.FC<{
-    associations: { title: string; products: Product[] }[];
-    loading: boolean;
-}> = ({ associations, loading }) => {
-    if (typeof window === 'undefined') return null;
-
-    if (loading) {
-        return (
-            <div className="container mb-5 position-relative">
-                <Skeleton width={200} height={24} className="mb-3" />
-                <div className="d-flex">
-                    {Array(4)
-                        .fill(0)
-                        .map((_, i) => (
-                            <div key={i} className="px-2" style={{ flex: '1 0 auto' }}>
-                                <Skeleton height={300} />
-                            </div>
-                        ))}
-                </div>
-            </div>
-        );
-    }
-
-    const settings: Settings = {
-        infinite: true,
-        slidesToShow: 5,
-        slidesToScroll: 1,
-        arrows: true,
-        prevArrow: <PrevArrow />,
-        nextArrow: <NextArrow />,
-        responsive: [
-            { breakpoint: 1400, settings: { slidesToShow: 4 } },
-            { breakpoint: 1200, settings: { slidesToShow: 3 } },
-            { breakpoint: 768, settings: { slidesToShow: 2 } },
-            { breakpoint: 576, settings: { slidesToShow: 1 } },
-        ],
-    };
-
-    return (
-        <>
-            {associations.map(({ title, products }) => (
-                <div key={title} className="container mb-5 position-relative">
-                    <h2 className="h4 mb-3">{title}</h2>
-                    <Slider {...settings}>
-                        {products.map((p) => (
-                            <div key={p.code} className="px-2">
-                                <ProductCard product={p} />
-                            </div>
-                        ))}
-                    </Slider>
-                </div>
-            ))}
-        </>
-    );
 };
 
 const ProductPage: React.FC<Props> = ({
@@ -130,6 +71,17 @@ const ProductPage: React.FC<Props> = ({
     const [isAddToCartLoading, setIsAddToCartLoading] = useState(false);
     const [quantity, setQuantity] = useState(1);
 
+    const [loadedAssociations, setLoadedAssociations] = useState<{ title: string; products: Product[] }[]>([]);
+    const [associationsLoading, setAssociationsLoading] = useState(true);
+
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            setLoadedAssociations(associations.slice(0, 5));
+            setAssociationsLoading(false);
+        }, 500);
+        return () => clearTimeout(timeout);
+    }, [associations]);
+
     useEffect(() => {
         const path = product.images?.[0]?.path ?? null;
         setActiveImage(path);
@@ -137,9 +89,7 @@ const ProductPage: React.FC<Props> = ({
         if (path) {
             const img = new Image();
             img.src = getImageUrl(path, 'sylius_original');
-            if (img.complete) {
-                setLoadedFullImageMap((prev) => ({ ...prev, [path]: true }));
-            }
+            img.onload = () => setLoadedFullImageMap((prev) => ({ ...prev, [path]: true }));
         }
     }, [product.code]);
 
@@ -160,28 +110,21 @@ const ProductPage: React.FC<Props> = ({
         }
     }, [navigationType]);
 
-    const currentVariant: ProductVariantDetails | null = useMemo(() => {
-        const selectedKeys = Object.values(selectedValues).sort().join('|');
-        return (
-            variants.find((v) => {
-                const variantKeys = (v.optionValues ?? []).map((ov) => ov.code).sort().join('|');
-                return variantKeys === selectedKeys;
-            }) ?? variant
-        );
-    }, [selectedValues, variants, variant]);
+    const defaultVariant = product.defaultVariantData;
+    const currentPrice = defaultVariant?.price ? (defaultVariant.price / 100).toFixed(2) : 'No price available';
 
     const handleOptionChange = (opt: string, val: string) => {
         setSelectedValues((prev) => ({ ...prev, [opt]: val }));
     };
 
     const handleAddToCart = async () => {
-        if (!currentVariant || !orderToken) return;
+        if (!defaultVariant || !orderToken) return;
         setIsAddToCartLoading(true);
         try {
             const resp = await fetch(`${API_URL}/api/v2/shop/orders/${orderToken}/items`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ productVariant: currentVariant.code, quantity }),
+                body: JSON.stringify({ productVariant: defaultVariant.code, quantity }),
             });
             if (!resp.ok) throw new Error('add to cart failed');
             fetchOrder();
@@ -200,7 +143,7 @@ const ProductPage: React.FC<Props> = ({
 
     const lightboxIndex = product?.images?.findIndex((img) => img.path === activeImage) ?? 0;
 
-    const [breadcrumbs, setBreadcrumbs] = useState<{ label: string; url: string }[]>([]);
+    const [breadcrumbs, setBreadcrumbs] = useState<{ label: string; url: string }[] | null>(null);
 
     useEffect(() => {
         const buildBreadcrumbs = async () => {
@@ -278,14 +221,9 @@ const ProductPage: React.FC<Props> = ({
                         </div>
                     </>
                 ) : (
-                    <>
-                        <div className="alert alert-info">
-                            <div className="fw-bold">Info</div>There are no reviews
-                        </div>
-                        <a href={`/product/${code}/review/new`} className="btn btn-primary">
-                            Add your review
-                        </a>
-                    </>
+                    <div className="alert alert-info">
+                        <div className="fw-bold">Info</div>There are no reviews
+                    </div>
                 ),
             },
         ];
@@ -294,7 +232,11 @@ const ProductPage: React.FC<Props> = ({
     return (
         <Layout>
             <div className="container mt-4 mb-5">
-                <Breadcrumbs paths={breadcrumbs} />
+                {breadcrumbs ? (
+                    <Breadcrumbs paths={breadcrumbs} />
+                ) : (
+                    <Skeleton width={250} height={24} className="mb-4" />
+                )}
                 <div className="row g-3 g-lg-5 mb-6">
                     <div className="col-12 col-lg-7 col-xl-8">
                         <div className="row spotlight-group mb-5">
@@ -304,15 +246,7 @@ const ProductPage: React.FC<Props> = ({
                                         {product.images.map((img) => (
                                             <button
                                                 key={img.id}
-                                                onClick={() => {
-                                                    setActiveImage(img.path);
-                                                    const imageUrl = getImageUrl(img.path, 'sylius_original');
-                                                    const preloaded = new Image();
-                                                    preloaded.src = imageUrl;
-                                                    if (preloaded.complete) {
-                                                        setLoadedFullImageMap((prev) => ({ ...prev, [img.path]: true }));
-                                                    }
-                                                }}
+                                                onClick={() => setActiveImage(img.path)}
                                                 className={`border-0 p-0 bg-transparent rounded overflow-hidden ${
                                                     activeImage === img.path ? 'opacity-100' : 'opacity-50'
                                                 }`}
@@ -333,22 +267,11 @@ const ProductPage: React.FC<Props> = ({
                                     onClick={() => setLightboxOpen(true)}
                                 >
                                     <img
-                                        src={
-                                            loadedFullImageMap[activeImage ?? ''] === true
-                                                ? getImageUrl(activeImage ?? undefined, 'sylius_original')
-                                                : getImageUrl(activeImage ?? undefined, 'sylius_shop_product_small_thumbnail')
-                                        }
+                                        src={getImageUrl(activeImage ?? undefined, 'sylius_shop_product_original')}
                                         alt={product?.name}
                                         loading="lazy"
-                                        onLoad={() =>
-                                            setLoadedFullImageMap((prev) => ({
-                                                ...prev,
-                                                [activeImage ?? '']: true,
-                                            }))
-                                        }
-                                        className={`img-fluid w-100 h-100 object-fit-cover ${
-                                            loadedFullImageMap[activeImage ?? ''] ? '' : 'product-image-blurred'
-                                        }`}
+                                        onLoad={() => setLoadedFullImageMap((prev) => ({ ...prev, [activeImage ?? '']: true }))}
+                                        className="img-fluid w-100 h-100 object-fit-cover"
                                     />
                                 </div>
                             </div>
@@ -358,15 +281,9 @@ const ProductPage: React.FC<Props> = ({
                     <div className="col-12 col-lg-5 col-xl-4 order-lg-1">
                         <div className="sticky-top pt-2">
                             <h1 className="h2 text-wrap mb-4">{product?.name}</h1>
-                            <ReviewSummary
-                                reviews={reviews}
-                                productCode={product.code}
-                                allReviewCount={reviews.length}
-                            />
+                            <ReviewSummary reviews={reviews} productCode={product.code} allReviewCount={reviews.length} />
                             <div className="fs-3 mb-3">
-                                {currentVariant?.price != null
-                                    ? `$${(currentVariant.price / 100).toFixed(2)}`
-                                    : 'No price available'}
+                                {currentPrice !== 'No price available' ? `$${currentPrice}` : currentPrice}
                             </div>
                             {options.map((opt) => (
                                 <div className="mb-3" key={opt.code}>
@@ -407,13 +324,8 @@ const ProductPage: React.FC<Props> = ({
                     </div>
                 </div>
             </div>
-            <Lightbox
-                open={lightboxOpen}
-                close={() => setLightboxOpen(false)}
-                slides={lightboxSlides}
-                index={lightboxIndex}
-            />
-            <AssociationsSection associations={associations} loading={false} />
+            <Lightbox open={lightboxOpen} close={() => setLightboxOpen(false)} slides={lightboxSlides} index={lightboxIndex} />
+            <AssociationsSection associations={loadedAssociations} loading={associationsLoading} />
         </Layout>
     );
 };

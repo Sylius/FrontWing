@@ -25,7 +25,7 @@
     "react-loading-skeleton": "^3.5.0",
     "react-slick": "^0.30.3",
     "slick-carousel": "^1.8.1",
-    "yet-another-react-lightbox": "^3.23.2"
+    "yet-another-react-lightbox": "^3.24.0"
   },
   "devDependencies": {
     "@remix-run/css-bundle": "^2.16.8",

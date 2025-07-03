@@ -1,4 +1,3 @@
-// vite.config.ts
 import { vitePlugin as remix } from "@remix-run/dev";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
@@ -73,6 +72,14 @@ export default defineConfig({
   resolve: {
     alias: {
       "@tabler/icons-react": "@tabler/icons-react/dist/esm/icons/index.mjs",
+    },
+  },
+  optimizeDeps: {
+    include: ['yet-another-react-lightbox'],
+  },
+  build: {
+    rollupOptions: {
+      external: ['yet-another/react-lightbox/styles.css'],
     },
   },
 });
