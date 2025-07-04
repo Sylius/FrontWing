@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { Product, ProductVariantDetails } from '~/types/Product';
+import { ProductVariantDetails, Product } from '~/types/Product';
 import { formatPrice } from '~/utils/price';
 import Skeleton from 'react-loading-skeleton';
 
@@ -9,67 +9,40 @@ interface ProductCardProps {
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const [variant, setVariant] = React.useState<ProductVariantDetails | null>(null);
-  const [loading, setLoading] = React.useState<boolean>(true);
-
-  useEffect(() => {
-    const fetchVariant = async () => {
-      try {
-        if (!product.variants.length) {
-          return;
-        }
-
-        const response = await fetch(
-            `${window.ENV?.API_URL}${product.variants[0]}`
-        );
-        const data: ProductVariantDetails = await response.json();
-        setVariant(data);
-      } catch (error) {
-        console.error('Error loading product variant:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchVariant();
-  }, [product]);
+  const variant: ProductVariantDetails | undefined =
+      (product as any).defaultVariantData || product.defaultVariant;
 
   const getImageUrl = (path?: string, filter = 'sylius_shop_product_small_thumbnail') => {
-    console.log('Generating image URL with filter:', filter);
     if (!path) return '';
     return `${path}?imageFilter=${filter}`;
   };
+
+  const image = product.images?.[0]?.path;
+  const name = product.name;
 
   return (
       <div>
         <Link to={`/product/${product.code}`} className="link-reset">
           <div className="mb-4">
-            <div
-                className="bg-light rounded-3"
-                style={{ aspectRatio: '3 / 4', overflow: 'hidden' }}
-            >
-              {loading ? (
-                  <Skeleton
-                      style={{ width: '100%', height: '100%', display: 'block' }}
-                  />
-              ) : (
+            <div className="bg-light rounded-3" style={{ aspectRatio: '3 / 4', overflow: 'hidden' }}>
+              {image ? (
                   <img
-                      src={getImageUrl(product.images[0]?.path, 'sylius_shop_product_small_thumbnail')}
-                      alt={product.name}
+                      src={getImageUrl(image)}
+                      alt={name}
                       className="img-fluid w-100 h-100 object-fit-cover"
                       loading="lazy"
                   />
+              ) : (
+                  <Skeleton style={{ width: '100%', height: '100%', display: 'block' }} />
               )}
             </div>
           </div>
           <div className="h6 text-break">
-            {loading ? <Skeleton width={120} /> : product.name}
+            {name || <Skeleton width={120} />}
           </div>
         </Link>
         <div>
-          {loading ? (
-              <Skeleton width={80} height={20} />
-          ) : variant?.price ? (
+          {variant?.price != null ? (
               <span>${formatPrice(variant.price)}</span>
           ) : (
               <span>No price</span>

@@ -19,7 +19,7 @@ const AssociationsSection: React.FC<AssociationsSectionProps> = ({ associations,
         const observer = new IntersectionObserver((entries) => {
             const entry = entries[0];
             if (entry.isIntersecting) {
-                setIsInView(true); // Set to true when the section is in view
+                setIsInView(true);
             }
         }, { threshold: 0.5 });
 
