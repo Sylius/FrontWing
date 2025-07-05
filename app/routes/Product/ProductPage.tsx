@@ -38,7 +38,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
     const [
         attributesData,
         reviewsData,
-        associationsData,
+        associationTypes,
         optionsData,
         variantsData,
     ] = await Promise.all([
@@ -48,18 +48,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
                 fetch(`${API_URL}${r['@id']}`).then((res) => res.json())
             ) ?? []
         ),
-        Promise.all(
-            product.associations?.map(async (url: string) => {
-                const assoc = await fetch(`${API_URL}${url}`).then((r) => r.json());
-                const assocType = await fetch(`${API_URL}${assoc.type}`).then((r) => r.json());
-                const assocProducts = await Promise.all(
-                    assoc.associatedProducts.map((url: string) =>
-                        fetch(`${API_URL}${url}`).then((r) => r.json())
-                    )
-                );
-                return { title: assocType.name, products: assocProducts };
-            }) ?? []
-        ),
+        fetch(`${API_URL}/api/v2/shop/product-association-types`).then((r) => r.json()),
         Promise.all(
             product.options?.map(async (url: string) => {
                 const opt = await fetch(`${API_URL}${url}`).then((r) => r.json());
@@ -91,6 +80,21 @@ export async function loader({ params }: LoaderFunctionArgs) {
             }) ?? []
         ),
     ]);
+
+    const associationsDataRaw = await Promise.all(
+        associationTypes['hydra:member'].map(async (type: any) => {
+            const assocRes = await fetch(
+                `${API_URL}/api/v2/shop/products?association[ownerCode]=${code}&association[typeCode]=${type.code}`
+            );
+            const assocJson = await assocRes.json();
+            return {
+                title: type.name,
+                products: assocJson['hydra:member'] ?? [],
+            };
+        })
+    );
+
+    const associationsData = associationsDataRaw.filter(a => a.products.length > 0);
 
     const breadcrumbs: { label: string; url: string }[] = [
         { label: 'Home', url: '/' },

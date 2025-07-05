@@ -23,6 +23,7 @@ import mainStylesHref from "./assets/scss/main.scss?url";
 
 import { orderTokenCookie } from "~/utils/cookies.server";
 import { cssBundleHref } from "@remix-run/css-bundle";
+import type { Taxon } from "~/types/Taxon";
 
 const queryClient = new QueryClient();
 
@@ -31,11 +32,16 @@ export const loader: LoaderFunction = async ({ request }) => {
     const parsed = await orderTokenCookie.parse(cookieHeader);
     const token = typeof parsed === "string" ? parsed : parsed?.token ?? "";
 
+    const API_URL = process.env.PUBLIC_API_URL!;
+    const res = await fetch(`${API_URL}/api/v2/shop/taxon-tree/MENU_CATEGORY/branch`);
+    const taxonTreeData = await res.json();
+
     return json({
         ENV: {
-            API_URL: process.env.PUBLIC_API_URL,
+            API_URL,
         },
         orderToken: token || null,
+        taxonTree: taxonTreeData["hydra:member"],
     });
 };
 
@@ -80,6 +86,7 @@ export default function App() {
     const data = useLoaderData<{
         ENV: Record<string, string>;
         orderToken: string | null;
+        taxonTree: Taxon[];
     }>();
 
     return (
@@ -96,7 +103,7 @@ export default function App() {
             <CustomerProvider>
                 <OrderProvider>
                     <FlashMessagesProvider>
-                        <Outlet />
+                        <Outlet context={{ taxonTree: data.taxonTree }} />
                     </FlashMessagesProvider>
                 </OrderProvider>
             </CustomerProvider>

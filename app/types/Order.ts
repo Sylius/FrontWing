@@ -63,13 +63,27 @@ export interface Payment {
         name?: string;
     } | null;
     state?: string;
+    createdAt?: string;
+}
+
+export interface ShippingMethod {
+    "@id"?: string;
+    "@type"?: string;
+    code?: string;
+    name?: string;
+    description?: string;
 }
 
 export interface Shipment {
     id?: number;
     "@id"?: string;
     "@type"?: string;
-    method?: string;
+    state?: string;
+    method?: string | ShippingMethod;
+    shippedAt?: string | null;
+    tracking?: string | null;
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 export interface Order {
@@ -94,5 +108,6 @@ export interface Order {
     items?: OrderItem[];
     localeCode?: string;
     paymentState?: string;
+    shippingState?: string;
     checkoutCompletedAt?: string;
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import CheckoutLayout from "../../layouts/Checkout";
 import { useOrder } from "../../context/OrderContext";
 import { useNavigate } from "react-router-dom";
@@ -12,14 +12,10 @@ import { formatPrice } from "../../utils/price";
 import { pickupCartClient } from "../../api/order.client";
 
 const SummaryPage: React.FC = () => {
-  const { order, fetchOrder, resetCart, setOrderToken } = useOrder();
+  const { order, resetCart, setOrderToken } = useOrder();
   const navigate = useNavigate();
   const [extraNotes, setExtraNotes] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    fetchOrder();
-  }, [fetchOrder]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

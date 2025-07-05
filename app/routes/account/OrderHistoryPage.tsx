@@ -64,77 +64,87 @@ export default function OrderHistoryPage() {
                         Browse your past orders
                     </div>
 
-                    <div className="card">
-                        <div className="card-body border-bottom py-3">
-                            <div className="table-responsive">
-                                {isLoading ? (
-                                    <table className="table card-table">
-                                        <tbody>
-                                        <tr>
-                                            <td><Skeleton width={80} /></td>
-                                            <td><Skeleton width={100} /></td>
-                                            <td><Skeleton width={100} /></td>
-                                            <td><Skeleton width={80} /></td>
-                                            <td><Skeleton width={80} /></td>
-                                            <td><Skeleton width={60} height={30} /></td>
-                                        </tr>
-                                        </tbody>
-                                    </table>
-                                ) : isError ? (
-                                    <p>Failed to load orders. Please try again later.</p>
-                                ) : (
-                                    <table className="table card-table table-vcenter text-nowrap datatable">
-                                        <thead>
-                                        <tr>
-                                            <th>Number</th>
-                                            <th>Date</th>
-                                            <th>Ship to</th>
-                                            <th>Total</th>
-                                            <th>State</th>
-                                            <th className="text-center">Actions</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        {orders.map((order) => (
-                                            <tr key={order.tokenValue}>
-                                                <td>#{order.number}</td>
-                                                <td>
-                                                    {order.checkoutCompletedAt
-                                                        ? new Date(order.checkoutCompletedAt).toLocaleDateString('en-GB')
-                                                        : '-'}
-                                                </td>
-                                                <td>
-                                                    {order.shippingAddress
-                                                        ? `${order.shippingAddress.firstName ?? ''} ${order.shippingAddress.lastName ?? ''}`.trim()
-                                                        : '-'}
-                                                </td>
-                                                <td>${(order.itemsSubtotal / 100).toFixed(2)}</td>
-                                                <td>{order.state}</td>
-                                                <td className="d-flex gap-2 flex-wrap justify-content-center">
-                                                    <Link
-                                                        to={`/account/orders/${order.tokenValue}`}
-                                                        className="btn btn-sm btn-outline-gray"
-                                                    >
-                                                        Show
-                                                    </Link>
-                                                    {order.state !== 'completed' && order.paymentState === 'awaiting_payment' && (
-                                                        <Link
-                                                            to={`/account/orders/${order.tokenValue}/pay`}
-                                                            className="btn btn-sm btn-outline-gray d-flex align-items-center gap-1"
-                                                        >
-                                                            <IconCreditCard size={18} />
-                                                            Pay
-                                                        </Link>
-                                                    )}
-                                                </td>
+                    {isLoading || orders.length > 0 ? (
+                        <div className="card">
+                            <div className="card-body border-bottom py-3">
+                                <div className="table-responsive">
+                                    {isLoading ? (
+                                        <table className="table card-table">
+                                            <tbody>
+                                            <tr>
+                                                <td><Skeleton width={80} /></td>
+                                                <td><Skeleton width={100} /></td>
+                                                <td><Skeleton width={100} /></td>
+                                                <td><Skeleton width={80} /></td>
+                                                <td><Skeleton width={80} /></td>
+                                                <td><Skeleton width={60} height={30} /></td>
                                             </tr>
-                                        ))}
-                                        </tbody>
-                                    </table>
-                                )}
+                                            </tbody>
+                                        </table>
+                                    ) : (
+                                        <table className="table card-table table-vcenter text-nowrap datatable">
+                                            <thead>
+                                            <tr>
+                                                <th>Number</th>
+                                                <th>Date</th>
+                                                <th>Ship to</th>
+                                                <th>Total</th>
+                                                <th>State</th>
+                                                <th className="text-center">Actions</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {orders.map((order) => (
+                                                <tr key={order.tokenValue}>
+                                                    <td>#{order.number}</td>
+                                                    <td>
+                                                        {order.checkoutCompletedAt
+                                                            ? new Date(order.checkoutCompletedAt).toLocaleDateString('en-GB')
+                                                            : '-'}
+                                                    </td>
+                                                    <td>
+                                                        {order.shippingAddress
+                                                            ? `${order.shippingAddress.firstName ?? ''} ${order.shippingAddress.lastName ?? ''}`.trim()
+                                                            : '-'}
+                                                    </td>
+                                                    <td>${(order.itemsSubtotal / 100).toFixed(2)}</td>
+                                                    <td>{order.state}</td>
+                                                    <td className="d-flex gap-2 flex-wrap justify-content-center">
+                                                        <Link
+                                                            to={`/account/orders/${order.tokenValue}`}
+                                                            className="btn btn-sm btn-outline-gray"
+                                                        >
+                                                            Show
+                                                        </Link>
+                                                        {order.state !== 'completed' && order.paymentState === 'awaiting_payment' && (
+                                                            <Link
+                                                                to={`/account/orders/${order.tokenValue}/pay`}
+                                                                className="btn btn-sm btn-outline-gray d-flex align-items-center gap-1"
+                                                            >
+                                                                <IconCreditCard size={18} />
+                                                                Pay
+                                                            </Link>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                            </tbody>
+                                        </table>
+                                    )}
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    ) : isError ? (
+                        <div className="alert alert-danger">
+                            <div className="fw-bold">Error</div>
+                            Failed to load orders. Please try again later.
+                        </div>
+                    ) : (
+                        <div className="alert alert-info">
+                            <div className="fw-bold">Info</div>
+                            You have no orders yet.
+                        </div>
+                    )}
                 </div>
             </AccountLayout>
         </Default>

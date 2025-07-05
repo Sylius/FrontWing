@@ -4,7 +4,6 @@ import Default from "~/layouts/Default";
 import AccountLayout from "~/layouts/Account";
 import Address from "~/components/Address";
 import PaymentsCard from "~/components/order/PaymentsCard";
-import ShipmentsCard from "~/components/order/ShipmentsCard";
 import ProductRow from "~/components/order/ProductRow";
 import { OrderItem, Order } from "~/types/Order";
 import { formatPrice } from "~/utils/price";
@@ -49,6 +48,23 @@ export default function OrderDetailsPage() {
                         data.createdAt = full.createdAt;
                     }
                 }
+
+                const shipmentPromises = (data.shipments ?? []).map(async (shipment) => {
+                    const res = await fetch(`${baseUrl}${shipment["@id"]}`, {
+                        headers: { Authorization: `Bearer ${jwt}` },
+                    });
+                    return res.ok ? await res.json() : shipment;
+                });
+                data.shipments = await Promise.all(shipmentPromises);
+
+                const methodPromises = (data.shipments ?? []).map(async (shipment) => {
+                    const res = await fetch(`${baseUrl}${shipment.method}`, {
+                        headers: { Authorization: `Bearer ${jwt}` },
+                    });
+                    shipment.method = res.ok ? await res.json() : shipment.method;
+                    return shipment;
+                });
+                data.shipments = await Promise.all(methodPromises);
 
                 setOrder(data);
             } catch (e) {
@@ -171,13 +187,29 @@ export default function OrderDetailsPage() {
                     )}
 
                     <div className="card border-0 bg-body-tertiary mb-3">
-                        <div className="card-header d-flex align-items-center">
-                            <div className="me-auto">Shipments</div>
-                            <div>{order.state}</div>
+                        <div className="card-header d-flex align-items-center justify-content-between">
+                            <div>Shipments</div>
+                            <div>
+                                {order.shippingState}
+                            </div>
+                        </div>
+                        <div className="card-body d-flex flex-column gap-2">
+                            {order.shipments?.map((shipment) => (
+                                <div key={shipment.id} className="d-flex justify-content-between">
+                                    <div>
+                                        {typeof shipment.method === "object"
+                                            ? shipment.method.name ?? shipment.method.code
+                                            : shipment.method}
+                                    </div>
+                                    {shipment.state && (
+                                        <div>
+                                            {shipment.state}
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
                         </div>
                     </div>
-
-                    {order.shipments?.[0] && <ShipmentsCard shipment={order.shipments[0]} />}
 
                     <div className="table-responsive mt-4">
                         <table className="table table-borderless align-middle">

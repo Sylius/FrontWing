@@ -9,13 +9,9 @@ interface CustomerContextType {
   clearCustomer: () => void;
 }
 
-const CustomerContext = createContext<CustomerContextType | undefined>(
-  undefined,
-);
+const CustomerContext = createContext<CustomerContextType | undefined>(undefined);
 
-export const CustomerProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const CustomerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,6 +19,10 @@ export const CustomerProvider: React.FC<{ children: React.ReactNode }> = ({
   const fetchCustomer = async () => {
     const token = localStorage.getItem("jwtToken");
     const userUrl = localStorage.getItem("userUrl");
+
+    setLoading(true);
+    setError(null);
+
     if (!token || !userUrl) {
       setCustomer(null);
       setLoading(false);
@@ -30,20 +30,15 @@ export const CustomerProvider: React.FC<{ children: React.ReactNode }> = ({
     }
 
     try {
-      setLoading(true);
-      const response = await fetch(
-        `${window.ENV?.API_URL}${userUrl}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
+      const response = await fetch(`${window.ENV?.API_URL}${userUrl}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       if (!response.ok) {
         throw new Error("Unauthorized");
       }
 
       const data = await response.json();
-
       setCustomer(data);
     } catch (err: any) {
       setCustomer(null);
@@ -64,17 +59,17 @@ export const CustomerProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   return (
-    <CustomerContext.Provider
-      value={{
-        customer,
-        loading,
-        error,
-        refetchCustomer: fetchCustomer,
-        clearCustomer,
-      }}
-    >
-      {children}
-    </CustomerContext.Provider>
+      <CustomerContext.Provider
+          value={{
+            customer,
+            loading,
+            error,
+            refetchCustomer: fetchCustomer,
+            clearCustomer,
+          }}
+      >
+        {children}
+      </CustomerContext.Provider>
   );
 };
 

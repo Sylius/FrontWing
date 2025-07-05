@@ -9,7 +9,6 @@ export interface Taxon {
     name: string;
     description?: string;
     level?: number;
-    children?: string[];
     parent?: string;
 }
 
