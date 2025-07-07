@@ -59,6 +59,7 @@ export async function action({ request }: ActionFunctionArgs) {
         company: form.get(`${prefix}_company`)?.toString() ?? "",
         street: form.get(`${prefix}_street`)?.toString() ?? "",
         countryCode: form.get(`${prefix}_countryCode`)?.toString() ?? "",
+        provinceName: form.get(`${prefix}_provinceName`)?.toString() ?? "",
         city: form.get(`${prefix}_city`)?.toString() ?? "",
         postcode: form.get(`${prefix}_postcode`)?.toString() ?? "",
         phoneNumber: form.get(`${prefix}_phoneNumber`)?.toString() ?? "",
@@ -199,7 +200,8 @@ export default function AddressPage() {
             </div>
             <div className="mb-3">
                 <label className="form-label">Country</label>
-                <select name={`${prefix}_countryCode`} className="form-select" required value={address.countryCode} onChange={handleChange(setAddress)}>
+                <select name={`${prefix}_countryCode`} className="form-select" required value={address.countryCode}
+                        onChange={handleChange(setAddress)}>
                     <option value="">Select</option>
                     {countries.map((c) => (
                         <option key={c.code} value={c.code}>
@@ -208,9 +210,20 @@ export default function AddressPage() {
                     ))}
                 </select>
             </div>
+
+            <div className="mb-3">
+                <label className="form-label">Province / State</label>
+                <input
+                    name={`${prefix}_provinceName`}
+                    className="form-control"
+                    value={address.provinceName ?? ""}
+                    onChange={handleChange(setAddress)}
+                />
+            </div>
             <div className="mb-3">
                 <label className="form-label">City</label>
-                <input name={`${prefix}_city`} className="form-control" required value={address.city} onChange={handleChange(setAddress)} />
+                <input name={`${prefix}_city`} className="form-control" required value={address.city}
+                       onChange={handleChange(setAddress)}/>
             </div>
             <div className="mb-3">
                 <label className="form-label">Postcode</label>

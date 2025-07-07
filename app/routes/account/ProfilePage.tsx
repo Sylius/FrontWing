@@ -129,7 +129,7 @@ const ProfilePage: React.FC = () => {
                                     />
                                 </div>
                                 <div className="col-md-6 mb-3">
-                                    <label className="form-label">Birthday</label>
+                                    <label className="form-label">Birthday *</label>
                                     <input
                                         className="form-control"
                                         name="birthday"
