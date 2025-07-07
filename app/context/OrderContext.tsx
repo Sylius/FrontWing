@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-    pickupCartClient,
     fetchOrderFromAPIClient,
     updateOrderItemAPIClient,
     removeOrderItemAPIClient,
@@ -34,32 +33,55 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const [orderToken, setOrderToken] = useState<string | null>(null);
     const [activeCouponCode, setActiveCouponCode] = useState<string | null>(null);
 
-    useEffect(() => {
-        const remixToken =
-            typeof window !== "undefined" && (window as any).__remixOrderToken;
-        const cookieToken = getCookieToken();
+    const createNewOrder = async () => {
+        try {
+            const response = await fetch(`${window.ENV?.API_URL}/api/v2/shop/orders`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: "{}",
+            });
 
-        const initialToken = remixToken || cookieToken;
+            if (!response.ok) throw new Error("Failed to create new cart");
 
-        if (initialToken) {
-            setOrderToken(initialToken);
-        } else {
-            (async () => {
-                try {
-                    const newToken = await pickupCartClient();
-                    document.cookie = `orderToken=${newToken}; path=/; max-age=2592000; SameSite=Lax`;
-                    setOrderToken(newToken);
+            const order = await response.json();
+            if (!order?.tokenValue) throw new Error("Missing tokenValue in order response");
 
-                    await fetch("/api/sync-cart", {
-                        method: "POST",
-                        body: newToken,
-                    });
+            const newToken = order.tokenValue;
+            document.cookie = `orderToken=${newToken}; path=/; max-age=2592000; SameSite=Lax`;
+            setOrderToken(newToken);
 
-                } catch (e) {
-                    console.error("Failed to create order token on startup:", e);
-                }
-            })();
+            await fetch("/api/sync-cart", {
+                method: "POST",
+                body: newToken,
+            });
+        } catch (e) {
+            console.error("Could not create a new order:", e);
         }
+    };
+
+    useEffect(() => {
+        (async () => {
+            const remixToken = typeof window !== "undefined" && (window as any).__remixOrderToken;
+            const cookieToken = getCookieToken();
+            const initialToken = remixToken || cookieToken;
+
+            if (initialToken) {
+                try {
+                    const order = await fetchOrderFromAPIClient(initialToken, true);
+                    if (order?.checkoutState === "completed") {
+                        console.warn("⚠️ Existing token is for completed order, creating new cart...");
+                        await createNewOrder();
+                    } else {
+                        setOrderToken(initialToken);
+                    }
+                } catch {
+                    console.warn("⚠️ Existing token invalid, creating new cart...");
+                    await createNewOrder();
+                }
+            } else {
+                await createNewOrder();
+            }
+        })();
     }, []);
 
     const orderQuery = useQuery<Order, Error>({
@@ -108,9 +130,7 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
 
     const fetchOrder = () => {
-        if (!orderToken) {
-            return;
-        }
+        if (!orderToken) return;
         queryClient.invalidateQueries({ queryKey: ["order", orderToken] });
     };
 
@@ -119,6 +139,7 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setOrderToken(null);
         setActiveCouponCode(null);
         document.cookie = "orderToken=; path=/; max-age=0; SameSite=Lax";
+        createNewOrder();
     };
 
     return (

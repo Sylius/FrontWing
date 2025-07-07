@@ -1,15 +1,14 @@
 import React, { useState } from "react";
-import CheckoutLayout from "../../layouts/Checkout";
-import { useOrder } from "../../context/OrderContext";
+import CheckoutLayout from "~/layouts/Checkout";
+import { useOrder } from "~/context/OrderContext";
 import { useNavigate } from "react-router-dom";
-import Steps from "../../components/checkout/Steps";
-import Address from "../../components/Address";
-import PaymentsCard from "../../components/order/PaymentsCard";
-import ShipmentsCard from "../../components/order/ShipmentsCard";
-import ProductRow from "../../components/order/ProductRow";
-import { OrderItem } from "../../types/Order";
-import { formatPrice } from "../../utils/price";
-import { pickupCartClient } from "../../api/order.client";
+import Steps from "~/components/checkout/Steps";
+import Address from "~/components/Address";
+import PaymentsCard from "~/components/order/PaymentsCard";
+import ShipmentsCard from "~/components/order/ShipmentsCard";
+import ProductRow from "~/components/order/ProductRow";
+import { OrderItem } from "~/types/Order";
+import { formatPrice } from "~/utils/price";
 
 const SummaryPage: React.FC = () => {
   const { order, resetCart, setOrderToken } = useOrder();
@@ -22,7 +21,7 @@ const SummaryPage: React.FC = () => {
     setIsSubmitting(true);
 
     if (!order?.tokenValue) {
-      console.warn(" Missing order token");
+      console.warn("Missing order token");
       setIsSubmitting(false);
       return;
     }
@@ -46,7 +45,15 @@ const SummaryPage: React.FC = () => {
 
       resetCart();
 
-      const newToken = await pickupCartClient();
+      const res = await fetch(`${window.ENV?.API_URL}/api/v2/shop/orders`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: "{}",
+      });
+
+      const newOrder = await res.json();
+      const newToken = newOrder.tokenValue;
+
       document.cookie = `orderToken=${newToken}; path=/; max-age=2592000; SameSite=Lax`;
       setOrderToken(newToken);
 

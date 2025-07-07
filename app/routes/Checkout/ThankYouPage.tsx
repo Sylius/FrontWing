@@ -1,15 +1,18 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Layout from "~/layouts/Default";
 import { useCustomer } from "~/context/CustomerContext";
 import { useSearchParams, useLocation, Link } from "@remix-run/react";
+import { useOrder } from "~/context/OrderContext";
 
 export default function ThankYouPage() {
     const { customer } = useCustomer();
+    const { resetCart } = useOrder();
     const [searchParams] = useSearchParams();
     const location = useLocation();
 
     const tokenFromQuery = searchParams.get("token") || searchParams.get("completed");
     const tokenFromState = (location.state as any)?.tokenValue;
+
     const token =
         tokenFromState ||
         tokenFromQuery ||
@@ -19,6 +22,10 @@ export default function ThankYouPage() {
                 .find((row) => row.startsWith("orderToken="))
                 ?.split("=")[1]
             : null);
+
+    useEffect(() => {
+        resetCart();
+    }, []);
 
     return (
         <Layout>
