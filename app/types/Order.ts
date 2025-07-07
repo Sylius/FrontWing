@@ -89,6 +89,7 @@ export interface Shipment {
 export interface Order {
     id?: number;
     number: string;
+    checkoutState?: string;
     tokenValue: string;
     state: string;
     itemsSubtotal: number;
