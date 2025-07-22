@@ -92,26 +92,50 @@ export default function App() {
     return (
         <html lang="en">
         <head>
-            <meta charSet="utf-8" />
-            <meta name="viewport" content="width=device-width, initial-scale=1" />
-            <Meta />
-            <Links />
+            <meta charSet="utf-8"/>
+            <meta name="viewport" content="width=device-width, initial-scale=1"/>
+            <meta name="apple-mobile-web-app-capable" content="yes"/>
+            <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+            <meta name="apple-mobile-web-app-title" content="Sylius Demo"/>
+            <link rel="manifest" href="/manifest.webmanifest"/>
+            <link rel="apple-touch-icon" href="/logo192.png"/>
+            <Meta/>
+            <Links/>
         </head>
+
         <body>
-        <BootstrapLoader />
+        <BootstrapLoader/>
         <QueryClientProvider client={queryClient}>
             <CustomerProvider>
                 <OrderProvider>
                     <FlashMessagesProvider>
-                        <Outlet context={{ taxonTree: data.taxonTree }} />
+                        <Outlet context={{taxonTree: data.taxonTree}}/>
                     </FlashMessagesProvider>
                 </OrderProvider>
             </CustomerProvider>
         </QueryClientProvider>
-        <ScrollRestoration />
-        <Scripts />
-        <EnvironmentScript env={data.ENV} />
-        <RemixOrderTokenScript token={data.orderToken} />
+        <ScrollRestoration/>
+        <Scripts/>
+        <EnvironmentScript env={data.ENV}/>
+        <RemixOrderTokenScript token={data.orderToken}/>
+
+        <script
+            dangerouslySetInnerHTML={{
+                __html: `
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/service-worker.js')
+            .then(function (registration) {
+              console.log('ServiceWorker registered: ', registration);
+            })
+            .catch(function (error) {
+              console.log('ServiceWorker registration failed: ', error);
+            });
+        });
+      }
+    `,
+            }}
+        />
         </body>
         </html>
     );
