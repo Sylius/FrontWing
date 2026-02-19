@@ -1,0 +1,21 @@
+services:
+  react-app:
+    image: node:20-alpine
+    container_name: react-app
+    working_dir: /app
+    volumes:
+      - ./:/app
+      # Avoid mixing container node_modules (Linux) with host node_modules
+      - /app/node_modules
+    ports:
+      - "5173:5173" # Default Vite port
+    environment:
+      - NODE_ENV=development
+    # Activate pnpm via Corepack, install dependencies, and start dev server
+    command: >
+      sh -c "corepack enable && 
+             corepack prepare pnpm@latest --activate && 
+             pnpm install && 
+             pnpm dev --host"
+    stdin_open: true
+    tty: true
