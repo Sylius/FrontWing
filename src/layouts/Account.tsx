@@ -1,6 +1,3 @@
-import React from "react";
-import Breadcrumbs from "../components/Breadcrumbs";
-import { Link } from "react-router";
 import {
   IconBook,
   IconHome,
@@ -8,6 +5,9 @@ import {
   IconShoppingCart,
   IconUser,
 } from "@tabler/icons-react";
+import React from "react";
+import { Link } from "react-router-dom";
+import Breadcrumbs from "../components/Breadcrumbs";
 
 interface AccountLayoutProps {
     children: React.ReactNode;

@@ -1,9 +1,9 @@
+import { IconMenu2, IconShoppingBag } from "@tabler/icons-react";
 import React from 'react';
-import { Link } from 'react-router';
-import {useOrder} from "../../context/OrderContext";
-import {formatPrice} from "../../utils/price";
+import { Link } from 'react-router-dom';
+import { useOrder } from "../../context/OrderContext";
+import { formatPrice } from "../../utils/price";
 import UserNavigation from "./header/UserNavigation";
-import {IconMenu2, IconShoppingBag} from "@tabler/icons-react";
 
 const Header: React.FC =  () => {
     const { order } = useOrder();

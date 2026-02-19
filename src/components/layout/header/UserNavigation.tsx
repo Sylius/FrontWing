@@ -1,7 +1,7 @@
-import React from "react";
-import {useCustomer} from "../../../context/CustomerContext";
-import {Link} from "react-router";
 import { IconUser } from '@tabler/icons-react';
+import React from "react";
+import { Link } from "react-router-dom";
+import { useCustomer } from "../../../context/CustomerContext";
 
 
 const UserNavigation: React.FC = () => {
