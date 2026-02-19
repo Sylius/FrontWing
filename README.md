@@ -30,6 +30,7 @@ The goal is to provide a modern, fast, and flexible frontend for Sylius-based eC
 - **Bootstrap 5**
 - **TanStack Query (React Query)**
 - **TypeScript**
+- **Claude Code & MOAI SDK** (AI-assisted development)
 
 ## 🚧 Development Roadmap
 
