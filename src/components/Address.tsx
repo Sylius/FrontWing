@@ -10,10 +10,10 @@ const BillingCard: React.FC<AddressProps> = ({ sectionName, address }) => {
     const fullName = `${address.firstName ?? ''} ${address.lastName ?? ''}`.trim();
 
     return (
-        <div className="card border-0 bg-body-tertiary">
-            <div className="card-header">{sectionName}</div>
-            <div className="card-body">
-                <address className="d-flex flex-column">
+        <div className="bg-muted/50 rounded-lg border-0">
+            <div className="px-4 py-3 border-b font-medium">{sectionName}</div>
+            <div className="p-4">
+                <address className="flex flex-col not-italic">
                     {address.company && <strong>{address.company}</strong>}
                     <strong>{fullName}</strong>
                     <span>{address.phoneNumber}</span>

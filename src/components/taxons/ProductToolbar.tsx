@@ -1,6 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import {
+    InputGroup,
+    InputGroupAddon,
+    InputGroupButton,
+    InputGroupInput
+} from "@/components/ui/input-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { IconSearch, IconX } from '@tabler/icons-react';
+import React, { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 const sortOptions = [
     { label: 'By position', value: '' },
@@ -15,78 +22,94 @@ const sortOptions = [
 const ProductToolbar: React.FC = () => {
     const [searchParams, setSearchParams] = useSearchParams();
 
-    const [searchValue, setSearchValue] = useState(() => searchParams.get('translations.name') || '');
-    const [sortValue, setSortValue] = useState(() => {
-        const found = sortOptions.find(opt => searchParams.toString().includes(opt.value));
-        return found?.value || '';
-    });
+    // 1. État local uniquement pour ce que l'utilisateur tape (avant validation)
+    const [searchValue, setSearchValue] = useState(searchParams.get('translations.name') || '');
 
-    useEffect(() => {
-        setSearchValue(searchParams.get('translations.name') || '');
-    }, [searchParams]);
+    // 2. Calculer la valeur de tri directement depuis l'URL (Pas besoin de useState ici !)
+    const sortValue = sortOptions.find(opt => 
+        opt.value !== '' && searchParams.toString().includes(opt.value)
+    )?.value || '';
+
+    const updateParams = (updates: Record<string, string | null>) => {
+        const newParams = new URLSearchParams(searchParams);
+        Object.entries(updates).forEach(([key, value]) => {
+            if (value === null || value === '') {
+                newParams.delete(key);
+            } else {
+                newParams.set(key, value);
+            }
+        });
+        setSearchParams(newParams);
+    };
 
     const handleSearch = () => {
-        const newParams = new URLSearchParams(searchParams.toString());
-        if (searchValue) {
-            newParams.set('translations.name', searchValue);
-        } else {
-            newParams.delete('translations.name');
-        }
-        setSearchParams(newParams);
+        updateParams({ 'translations.name': searchValue });
     };
 
     const clearSearch = () => {
-        const newParams = new URLSearchParams(searchParams.toString());
-        newParams.delete('translations.name');
         setSearchValue('');
-        setSearchParams(newParams);
+        updateParams({ 'translations.name': null });
     };
 
-    const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const newParams = new URLSearchParams(searchParams.toString());
+    const handleSortChange = (selected: string) => {
+        const actualValue = selected === '__empty__' ? '' : selected;
+        const newParams = new URLSearchParams(searchParams);
+
+        // Nettoyer les anciens tris
         sortOptions.forEach(opt => {
-            const key = opt.value.split('=')[0];
-            if (key) newParams.delete(key);
+            if (opt.value) {
+                const [key] = opt.value.split('=');
+                newParams.delete(key);
+            }
         });
 
-        const selected = e.target.value;
-        if (selected) {
-            const [key, value] = selected.split('=');
-            newParams.set(key, value);
+        // Appliquer le nouveau
+        if (actualValue) {
+            const [key, val] = actualValue.split('=');
+            newParams.set(key, val);
         }
-
-        setSortValue(selected);
         setSearchParams(newParams);
     };
 
     return (
-        <div className="d-flex flex-wrap align-items-center gap-2 mb-4">
-            <div className="d-flex border rounded overflow-hidden flex-grow-1">
-                <input
-                    type="text"
-                    className="form-control border-0"
-                    placeholder="Value"
-                    value={searchValue}
-                    onChange={e => setSearchValue(e.target.value)}
-                />
-                <button className="btn btn-outline-secondary border-0 rounded-0" onClick={handleSearch}>
-                    <IconSearch size={24} />
-                </button>
-                <button className="btn btn-outline-secondary border-0 rounded-0" onClick={clearSearch}>
-                    <IconX size={24} />
-                </button>
-
+        <div className="flex flex-wrap items-center gap-2 mb-4">
+            <div className="flex border rounded-md shadow-xs overflow-hidden flex-1">
+                <InputGroup className="border-0 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0">
+                    <InputGroupInput
+                        placeholder="Search..."
+                        value={searchValue}
+                        onChange={e => setSearchValue(e.target.value)}
+                        onKeyDown={e => e.key === 'Enter' && handleSearch()}
+                    />
+                    <InputGroupAddon align="inline-end" className="has-[>button]:m-0 gap-0">
+                        {searchValue && (
+                            <InputGroupButton size="icon-sm" className="cursor-pointer" variant="ghost" onClick={clearSearch}>
+                                <IconX size={16} />
+                            </InputGroupButton>
+                        )}
+                        <InputGroupButton size="icon-sm" className="cursor-pointer" variant="ghost" onClick={handleSearch}>
+                            <IconSearch size={16} />
+                        </InputGroupButton>
+                    </InputGroupAddon>
+                </InputGroup>
             </div>
 
-            <div className="ms-auto d-flex align-items-center gap-2 ps-4">
-                <label className="form-label m-0">Sort:</label>
-                <select className="form-select" value={sortValue} onChange={handleSortChange}>
-                    {sortOptions.map(opt => (
-                        <option key={opt.label} value={opt.value}>
-                            {opt.label}
-                        </option>
-                    ))}
-                </select>
+            <div className="ml-auto flex items-center gap-2 pl-4">
+                <label className="text-sm m-0">Sort:</label>
+                <Select value={sortValue || '__empty__'} onValueChange={handleSortChange}>
+                    <SelectTrigger className="w-50">
+                        <SelectValue>
+                            {sortOptions.find(opt => (opt.value || '__empty__') === (sortValue || '__empty__'))?.label}
+                        </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                        {sortOptions.map(opt => (
+                            <SelectItem key={opt.label} value={opt.value || '__empty__'}>
+                                {opt.label}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
             </div>
         </div>
     );

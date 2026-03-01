@@ -1,10 +1,11 @@
+import { Button } from "@/components/ui/button";
 import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import Default from "../../layouts/Default";
-import AccountLayout from "../../layouts/Account";
 import Skeleton from "react-loading-skeleton";
-import { useFlashMessages } from "../../context/FlashMessagesContext";
+import { useNavigate, useParams } from "react-router-dom";
 import AddressForm from "../../components/account/AddressForm";
+import { useFlashMessages } from "../../context/FlashMessagesContext";
+import AccountLayout from "../../layouts/Account";
+import Default from "../../layouts/Default";
 
 interface Country {
     code: string;
@@ -20,6 +21,8 @@ const EditAddressPage: React.FC = () => {
     const [loadingCountries, setLoadingCountries] = useState(true);
     const [loadingAddress, setLoadingAddress] = useState(true);
     const [submitting, setSubmitting] = useState(false);
+    const [errors, setErrors] = useState<Record<string, string>>({});
+    const [submitted, setSubmitted] = useState(false);
 
     const [formData, setFormData] = useState({
         firstName: "",
@@ -78,15 +81,33 @@ const EditAddressPage: React.FC = () => {
 
         fetchCountries();
         fetchAddress();
-    }, [id]);
+    }, [id, addMessage]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
+    const handleCountryChange = (value: string) => {
+        setFormData((prev) => ({ ...prev, countryCode: value }));
+    };
+
+    const validate = (): boolean => {
+        const e: Record<string, string> = {};
+        if (!formData.firstName.trim()) e.firstName = "Required";
+        if (!formData.lastName.trim()) e.lastName = "Required";
+        if (!formData.street.trim()) e.street = "Required";
+        if (!formData.city.trim()) e.city = "Required";
+        if (!formData.postcode.trim()) e.postcode = "Required";
+        if (!formData.countryCode.trim()) e.countryCode = "Required";
+        setErrors(e);
+        return Object.keys(e).length === 0;
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setSubmitted(true);
+        if (!validate()) return;
         setSubmitting(true);
 
         try {
@@ -125,7 +146,7 @@ const EditAddressPage: React.FC = () => {
                     { label: "Edit", url: `/account/address-book/edit/${id}` },
                 ]}
             >
-                <div className="col-12 col-md-9">
+                <div className="w-full md:w-3/4">
                     <div className="mb-4">
                         <h1>Address book</h1>
                         <p>Edit my address</p>
@@ -141,20 +162,23 @@ const EditAddressPage: React.FC = () => {
                                     countries={countries}
                                     loadingCountries={loadingCountries}
                                     onChange={handleChange}
+                                    onCountryChange={handleCountryChange}
+                                    errors={errors}
+                                    submitted={submitted}
                                 />
                             </div>
 
-                            <div className="d-flex gap-2">
-                                <button type="submit" className="btn btn-primary" disabled={submitting}>
+                            <div className="flex gap-2">
+                                <Button type="submit" disabled={submitting}>
                                     {submitting ? "Saving..." : "Save changes"}
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                     type="button"
-                                    className="btn btn-outline-gray"
+                                    variant="outline"
                                     onClick={() => navigate("/account/address-book")}
                                 >
                                     Cancel
-                                </button>
+                                </Button>
                             </div>
                         </form>
                     )}

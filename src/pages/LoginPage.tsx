@@ -1,8 +1,14 @@
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { IconLockOpen } from "@tabler/icons-react";
 import React, { useState } from "react";
-import Default from "../layouts/Default";
 import { useNavigate } from "react-router-dom";
 import { useCustomer } from "../context/CustomerContext";
-import { IconLockOpen } from "@tabler/icons-react";
+import Default from "../layouts/Default";
+
+const labelClass = "block text-sm font-medium mb-1";
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -29,12 +35,16 @@ const LoginPage: React.FC = () => {
         },
       );
 
-      const data: { token: string; customer: string; message?: string } =
-        await response.json();
-
       if (!response.ok) {
-        throw new Error(data.message || "Invalid credentials");
+        const contentType = response.headers.get("content-type");
+        if (contentType?.includes("application/json")) {
+          const errData: { message?: string } = await response.json();
+          throw new Error(errData.message || "Invalid credentials");
+        }
+        throw new Error("Invalid credentials");
       }
+
+      const data: { token: string; customer: string } = await response.json();
 
       localStorage.setItem("jwtToken", data.token);
       localStorage.setItem("userUrl", data.customer);
@@ -56,64 +66,61 @@ const LoginPage: React.FC = () => {
   return (
     <Default>
       <div className="container my-auto">
-        <div className="row my-4">
-          <div className="col-12 col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-6 offset-lg-0 col-xl-4 offset-xl-1 order-lg-1">
-            <div className="d-flex justify-content-center align-items-center h-100 px-3">
-              <div className="w-100 py-lg-5 mb-5 my-lg-5">
-                <h1 className="h2 mb-5">Login</h1>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 my-4">
+          <div className="flex justify-center items-center lg:order-2">
+            <div className="w-full max-w-md py-8 lg:py-20">
+                <h1 className="text-2xl font-bold mb-5">Login</h1>
                 <form onSubmit={handleLogin} noValidate>
                   {error && (
-                    <div className="alert alert-danger">
-                      <div className="fw-bold">Error</div>
-                      {error}
-                    </div>
+                    <Alert variant="destructive" className="mb-4">
+                      <AlertDescription>
+                        <div className="font-bold">Error</div>
+                        {error}
+                      </AlertDescription>
+                    </Alert>
                   )}
 
                   <div className="mb-5">
-                    <div className="field mb-3 required">
+                    <div className="mb-3">
                       <label
                         htmlFor="_username"
-                        className="form-label required"
+                        className={labelClass}
                       >
                         Username
                       </label>
-                      <input
+                      <Input
                         type="text"
                         id="_username"
                         name="_username"
                         required
-                        className="form-control"
                         onChange={(e) => setEmail(e.target.value)}
                       />
                     </div>
 
-                    <div className="field mb-3 required">
+                    <div className="mb-3">
                       <label
                         htmlFor="_password"
-                        className="form-label required"
+                        className={labelClass}
                       >
                         Password
                       </label>
-                      <input
+                      <Input
                         type="password"
                         id="_password"
                         name="_password"
                         required
-                        className="form-control"
                         onChange={(e) => setPassword(e.target.value)}
                       />
                     </div>
 
-                    <div className="form-check">
-                      <input
-                        type="checkbox"
+                    <div className="flex items-center gap-2">
+                      <Checkbox
                         id="_remember_me"
                         name="_remember_me"
-                        className="form-check-input"
                         value="1"
                       />
                       <label
-                        className="form-check-label"
+                        className="text-sm"
                         htmlFor="_remember_me"
                       >
                         Remember me
@@ -121,15 +128,15 @@ const LoginPage: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="d-grid mb-2">
-                    <button
+                  <div className="mb-2">
+                    <Button
                       type="submit"
-                      className="btn btn-primary"
+                      className="w-full"
                       id="login-button"
                       disabled={loading}
                     >
                       Login
-                    </button>
+                    </Button>
                   </div>
 
                   <input
@@ -139,24 +146,27 @@ const LoginPage: React.FC = () => {
                   />
                 </form>
 
-                <div className="d-grid">
-                  <a className="btn btn-link" href="/en_US/forgotten-password">
+                <div className="text-center">
+                  <a className="text-primary hover:underline text-sm" href="/en_US/forgotten-password">
                     Forgot password?
                   </a>
                 </div>
-              </div>
             </div>
           </div>
 
-          <div className="col-12 col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-6 offset-lg-0 order-lg-0">
-            <div className="d-flex flex-column justify-content-center align-items-center bg-light rounded-4 h-100 p-3">
+          <div className="lg:order-1">
+            <div className="flex flex-col justify-center items-center bg-muted rounded-2xl h-full p-3">
               <div className="text-center">
-                <div className="mb-3">
-                  <IconLockOpen stroke={2} size={144} color={"#e8eaed"} />
+                <div className="flex justify-center mb-3">
+                  <IconLockOpen 
+                  stroke={2} 
+                  size={144} 
+                  color={"#22b99a"} 
+                  />
                 </div>
                 <h2>Don't have an account?</h2>
                 <a
-                  className="btn btn-link"
+                  className="text-primary hover:underline"
                   id="register-here-button"
                   href="/en_US/register"
                 >

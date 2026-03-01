@@ -1,14 +1,26 @@
+import { Button } from '@/components/ui/button';
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
+} from '@/components/ui/navigation-menu';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { IconChevronDown, IconMenu2 } from '@tabler/icons-react';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Taxon, TaxonChild } from '../../types/Taxon';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-import { IconChevronDown } from '@tabler/icons-react';
 
 const Navbar: React.FC = () => {
   const [taxons, setTaxons] = useState<Taxon[]>([]);
   const [childrenMap, setChildrenMap] = useState<Record<number, TaxonChild[]>>(
     {}
   );
+  const [isOpen, setIsOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchTaxons = async () => {
@@ -42,7 +54,7 @@ const Navbar: React.FC = () => {
 
         setChildrenMap(map);
       } catch (err) {
-        console.error('Błąd ładowania kategorii:', err);
+        console.error('Error loading categories:', err);
       }
     };
 
@@ -50,64 +62,112 @@ const Navbar: React.FC = () => {
   }, []);
 
   return (
-    <div className="w-100 border-bottom">
-      <nav
-        className="navbar offcanvas-lg offcanvas-start offcanvas-wide p-0"
-        id="navbarNav"
-      >
-        <div className="offcanvas-header w-100">
-          <h5 className="offcanvas-title">Taxons</h5>
-          <button
-            type="button"
-            className="btn-close"
-            data-bs-dismiss="offcanvas"
-            data-bs-target="#navbarNav"
-            aria-label="Close"
-          ></button>
-        </div>
-
-        <div className="offcanvas-body justify-content-lg-center w-100 py-0">
-          <div className="navbar-nav my-2 flex-column flex-lg-row gap-lg-4">
+    <div className="w-full border-b">
+      {/* Desktop navbar */}
+      <nav className="hidden lg:flex justify-center py-0">
+        <NavigationMenu className="my-1">
+          <NavigationMenuList>
             {taxons.map((taxon) => {
               const hasChildren = childrenMap[taxon.id]?.length > 0;
-
-              return hasChildren ? (
-                <div
-                  key={taxon.id}
-                  className="nav-item dropdown position-relative"
-                >
-                  <a
-                    href="#"
-                    className="nav-link d-flex align-items-center gap-1"
-                    role="button"
-                    data-bs-toggle="dropdown"
-                    aria-expanded="false"
-                  >
-                    {taxon.name}
-                    <IconChevronDown stroke={2} size={20} />
-                  </a>
-
-                  <div className="dropdown-menu position-absolute border dropdown-custom ">
-                    {childrenMap[taxon.id].map((child) => (
-                      <Link
-                        key={child.id}
-                        className="nav-link nav-link-padding"
-                        to={`/${taxon.code}/${child.code}`}
+              return (
+                <NavigationMenuItem key={taxon.id}>
+                  {hasChildren ? (
+                    <>
+                      <NavigationMenuTrigger 
+                        className="data-popup-open:bg-transparent data-popup-open:text-primary data-popup-open:hover:bg-transparent data-popup-open:hover:text-primary active:text-primary hover:bg-transparent hover:text-primary focus:bg-transparent focus:text-primary"
                       >
-                        {child.name}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <Link key={taxon.id} className="nav-link" to={`/${taxon.slug}`}>
-                  {taxon.name}
-                </Link>
+                        {taxon.name}
+                      </NavigationMenuTrigger>
+                      <NavigationMenuContent>
+                        <ul className="grid w-50 p-2 gap-0.5">
+                          {childrenMap[taxon.id].map((child) => (
+                            <li key={child.id}>
+                              <NavigationMenuLink
+                                render={<Link to={`/${taxon.code}/${child.code}`} className="hover:bg-transparent hover:text-primary focus:bg-transparent focus:text-primary" />}
+                              >
+                                {child.name}
+                              </NavigationMenuLink>
+                            </li>
+                          ))}
+                        </ul>
+                      </NavigationMenuContent>
+                    </>
+                  ) : (
+                    <NavigationMenuLink
+                      className={navigationMenuTriggerStyle()}
+                      render={<Link to={`/${taxon.slug}`} className="hover:bg-transparent hover:text-primary focus:bg-transparent focus:text-primary" />}
+                    >
+                      {taxon.name}
+                    </NavigationMenuLink>
+                  )}
+                </NavigationMenuItem>
               );
             })}
-          </div>
-        </div>
+          </NavigationMenuList>
+        </NavigationMenu>
       </nav>
+
+      {/* Mobile navbar trigger */}
+      <div className="lg:hidden flex items-center px-4 py-2">
+        <Sheet open={isOpen} onOpenChange={setIsOpen}>
+          <SheetTrigger render={<Button variant="ghost" size="icon" aria-label="Toggle navigation" />}>
+            <IconMenu2 stroke={1.25} size={28} />
+          </SheetTrigger>
+          <SheetContent side="left" className="w-70 p-0">
+            <div className="p-4 border-b">
+              <h5 className="font-semibold text-lg">Taxons</h5>
+            </div>
+            <div className="flex flex-col py-2">
+              {taxons.map((taxon) => {
+                const hasChildren = childrenMap[taxon.id]?.length > 0;
+                return hasChildren ? (
+                  <div key={taxon.id}>
+                    <Button
+                      variant="ghost"
+                      className="flex items-center gap-1 py-2 px-3 w-full justify-start"
+                      onClick={() =>
+                        setOpenDropdown(openDropdown === taxon.id ? null : taxon.id)
+                      }
+                    >
+                      {taxon.name}
+                      <IconChevronDown
+                        stroke={2}
+                        size={20}
+                        className={`ml-auto transition-transform duration-200 ${
+                          openDropdown === taxon.id ? 'rotate-180' : ''
+                        }`}
+                      />
+                    </Button>
+                    {openDropdown === taxon.id && (
+                      <div className="pl-4">
+                        {childrenMap[taxon.id].map((child) => (
+                          <Link
+                            key={child.id}
+                            className="block py-2 px-6 text-foreground hover:text-primary hover:bg-muted/50"
+                            to={`/${taxon.code}/${child.code}`}
+                            onClick={() => setIsOpen(false)}
+                          >
+                            {child.name}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Link
+                    key={taxon.id}
+                    className="block py-2 px-3 text-foreground hover:text-primary"
+                    to={`/${taxon.slug}`}
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {taxon.name}
+                  </Link>
+                );
+              })}
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
     </div>
   );
 };

@@ -10,10 +10,10 @@ const Reviews: React.FC<ReviewListProps> = ({ reviews }) => {
     return (
         <div className="mb-5">
             {reviews.map((review) => (
-                <div key={review.id} className="border-bottom py-4">
-                    <div className="d-sm-flex w-100 justify-content-between align-items-center mb-2">
-                        <div className="h6 mb-1">{review.title}</div>
-                        <div className="mb-3 fs-3 review-stars d-flex gap-1">
+                <div key={review.id} className="border-b py-4">
+                    <div className="sm:flex w-full justify-between items-center mb-2">
+                        <div className="text-base font-semibold mb-1">{review.title}</div>
+                        <div className="mb-3 text-3xl text-yellow-400 flex gap-1">
                             {[...Array(5)].map((_, index) => (
                                 <IconStar
                                     key={index}
@@ -27,7 +27,7 @@ const Reviews: React.FC<ReviewListProps> = ({ reviews }) => {
                     <div className="mb-2">
                         <div>{review.comment}</div>
                     </div>
-                    <small className="text-muted">
+                    <small className="text-muted-foreground">
                         {review.author?.firstName
                             ? `${review.author.firstName}, `
                             : ''}

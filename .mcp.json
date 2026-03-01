@@ -10,6 +10,10 @@
       "$comment": "Step-by-step reasoning for complex problems",
       "command": "/bin/bash",
       "args": ["-l", "-c", "exec npx -y @modelcontextprotocol/server-sequential-thinking"]
+    },
+    "shadcn": {
+      "command": "npx",
+      "args": ["shadcn@latest", "mcp"]
     }
   },
   "staggeredStartup": {

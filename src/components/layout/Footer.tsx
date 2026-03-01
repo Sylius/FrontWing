@@ -1,82 +1,16 @@
+import { IconBrandFacebook, IconBrandInstagram, IconBrandX } from "@tabler/icons-react";
 import React from 'react';
-import {IconBrandFacebook, IconBrandInstagram, IconBrandX} from "@tabler/icons-react";
 
 
 const Footer: React.FC =  () => {
 return (
-    <div className="mt-auto border-top mt-5 py-5">
-        <footer className="container">
-            <div className="row">
-                <div className="col-12 col-lg-6 order-lg-2">
-                    <div className="row">
-                        <div className="col-12 col-sm-6">
-                            <nav className="nav flex-column">
-                                <a className="nav-link" href="#">About</a>
-                                <a className="nav-link" href="#">Terms and Conditions</a>
-                                <a className="nav-link" href="#">Privacy Policy</a>
-                                <a className="nav-link" href="/en_US/contact/">Contact us</a>
-                            </nav>
-                        </div>
+    <div className="border-t mt-5 py-5">
+        <footer className="container mx-auto px-4">
+            <div className="grid grid-cols-1 lg:grid-cols-6 gap-8">
 
-                        <div className="col-12 col-sm-6">
-                            <nav className="nav flex-column mb-5">
-                                <a className="nav-link" href="#">FAQ</a>
-                                <a className="nav-link" href="#">Delivery &amp; Shipping</a>
-                                <a className="nav-link" href="#">Returns Policy</a>
-                            </nav>
-                        </div>
-                    </div>
-                </div>
-
-                <div
-                    className="col-12 text-center col-md-6 order-md-4 text-md-start col-lg-3 order-lg-4 text-lg-center">
-                    <div className="mb-3 fw-medium">Payment methods:</div>
-
-                    <div className="row g-2 mb-4">
-                        <div className="col-4">
-                            <a href="https://sylius.com/partner/paypal/" target="_blank"
-                               className="d-block border rounded p-2">
-                                <img className="img-fluid" loading="lazy"
-                                     src="/paypal-logo.svg" width="100%" height="100%"
-                                     alt="PayPal"/>
-                            </a>
-                        </div>
-                        <div className="col-4">
-                            <a href="https://sylius.com/partner/adyen/" target="_blank"
-                               className="d-block border rounded p-2">
-                                <img className="img-fluid" loading="lazy"
-                                     src="/adyen-logo.svg" width="100%" height="100%"
-                                     alt="Adyen"/>
-                            </a>
-                        </div>
-                        <div className="col-4">
-                            <a href="https://sylius.com/partner/mollie/" target="_blank"
-                               className="d-block border rounded p-2">
-                                <img className="img-fluid" loading="lazy"
-                                     src="/mollie-logo.svg" width="100%" height="100%"
-                                     alt="Mollie"/>
-                            </a>
-                        </div>
-                    </div>
-
-                    <div
-                        className="d-flex justify-content-center justify-content-md-start justify-content-lg-center gap-3 mb-5">
-                        <a className="link-reset" href="https://www.instagram.com/sylius.team/" target="_blank"
-                           aria-label="instagram logo">
-                            <IconBrandInstagram stroke={2} />
-                        </a>
-                        <a className="link-reset" href="https://www.facebook.com/SyliusEcommerce/" target="_blank"
-                           aria-label="facebook logo">
-                            <IconBrandFacebook stroke={2} />
-                        </a>
-                        <a className="link-reset" href="https://x.com/Sylius" target="_blank" aria-label="x logo">
-                            <IconBrandX stroke={2} />
-                        </a>
-                    </div>
-                </div>
-
-                <div className="col-12 text-center col-md-6 order-md-3 text-md-start col-lg-3 order-lg-1">
-                    <a href="/en_US/" className="d-inline-block mb-4" aria-label="sylius logo">
+                {/* Column 1 — Logo + copyright */}
+                <div className="text-center lg:text-left lg:col-span-2">
+                    <a href="/en_US/" className="inline-block mb-4" aria-label="sylius logo">
                         <div style={{ width: '10rem' }}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 3512 1033"
                                  fillRule="evenodd" strokeLinejoin="round" strokeMiterlimit="2">
@@ -100,6 +34,63 @@ return (
                         <a href="https://sylius.com" target="_blank">Sylius</a>
                     </div>
                 </div>
+
+                {/* Column 2 — Navigation links */}
+                <div className="lg:col-span-3 grid grid-cols-2 gap-4">
+                    <nav className="flex flex-col">
+                        <a className="py-1 text-foreground hover:text-primary" href="#">About</a>
+                        <a className="py-1 text-foreground hover:text-primary" href="#">Terms and Conditions</a>
+                        <a className="py-1 text-foreground hover:text-primary" href="#">Privacy Policy</a>
+                        <a className="py-1 text-foreground hover:text-primary" href="/en_US/contact/">Contact us</a>
+                    </nav>
+
+                    <nav className="flex flex-col">
+                        <a className="py-1 text-foreground hover:text-primary" href="#">FAQ</a>
+                        <a className="py-1 text-foreground hover:text-primary" href="#">Delivery &amp; Shipping</a>
+                        <a className="py-1 text-foreground hover:text-primary" href="#">Returns Policy</a>
+                    </nav>
+                </div>
+
+                {/* Column 3 — Payment methods + social */}
+                <div className="text-center lg:text-left lg:col-span-1">
+                    <div className="mb-3 font-medium">Payment methods:</div>
+
+                    <div className="grid grid-cols-3 gap-2 mb-4">
+                        <a href="https://sylius.com/partner/paypal/" target="_blank"
+                           className="block border rounded p-2">
+                            <img className="max-w-full h-auto" loading="lazy"
+                                 src="/paypal-logo.svg" width="100%" height="100%"
+                                 alt="PayPal"/>
+                        </a>
+                        <a href="https://sylius.com/partner/adyen/" target="_blank"
+                           className="block border rounded p-2">
+                            <img className="max-w-full h-auto" loading="lazy"
+                                 src="/adyen-logo.svg" width="100%" height="100%"
+                                 alt="Adyen"/>
+                        </a>
+                        <a href="https://sylius.com/partner/mollie/" target="_blank"
+                           className="block border rounded p-2">
+                            <img className="max-w-full h-auto" loading="lazy"
+                                 src="/mollie-logo.svg" width="100%" height="100%"
+                                 alt="Mollie"/>
+                        </a>
+                    </div>
+
+                    <div className="flex justify-center lg:justify-start gap-3">
+                        <a className="link-reset" href="https://www.instagram.com/sylius.team/" target="_blank"
+                           aria-label="instagram logo">
+                            <IconBrandInstagram stroke={2} />
+                        </a>
+                        <a className="link-reset" href="https://www.facebook.com/SyliusEcommerce/" target="_blank"
+                           aria-label="facebook logo">
+                            <IconBrandFacebook stroke={2} />
+                        </a>
+                        <a className="link-reset" href="https://x.com/Sylius" target="_blank" aria-label="x logo">
+                            <IconBrandX stroke={2} />
+                        </a>
+                    </div>
+                </div>
+
             </div>
         </footer>
     </div>

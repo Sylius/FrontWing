@@ -4,6 +4,7 @@ import Default from "../../layouts/Default";
 import AccountLayout from "../../layouts/Account";
 import { useFlashMessages } from "../../context/FlashMessagesContext";
 import AddressForm from "../../components/account/AddressForm";
+import { Button } from "@/components/ui/button";
 
 interface Country {
     code: string;
@@ -28,6 +29,8 @@ const AddAddressPage: React.FC = () => {
         phoneNumber: "",
     });
     const [submitting, setSubmitting] = useState(false);
+    const [errors, setErrors] = useState<Record<string, string>>({});
+    const [submitted, setSubmitted] = useState(false);
 
     useEffect(() => {
         const fetchCountries = async () => {
@@ -45,13 +48,31 @@ const AddAddressPage: React.FC = () => {
         fetchCountries();
     }, []);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
+    const handleCountryChange = (value: string) => {
+        setFormData((prev) => ({ ...prev, countryCode: value }));
+    };
+
+    const validate = (): boolean => {
+        const e: Record<string, string> = {};
+        if (!formData.firstName.trim()) e.firstName = "Required";
+        if (!formData.lastName.trim()) e.lastName = "Required";
+        if (!formData.street.trim()) e.street = "Required";
+        if (!formData.city.trim()) e.city = "Required";
+        if (!formData.postcode.trim()) e.postcode = "Required";
+        if (!formData.countryCode.trim()) e.countryCode = "Required";
+        setErrors(e);
+        return Object.keys(e).length === 0;
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setSubmitted(true);
+        if (!validate()) return;
         setSubmitting(true);
 
         try {
@@ -89,7 +110,7 @@ const AddAddressPage: React.FC = () => {
                     { label: "Create", url: "/account/address-book/create" },
                 ]}
             >
-                <div className="col-12 col-md-9">
+                <div className="w-full md:w-3/4">
                     <div className="mb-4">
                         <h1>Address book</h1>
                         <p>Add address</p>
@@ -102,16 +123,19 @@ const AddAddressPage: React.FC = () => {
                                 countries={countries}
                                 loadingCountries={loadingCountries}
                                 onChange={handleChange}
+                                onCountryChange={handleCountryChange}
+                                errors={errors}
+                                submitted={submitted}
                             />
                         </div>
 
-                        <div className="d-flex gap-2">
-                            <button type="submit" className="btn btn-primary" disabled={submitting}>
+                        <div className="flex gap-2">
+                            <Button type="submit" disabled={submitting}>
                                 {submitting ? "Adding..." : "Add"}
-                            </button>
-                            <button type="button" className="btn btn-outline-gray" onClick={() => navigate("/account/address-book")}>
+                            </Button>
+                            <Button type="button" variant="outline" onClick={() => navigate("/account/address-book")}>
                                 Cancel
-                            </button>
+                            </Button>
                         </div>
                     </form>
                 </div>

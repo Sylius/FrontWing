@@ -4,8 +4,8 @@ import Skeleton from 'react-loading-skeleton';
 const ReviewSummarySkeleton: React.FC = () => {
     return (
         <div className="mb-3">
-            <div className="d-flex align-items-center gap-2 mb-2">
-                <div className="d-flex gap-1 fs-4">
+            <div className="flex items-center gap-2 mb-2">
+                <div className="flex gap-1 text-2xl">
                     {Array.from({ length: 5 }).map((_, idx) => (
                         <Skeleton key={idx} width={18} height={18} circle />
                     ))}

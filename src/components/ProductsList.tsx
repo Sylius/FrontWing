@@ -1,6 +1,6 @@
 import React from 'react';
-import ProductCard from './ProductCard';
 import { Product } from '../types/Product';
+import ProductCard from './ProductCard';
 
 interface ProductsListProps {
     products: Product[];
@@ -10,10 +10,10 @@ interface ProductsListProps {
 
 const ProductsList: React.FC<ProductsListProps> = ({ products, limit = products.length, name }) => {
     return (
-        <div className="row">
-            { name && <h2 className={'mb-5'}>{ name }</h2> }
+        <div className="flex flex-wrap -mx-4">
+            { name && <h2 className={'mb-5 w-full px-4'}>{ name }</h2> }
             {products.slice(0, limit).map(product => (
-                <div key={product.id} className="col-12 col-sm-12 col-md-6 col-lg-3 mb-4">
+                <div key={product.id} className="w-full sm:w-full md:w-1/4 mb-4 px-4">
                     <ProductCard product={product} />
                 </div>
             ))}

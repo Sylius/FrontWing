@@ -6,6 +6,7 @@ import { useCustomer } from "../../context/CustomerContext";
 import { useQuery } from "@tanstack/react-query";
 import { Order } from "../../types/Order";
 import Skeleton from "react-loading-skeleton";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const fetchCustomerOrders = async (): Promise<Order[]> => {
     const token = localStorage.getItem("jwtToken");
@@ -83,48 +84,48 @@ const OrderHistoryPage: React.FC = () => {
                     { label: "Order History", url: "/account/order-history" },
                 ]}
             >
-                <div className="col-12 col-md-9">
+                <div className="w-full md:w-3/4">
                     <div className="mb-4">
                         <h1>Order history</h1>
                         Browse your orders from the past
                     </div>
 
-                    <div className="card">
-                        <div className="card-body border-bottom py-3">
-                            <div className="d-flex border-bottom pb-3"></div>
-                            <div className="table-responsive">
+                    <div className="border rounded-lg">
+                        <div className="p-4 border-b">
+                            <div className="border-b pb-3"></div>
+                            <div className="overflow-x-auto">
                                 {isLoading ? (
-                                    <table className="table card-table">
-                                        <tbody>
-                                        <tr>
-                                            <td><Skeleton width={80} /></td>
-                                            <td><Skeleton width={100} /></td>
-                                            <td><Skeleton width={100} /></td>
-                                            <td><Skeleton width={80} /></td>
-                                            <td><Skeleton width={80} /></td>
-                                            <td><Skeleton width={60} height={30} /></td>
-                                        </tr>
-                                        </tbody>
-                                    </table>
+                                    <Table>
+                                        <TableBody>
+                                        <TableRow>
+                                            <TableCell><Skeleton width={80} /></TableCell>
+                                            <TableCell><Skeleton width={100} /></TableCell>
+                                            <TableCell><Skeleton width={100} /></TableCell>
+                                            <TableCell><Skeleton width={80} /></TableCell>
+                                            <TableCell><Skeleton width={80} /></TableCell>
+                                            <TableCell><Skeleton width={60} height={30} /></TableCell>
+                                        </TableRow>
+                                        </TableBody>
+                                    </Table>
                                 ) : isError ? (
                                     <p>Failed to load orders. Please try again later.</p>
                                 ) : (
-                                    <table className="table card-table table-vcenter text-nowrap datatable">
-                                        <thead>
-                                        <tr>
-                                            <th>Number</th>
-                                            <th>Date</th>
-                                            <th>Ship to</th>
-                                            <th>Total</th>
-                                            <th>State</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
+                                    <Table className="whitespace-nowrap">
+                                        <TableHeader>
+                                        <TableRow>
+                                            <TableHead className="text-left pr-4">Number</TableHead>
+                                            <TableHead className="text-left pr-4">Date</TableHead>
+                                            <TableHead className="text-left pr-4">Ship to</TableHead>
+                                            <TableHead className="text-left pr-4">Total</TableHead>
+                                            <TableHead className="text-left pr-4">State</TableHead>
+                                            <TableHead className="text-left">Actions</TableHead>
+                                        </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
                                         {orders.map((order: Order) => (
-                                            <tr key={order.tokenValue} className="item">
-                                                <td>#{order.number}</td>
-                                                <td>
+                                            <TableRow key={order.tokenValue}>
+                                                <TableCell className="pr-4">#{order.number}</TableCell>
+                                                <TableCell className="pr-4">
                                                     {order.createdAt
                                                         ? new Date(order.createdAt).toLocaleDateString('en-GB', {
                                                             year: 'numeric',
@@ -132,26 +133,26 @@ const OrderHistoryPage: React.FC = () => {
                                                             day: '2-digit',
                                                         })
                                                         : '-'}
-                                                </td>
-                                                <td>
+                                                </TableCell>
+                                                <TableCell className="pr-4">
                                                     {order.shippingAddress
                                                         ? `${order.shippingAddress.firstName ?? ''} ${order.shippingAddress.lastName ?? ''}`.trim()
                                                         : '-'}
-                                                </td>
-                                                <td>${(order.itemsSubtotal / 100).toFixed(2)}</td>
-                                                <td>{order.state}</td>
-                                                <td>
+                                                </TableCell>
+                                                <TableCell className="pr-4">${(order.itemsSubtotal / 100).toFixed(2)}</TableCell>
+                                                <TableCell className="pr-4">{order.state}</TableCell>
+                                                <TableCell>
                                                     <Link
                                                         to={`/account/orders/${order.tokenValue}`}
-                                                        className="btn btn-sm btn-outline-gray"
+                                                        className="inline-flex items-center px-3 py-1.5 text-sm border border-border rounded hover:bg-muted"
                                                     >
                                                         Show
                                                     </Link>
-                                                </td>
-                                            </tr>
+                                                </TableCell>
+                                            </TableRow>
                                         ))}
-                                        </tbody>
-                                    </table>
+                                        </TableBody>
+                                    </Table>
                                 )}
                             </div>
                         </div>

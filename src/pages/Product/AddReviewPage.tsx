@@ -1,14 +1,19 @@
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { IconStar } from '@tabler/icons-react';
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import Skeleton from 'react-loading-skeleton';
+import { useNavigate, useParams } from 'react-router-dom';
+import Breadcrumbs from '../../components/Breadcrumbs';
 import ProductCard from '../../components/ProductCard';
 import { useFlashMessages } from '../../context/FlashMessagesContext';
-import Breadcrumbs from '../../components/Breadcrumbs';
 import Layout from '../../layouts/Default';
-import Skeleton from 'react-loading-skeleton';
 import { Product } from '../../types/Product';
-import { IconStar } from '@tabler/icons-react';
 
 const API_URL = import.meta.env.VITE_REACT_APP_API_URL;
+
+const labelClass = "block text-sm font-medium mb-1";
 
 const AddReviewPage: React.FC = () => {
     const { code } = useParams<{ code: string }>();
@@ -106,10 +111,12 @@ const AddReviewPage: React.FC = () => {
     return (
         <Layout>
             <div className="container mt-4 mb-5">
-                <div className="row">
-                    <Breadcrumbs paths={breadcrumbs} />
+                <div className="flex flex-wrap -mx-4">
+                    <div className="w-full px-4">
+                        <Breadcrumbs paths={breadcrumbs} />
+                    </div>
 
-                    <div className="col-12 col-md-5 col-lg-4">
+                    <div className="w-full md:w-5/12 lg:w-4/12 px-4">
                         {loading ? (
                             <Skeleton height={400} />
                         ) : (
@@ -117,36 +124,36 @@ const AddReviewPage: React.FC = () => {
                         )}
                     </div>
 
-                    <div className="col-12 col-md-7 col-lg-8">
+                    <div className="w-full md:w-7/12 lg:w-8/12 px-4">
                         <h1>Add Your Review</h1>
                         <form onSubmit={handleSubmit}>
                             <div className="mb-3">
-                                <label className="form-label d-block">Rating <span className="text-danger">*</span></label>
-                                <div className="d-flex gap-2" role="radiogroup" aria-label="Rating">
+                                <label className={labelClass}>Rating <span className="text-destructive">*</span></label>
+                                <div className="flex gap-1" role="radiogroup" aria-label="Rating">
                                     {[1, 2, 3, 4, 5].map((value) => (
-                                        <button
+                                        <Button
                                             type="button"
+                                            variant="ghost"
+                                            size="icon"
                                             key={value}
-                                            className="border-0 bg-transparent p-0"
                                             onClick={() => setRating(value)}
                                             aria-label={`${value} star`}
                                         >
                                             <IconStar
-                                                className="review-stars"
+                                                className="text-yellow-400"
                                                 stroke={2}
-                                                size={32}
+                                                size={20}
                                                 fill={value <= rating ? 'currentColor' : 'none'}
                                             />
-                                        </button>
+                                        </Button>
                                     ))}
                                 </div>
                             </div>
 
                             <div className="mb-3">
-                                <label className="form-label">Title <span className="text-danger">*</span></label>
-                                <input
+                                <label className={labelClass}>Title <span className="text-destructive">*</span></label>
+                                <Input
                                     type="text"
-                                    className="form-control"
                                     value={title}
                                     onChange={(e) => setTitle(e.target.value)}
                                     required
@@ -154,9 +161,8 @@ const AddReviewPage: React.FC = () => {
                             </div>
 
                             <div className="mb-3">
-                                <label className="form-label">Comment <span className="text-danger">*</span></label>
-                                <textarea
-                                    className="form-control"
+                                <label className={labelClass}>Comment <span className="text-destructive">*</span></label>
+                                <Textarea
                                     rows={4}
                                     value={comment}
                                     onChange={(e) => setComment(e.target.value)}
@@ -165,19 +171,18 @@ const AddReviewPage: React.FC = () => {
                             </div>
 
                             <div className="mb-4">
-                                <label className="form-label">Email <span className="text-danger">*</span></label>
-                                <input
+                                <label className={labelClass}>Email <span className="text-destructive">*</span></label>
+                                <Input
                                     type="email"
-                                    className="form-control"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     required
                                 />
                             </div>
 
-                            <button type="submit" className="btn btn-primary px-4">
+                            <Button type="submit">
                                 Add
-                            </button>
+                            </Button>
                         </form>
                     </div>
                 </div>

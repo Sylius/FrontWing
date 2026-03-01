@@ -1,10 +1,11 @@
-import React from 'react';
-import Layout from '../layouts/Default';
+import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import ProductRow from '../components/cart/ProductRow';
+import Layout from '../layouts/Default';
 import { Order, OrderItem } from '../types/Order';
 import { formatPrice } from '../utils/price';
-import { Link } from 'react-router-dom';
 
 const fetchCart = async (): Promise<Order> => {
   const response = await fetch(
@@ -81,59 +82,57 @@ const CartPage: React.FC = () => {
             <div>Edit your items, apply coupon or proceed to the checkout</div>
           </div>
           {order?.items?.length === 0 ? (
-              <div className="alert alert-info">
-                <div className="fw-bold">Info</div>
+              <div className="bg-blue-50 border border-blue-200 text-blue-800 rounded p-3">
+                <div className="font-bold">Info</div>
                 Your cart is empty
               </div>
           ) : (
-              <div className="row">
-                <div className="col-12 col-xl-8 mb-4 position-relative">
-                  <div className="table-responsive">
-                    <table className="table align-middle">
-                      <thead>
-                      <tr>
-                        <th style={{ width: '1px' }}></th>
-                        <th>Item</th>
-                        <th style={{ width: '90px' }} className="text-end text-nowrap">Unit price</th>
-                        <th style={{ minWidth: '70px', width: '110px' }} className="text-end">Qty</th>
-                        <th style={{ width: '90px' }} className="text-end">Total</th>
-                      </tr>
-                      </thead>
-                      <tbody>
-                      {order?.items?.map((orderItem: OrderItem) => (
-                          <ProductRow
-                              key={orderItem.id}
-                              orderItem={orderItem}
-                              onRemove={removeMutation.mutate}
-                              onUpdate={debouncedUpdate}
-                          />
-                      ))}
-                      </tbody>
-                    </table>
-                  </div>
+              <div className="flex flex-wrap -mx-4">
+                <div className="w-full xl:w-2/3 px-4 mb-4 relative">
+                  <Table>
+                    <TableHeader>
+                    <TableRow>
+                      <TableHead style={{ width: '1px' }}></TableHead>
+                      <TableHead className="text-left">Item</TableHead>
+                      <TableHead style={{ width: '90px' }} className="text-right whitespace-nowrap">Unit price</TableHead>
+                      <TableHead style={{ minWidth: '70px', width: '110px' }} className="text-right">Qty</TableHead>
+                      <TableHead style={{ width: '90px' }} className="text-right">Total</TableHead>
+                    </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                    {order?.items?.map((orderItem: OrderItem) => (
+                        <ProductRow
+                            key={orderItem.id}
+                            orderItem={orderItem}
+                            onRemove={removeMutation.mutate}
+                            onUpdate={debouncedUpdate}
+                        />
+                    ))}
+                    </TableBody>
+                  </Table>
                 </div>
-                <div className="col-12 col-xl-4 ps-xl-5 mb-4">
-                  <div className="p-4 bg-light mb-4 rounded-3">
+                <div className="w-full xl:w-1/3 xl:pl-20 px-4 mb-4">
+                  <div className="p-4 bg-muted mb-4 rounded-xl">
                     <h3 className="mb-4">Summary</h3>
-                    <div className="hstack gap-2 mb-2">
+                    <div className="flex justify-between mb-2">
                       <div>Items total:</div>
-                      <div className="ms-auto text-end">${formatPrice(order?.itemsSubtotal)}</div>
+                      <div className="text-right">${formatPrice(order?.itemsSubtotal)}</div>
                     </div>
-                    <div className="hstack gap-2 mb-2">
+                    <div className="flex justify-between mb-2">
                       <div>Estimated shipping cost:</div>
-                      <div className="ms-auto text-end">${formatPrice(order?.shippingTotal)}</div>
+                      <div className="text-right">${formatPrice(order?.shippingTotal)}</div>
                     </div>
-                    <div className="hstack gap-2 mb-2">
+                    <div className="flex justify-between mb-2">
                       <div>Taxes total:</div>
-                      <div className="ms-auto text-end">${formatPrice(order?.taxTotal)}</div>
+                      <div className="text-right">${formatPrice(order?.taxTotal)}</div>
                     </div>
-                    <div className="hstack gap-2 border-top pt-4 mt-4">
-                      <div className="h5">Order total:</div>
-                      <div className="ms-auto h5 text-end">${formatPrice(order?.total)}</div>
+                    <div className="flex justify-between border-t pt-4 mt-4">
+                      <div className="text-lg font-semibold">Order total:</div>
+                      <div className="text-lg font-semibold text-right">${formatPrice(order?.total)}</div>
                     </div>
                   </div>
-                  <div className="d-flex">
-                    <Link to="/checkout/address" className="btn btn-primary flex-grow-1">
+                  <div className="flex">
+                    <Link to="/checkout/address" className="inline-flex items-center justify-center px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90 flex-1 text-center">
                       Checkout
                     </Link>
                   </div>

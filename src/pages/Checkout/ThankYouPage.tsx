@@ -11,21 +11,21 @@ const ThankYouPage: React.FC = () => {
     return (
         <Layout>
             <div className="container text-center my-auto">
-                <div className="row flex-column my-4">
-                    <h1 className="h2">Thank you!</h1>
+                <div className="flex flex-col my-4">
+                    <h1 className="text-2xl font-bold">Thank you!</h1>
                     You have successfully placed an order.
 
-                    <div className="d-flex flex-column flex-lg-row justify-content-center gap-2 mt-4">
+                    <div className="flex flex-col lg:flex-row justify-center gap-2 mt-4">
                         {customer && tokenValue ? (
-                            <a className="btn btn-primary" href={`/account/orders/${tokenValue}`}>
+                            <a className="inline-flex items-center justify-center px-4 py-2 bg-primary text-white rounded hover:bg-primary/90" href={`/account/orders/${tokenValue}`}>
                                 View order
                             </a>
                         ) : (
                             <>
-                                <a className="btn btn-primary" href="/orderpay">
+                                <a className="inline-flex items-center justify-center px-4 py-2 bg-primary text-white rounded hover:bg-primary/90" href="/orderpay">
                                     Change payment method
                                 </a>
-                                <a className="btn btn-secondary" href="/register">
+                                <a className="inline-flex items-center justify-center px-4 py-2 bg-muted text-foreground rounded hover:bg-muted/80" href="/register">
                                     Create an account
                                 </a>
                             </>

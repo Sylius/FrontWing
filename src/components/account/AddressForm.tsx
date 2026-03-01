@@ -1,5 +1,7 @@
 import React from "react";
 import Skeleton from "react-loading-skeleton";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface AddressFormProps {
     formData: {
@@ -15,101 +17,124 @@ interface AddressFormProps {
     };
     countries: { code: string; name: string }[];
     loadingCountries: boolean;
-    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onCountryChange: (value: string) => void;
+    errors?: Record<string, string>;
+    submitted?: boolean;
 }
 
-const AddressForm: React.FC<AddressFormProps> = ({ formData, countries, loadingCountries, onChange }) => (
-    <div className="row">
-        <div className="col-12 col-md-6 mb-3">
-            <label className="form-label">First name *</label>
-            <input
-                className="form-control"
+const labelClass = "block text-sm font-medium mb-1";
+
+const AddressForm: React.FC<AddressFormProps> = ({ formData, countries, loadingCountries, onChange, onCountryChange, errors, submitted }) => (
+    <div className="flex flex-wrap -mx-3">
+        <div className="w-full md:w-1/2 px-3 mb-4">
+            <label className={labelClass}>First name *</label>
+            <Input
                 name="firstName"
                 value={formData.firstName}
                 onChange={onChange}
                 required
+                aria-invalid={submitted && !!errors?.firstName || undefined}
             />
+            {submitted && errors?.firstName && (
+                <p className="text-sm text-destructive mt-1">{errors.firstName}</p>
+            )}
         </div>
-        <div className="col-12 col-md-6 mb-3">
-            <label className="form-label">Last name *</label>
-            <input
-                className="form-control"
+        <div className="w-full md:w-1/2 px-3 mb-4">
+            <label className={labelClass}>Last name *</label>
+            <Input
                 name="lastName"
                 value={formData.lastName}
                 onChange={onChange}
                 required
+                aria-invalid={submitted && !!errors?.lastName || undefined}
             />
+            {submitted && errors?.lastName && (
+                <p className="text-sm text-destructive mt-1">{errors.lastName}</p>
+            )}
         </div>
-        <div className="col-12 mb-3">
-            <label className="form-label">Company</label>
-            <input className="form-control" name="company" value={formData.company} onChange={onChange} />
+        <div className="w-full px-3 mb-4">
+            <label className={labelClass}>Company</label>
+            <Input name="company" value={formData.company} onChange={onChange} />
         </div>
-        <div className="col-12 mb-3">
-            <label className="form-label">Street address *</label>
-            <input
-                className="form-control"
+        <div className="w-full px-3 mb-4">
+            <label className={labelClass}>Street address *</label>
+            <Input
                 name="street"
                 value={formData.street}
                 onChange={onChange}
                 required
+                aria-invalid={submitted && !!errors?.street || undefined}
             />
+            {submitted && errors?.street && (
+                <p className="text-sm text-destructive mt-1">{errors.street}</p>
+            )}
         </div>
-        <div className="col-12 mb-3">
-            <label className="form-label">Country *</label>
+        <div className="w-full px-3 mb-4">
+            <label className={labelClass}>Country *</label>
             {loadingCountries ? (
                 <Skeleton height={36} />
             ) : (
-                <select
-                    className="form-select"
-                    name="countryCode"
+                <Select
                     value={formData.countryCode}
-                    onChange={onChange}
+                    onValueChange={(v) => v && onCountryChange(v)}
                     required
                 >
-                    <option value="" disabled>Select</option>
-                    {countries.map((country) => (
-                        <option key={country.code} value={country.code}>
-                            {country.name}
-                        </option>
-                    ))}
-                </select>
+                    <SelectTrigger>
+                        <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {countries.map((country) => (
+                            <SelectItem key={country.code} value={country.code}>
+                                {country.name}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            )}
+            {submitted && errors?.countryCode && (
+                <p className="text-sm text-destructive mt-1">{errors.countryCode}</p>
             )}
         </div>
         {formData.countryCode && (
-            <div className="col-12 mb-3">
-                <label className="form-label">Province</label>
-                <input
-                    className="form-control"
+            <div className="w-full px-3 mb-4">
+                <label className={labelClass}>Province</label>
+                <Input
                     name="provinceName"
                     value={formData.provinceName}
                     onChange={onChange}
                 />
             </div>
         )}
-        <div className="col-12 col-md-6 mb-3">
-            <label className="form-label">City *</label>
-            <input
-                className="form-control"
+        <div className="w-full md:w-1/2 px-3 mb-4">
+            <label className={labelClass}>City *</label>
+            <Input
                 name="city"
                 value={formData.city}
                 onChange={onChange}
                 required
+                aria-invalid={submitted && !!errors?.city || undefined}
             />
+            {submitted && errors?.city && (
+                <p className="text-sm text-destructive mt-1">{errors.city}</p>
+            )}
         </div>
-        <div className="col-12 col-md-6 mb-3">
-            <label className="form-label">Postcode *</label>
-            <input
-                className="form-control"
+        <div className="w-full md:w-1/2 px-3 mb-4">
+            <label className={labelClass}>Postcode *</label>
+            <Input
                 name="postcode"
                 value={formData.postcode}
                 onChange={onChange}
                 required
+                aria-invalid={submitted && !!errors?.postcode || undefined}
             />
+            {submitted && errors?.postcode && (
+                <p className="text-sm text-destructive mt-1">{errors.postcode}</p>
+            )}
         </div>
-        <div className="col-12 mb-3">
-            <label className="form-label">Phone number</label>
-            <input
-                className="form-control"
+        <div className="w-full px-3 mb-4">
+            <label className={labelClass}>Phone number</label>
+            <Input
                 name="phoneNumber"
                 value={formData.phoneNumber}
                 onChange={onChange}

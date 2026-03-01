@@ -5,6 +5,10 @@ import { useCustomer } from "../../context/CustomerContext.tsx";
 import { useNavigate } from "react-router-dom";
 import Loader from "../../components/layout/Loader.tsx";
 import { useFlashMessages } from "../../context/FlashMessagesContext.tsx";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+
+const labelClass = "block text-sm font-medium mb-1";
 
 const ChangePasswordPage: React.FC = () => {
   const { customer } = useCustomer();
@@ -16,9 +20,22 @@ const ChangePasswordPage: React.FC = () => {
   const [confirmation, setConfirmation] = useState<string>();
   const [loading, setLoading] = useState<boolean>(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitted, setSubmitted] = useState(false);
+
+  const validate = (): boolean => {
+    const e: Record<string, string> = {};
+    if (!currentPassword?.trim()) e.currentPassword = "Required";
+    if (!newPassword?.trim()) e.newPassword = "Required";
+    if (!confirmation?.trim()) e.confirmNewPassword = "Required";
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    setSubmitted(true);
+    if (!validate()) return;
 
     setLoading(true);
     setErrors({});
@@ -67,71 +84,70 @@ const ChangePasswordPage: React.FC = () => {
   return (
     <Default>
       <AccountLayout>
-        <div className="col-12 col-md-9">
+        <div className="w-full md:w-3/4">
           <div className="mb-4">
             <h1>Change password</h1>
             Set a new password for your account
           </div>
 
-          <div className="mb-4 position-relative">
+          <div className="mb-4 relative">
             <Loader loading={loading}>
               <form method="post" onSubmit={handleChangePassword}>
                 <div className="mb-4">
-                  <div className="field mb-3 required">
-                    <label className="form-label required">
+                  <div className="mb-3">
+                    <label className={labelClass}>
                       Current password
                     </label>
-                    <input
+                    <Input
                       type="password"
                       required={true}
-                      className="form-control"
+                      aria-invalid={submitted && !!errors.currentPassword || undefined}
                       onChange={(e) => setCurrentPassword(e.target.value)}
                     />
                     {errors?.currentPassword && (
-                      <div className="invalid-feedback d-block">
+                      <div className="text-destructive text-sm mt-1">
                         {errors.currentPassword}
                       </div>
                     )}
                   </div>
 
-                  <div className="field mb-3 required">
-                    <label className="form-label required">New password</label>
-                    <input
+                  <div className="mb-3">
+                    <label className={labelClass}>New password</label>
+                    <Input
                       type="password"
                       required={true}
-                      className="form-control"
+                      aria-invalid={submitted && !!errors.newPassword || undefined}
                       onChange={(e) => setNewPassword(e.target.value)}
                     />
                     {errors?.newPassword && (
-                      <div className="invalid-feedback d-block">
+                      <div className="text-destructive text-sm mt-1">
                         {errors.newPassword}
                       </div>
                     )}
                   </div>
 
-                  <div className="field mb-3 required">
-                    <label className="form-label required">Confirmation</label>
-                    <input
+                  <div className="mb-3">
+                    <label className={labelClass}>Confirmation</label>
+                    <Input
                       type="password"
                       required={true}
-                      className="form-control"
+                      aria-invalid={submitted && !!errors.confirmNewPassword || undefined}
                       onChange={(e) => setConfirmation(e.target.value)}
                     />
                     {errors?.confirmNewPassword && (
-                      <div className="invalid-feedback d-block">
+                      <div className="text-destructive text-sm mt-1">
                         {errors.confirmNewPassword}
                       </div>
                     )}
                   </div>
                 </div>
 
-                <button
+                <Button
                   type="submit"
-                  className="btn btn-primary"
                   id="save-changes"
                 >
                   Save changes
-                </button>
+                </Button>
               </form>
             </Loader>
           </div>

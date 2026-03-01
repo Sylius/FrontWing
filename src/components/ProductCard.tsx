@@ -36,7 +36,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <Link to={`/product/${product.code}`} className="link-reset">
           <div className="mb-4">
             <div
-                className="bg-light rounded-3"
+                className="bg-muted rounded-xl"
                 style={{ aspectRatio: '3 / 4', overflow: 'hidden' }}
             >
               {loading ? (
@@ -47,12 +47,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                   <img
                       src={product.images[0]?.path}
                       alt={product.name}
-                      className="img-fluid w-100 h-100 object-fit-cover"
+                      className="max-w-full h-auto w-full h-full object-cover"
                   />
               )}
             </div>
           </div>
-          <div className="h6 text-break">
+          <div className="text-base font-semibold break-words">
             {loading ? <Skeleton width={120} /> : product.name}
           </div>
         </Link>
