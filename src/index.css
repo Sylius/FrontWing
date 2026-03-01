@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
 @import "tailwindcss";
 
 @custom-variant dark (&:is(.dark *));
@@ -173,7 +173,7 @@
 
 @layer base {
   * {
-    font-family: 'Inter', Arial, sans-serif;
+    font-family: "Inter", Arial, sans-serif;
     @apply border-border outline-ring/50;
     transition: all 0.2s ease;
   }
@@ -182,13 +182,13 @@
     letter-spacing: var(--tracking-normal);
   }
   h1 {
-    @apply text-2xl font-bold mb-4;
+    @apply mb-4 text-2xl font-bold;
   }
   h2 {
-    @apply text-xl font-semibold mb-3;
+    @apply mb-3 text-xl font-semibold;
   }
   h3 {
-    @apply text-lg font-semibold mb-2;
+    @apply mb-2 text-lg font-semibold;
   }
 }
 
@@ -202,19 +202,29 @@
     padding-right: 0.75rem;
   }
   @media (min-width: 576px) {
-    .container { max-width: 540px; }
+    .container {
+      max-width: 540px;
+    }
   }
   @media (min-width: 768px) {
-    .container { max-width: 720px; }
+    .container {
+      max-width: 720px;
+    }
   }
   @media (min-width: 992px) {
-    .container { max-width: 960px; }
+    .container {
+      max-width: 960px;
+    }
   }
   @media (min-width: 1200px) {
-    .container { max-width: 1140px; }
+    .container {
+      max-width: 1140px;
+    }
   }
   @media (min-width: 1400px) {
-    .container { max-width: 1320px; }
+    .container {
+      max-width: 1320px;
+    }
   }
 
   /* Icon utilities */
@@ -329,7 +339,7 @@
   }
   @media (min-width: 576px) {
     .steps .steps-item:not(:last-child)::after {
-      content: '›';
+      content: "›";
       padding: 0 1.4rem;
       color: #6c757d;
     }
@@ -350,7 +360,7 @@
     position: relative;
   }
   .steps .steps-item-active a::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 100%;
     left: 0;
@@ -411,7 +421,7 @@
   .custom-slick-arrow {
     width: 94px;
     height: 48px;
-    background: #1A866B !important;
+    background: #1a866b !important;
     border: 1px solid #22b99a;
     border-radius: 0.3rem;
     transition: background-color 0.2s ease;

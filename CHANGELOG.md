@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-03-01
+
+### Added
+
+- Prettier v3 with `prettier-plugin-tailwindcss` for automatic Tailwind class sorting
+- Husky v9 pre-commit git hook running lint-staged automatically
+- lint-staged: runs `eslint --fix` + `prettier --write` on staged `.ts/.tsx` files
+- `.editorconfig` for consistent editor settings (UTF-8, LF, 2-space indent)
+- `pnpm format` script for manual full-codebase formatting
+
+### Changed
+
+- ESLint config updated: added `eslint-config-prettier` (disables formatting rules conflicting with Prettier)
+- ESLint config: `react-refresh/only-export-components` disabled for `src/components/ui/` and `src/context/` (legitimate multi-export pattern)
+- `react-hooks/exhaustive-deps` warnings fixed in `ProductList.tsx` and `ProductPage.tsx` by moving fetch functions inside `useEffect`/`useCallback`
+- Entire codebase reformatted with Prettier baseline (formatting-only, no logic changes)
+
 ## [0.2.0] - 2026-03-01
 
 ### Added

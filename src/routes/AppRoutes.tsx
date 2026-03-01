@@ -5,13 +5,7 @@ import { coreRoutes } from "./coreRoutes";
 import { productRoutes } from "./productRoutes";
 
 const AppRoutes = () => {
-  return useRoutes([
-    ...coreRoutes,
-    ...productRoutes,
-    checkoutRoutes,
-    thankYouRoute,
-    accountRoutes,
-  ]);
+  return useRoutes([...coreRoutes, ...productRoutes, checkoutRoutes, thankYouRoute, accountRoutes]);
 };
 
 export default AppRoutes;

@@ -54,7 +54,7 @@ const ChangePasswordPage: React.FC = () => {
             confirmNewPassword: confirmation,
             currentPassword,
           }),
-        },
+        }
       );
 
       if (!response.ok) {
@@ -62,11 +62,9 @@ const ChangePasswordPage: React.FC = () => {
 
         const formattedErrors: Record<string, string> = {};
 
-        data.violations?.forEach(
-          (error: { propertyPath: string; message: string }) => {
-            formattedErrors[error.propertyPath] = error.message;
-          },
-        );
+        data.violations?.forEach((error: { propertyPath: string; message: string }) => {
+          formattedErrors[error.propertyPath] = error.message;
+        });
 
         setErrors(formattedErrors || {});
         throw new Error("Failed to submit order");
@@ -90,24 +88,20 @@ const ChangePasswordPage: React.FC = () => {
             Set a new password for your account
           </div>
 
-          <div className="mb-4 relative">
+          <div className="relative mb-4">
             <Loader loading={loading}>
               <form method="post" onSubmit={handleChangePassword}>
                 <div className="mb-4">
                   <div className="mb-3">
-                    <label className={labelClass}>
-                      Current password
-                    </label>
+                    <label className={labelClass}>Current password</label>
                     <Input
                       type="password"
                       required={true}
-                      aria-invalid={submitted && !!errors.currentPassword || undefined}
+                      aria-invalid={(submitted && !!errors.currentPassword) || undefined}
                       onChange={(e) => setCurrentPassword(e.target.value)}
                     />
                     {errors?.currentPassword && (
-                      <div className="text-destructive text-sm mt-1">
-                        {errors.currentPassword}
-                      </div>
+                      <div className="text-destructive mt-1 text-sm">{errors.currentPassword}</div>
                     )}
                   </div>
 
@@ -116,13 +110,11 @@ const ChangePasswordPage: React.FC = () => {
                     <Input
                       type="password"
                       required={true}
-                      aria-invalid={submitted && !!errors.newPassword || undefined}
+                      aria-invalid={(submitted && !!errors.newPassword) || undefined}
                       onChange={(e) => setNewPassword(e.target.value)}
                     />
                     {errors?.newPassword && (
-                      <div className="text-destructive text-sm mt-1">
-                        {errors.newPassword}
-                      </div>
+                      <div className="text-destructive mt-1 text-sm">{errors.newPassword}</div>
                     )}
                   </div>
 
@@ -131,21 +123,18 @@ const ChangePasswordPage: React.FC = () => {
                     <Input
                       type="password"
                       required={true}
-                      aria-invalid={submitted && !!errors.confirmNewPassword || undefined}
+                      aria-invalid={(submitted && !!errors.confirmNewPassword) || undefined}
                       onChange={(e) => setConfirmation(e.target.value)}
                     />
                     {errors?.confirmNewPassword && (
-                      <div className="text-destructive text-sm mt-1">
+                      <div className="text-destructive mt-1 text-sm">
                         {errors.confirmNewPassword}
                       </div>
                     )}
                   </div>
                 </div>
 
-                <Button
-                  type="submit"
-                  id="save-changes"
-                >
+                <Button type="submit" id="save-changes">
                   Save changes
                 </Button>
               </form>

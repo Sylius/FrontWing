@@ -1,10 +1,10 @@
-import { TableCell, TableRow } from '@/components/ui/table';
-import { useQuery } from '@tanstack/react-query';
+import { TableCell, TableRow } from "@/components/ui/table";
+import { useQuery } from "@tanstack/react-query";
 import React from "react";
 import { Link } from "react-router-dom";
-import { OrderItem } from '../../types/Order';
-import type { Product } from '../../types/Product';
-import { formatPrice } from '../../utils/price';
+import { OrderItem } from "../../types/Order";
+import type { Product } from "../../types/Product";
+import { formatPrice } from "../../utils/price";
 
 interface OrderVariant {
   product: string;
@@ -18,34 +18,30 @@ interface ProductRowProps {
 
 const ProductRow: React.FC<ProductRowProps> = ({ orderItem }) => {
   const fetchVariant = async (): Promise<OrderVariant> => {
-    const response = await fetch(
-      `${import.meta.env.VITE_REACT_APP_API_URL}${orderItem.variant}`
-    );
+    const response = await fetch(`${import.meta.env.VITE_REACT_APP_API_URL}${orderItem.variant}`);
     if (!response.ok) {
-      throw new Error('Problem loading variant');
+      throw new Error("Problem loading variant");
     }
 
     const data = await response.json();
 
-    return data['hydra:member'] || data;
+    return data["hydra:member"] || data;
   };
 
   const { data: variant } = useQuery<OrderVariant, Error>({
-    queryKey: ['variant', orderItem.id],
+    queryKey: ["variant", orderItem.id],
     queryFn: fetchVariant,
   });
 
   const fetchProduct = async (): Promise<Product> => {
-    const response = await fetch(
-      `${import.meta.env.VITE_REACT_APP_API_URL}${variant!.product}`
-    );
+    const response = await fetch(`${import.meta.env.VITE_REACT_APP_API_URL}${variant!.product}`);
     if (!response.ok) {
-      throw new Error('Problem loading product');
+      throw new Error("Problem loading product");
     }
 
     const data = await response.json();
 
-    return data['hydra:member'] || data;
+    return data["hydra:member"] || data;
   };
 
   const { data: product } = useQuery<Product, Error>({
@@ -57,14 +53,11 @@ const ProductRow: React.FC<ProductRowProps> = ({ orderItem }) => {
     <TableRow>
       <TableCell className="py-3">
         <div className="flex items-center gap-4">
-          <div style={{ width: '6rem' }}>
-            <div
-              className="overflow-auto bg-muted rounded-xl"
-              style={{ aspectRatio: '3/4' }}
-            >
+          <div style={{ width: "6rem" }}>
+            <div className="bg-muted overflow-auto rounded-xl" style={{ aspectRatio: "3/4" }}>
               {product?.images[0]?.path && (
                 <img
-                  className="max-w-full w-full h-full object-cover"
+                  className="h-full w-full max-w-full object-cover"
                   src={product?.images[0]?.path}
                   alt={variant?.code}
                 />
@@ -74,14 +67,11 @@ const ProductRow: React.FC<ProductRowProps> = ({ orderItem }) => {
           <div>
             <div className="text-base font-semibold">
               {product?.code ? (
-                  <Link
-                      className="link-reset wrap-break-words"
-                      to={`/product/${product.code}`}
-                  >
-                    {orderItem?.productName}
-                  </Link>
+                <Link className="link-reset wrap-break-words" to={`/product/${product.code}`}>
+                  {orderItem?.productName}
+                </Link>
               ) : (
-                  orderItem?.productName
+                orderItem?.productName
               )}
             </div>
 
