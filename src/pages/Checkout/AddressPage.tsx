@@ -132,12 +132,12 @@ const AddressPage: React.FC = () => {
 
   const validateAddress = (address: AddressInterface): Record<string, string> => {
     const e: Record<string, string> = {};
-    if (!address.firstName.trim()) e.firstName = "Required";
-    if (!address.lastName.trim()) e.lastName = "Required";
-    if (!address.street.trim()) e.street = "Required";
-    if (!address.city.trim()) e.city = "Required";
-    if (!address.postcode.trim()) e.postcode = "Required";
-    if (!address.countryCode.trim()) e.countryCode = "Required";
+    if (!address.firstName?.trim()) e.firstName = "Required";
+    if (!address.lastName?.trim()) e.lastName = "Required";
+    if (!address.street?.trim()) e.street = "Required";
+    if (!address.city?.trim()) e.city = "Required";
+    if (!address.postcode?.trim()) e.postcode = "Required";
+    if (!address.countryCode?.trim()) e.countryCode = "Required";
     return e;
   };
 
