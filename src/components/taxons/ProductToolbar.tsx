@@ -28,10 +28,10 @@ const sortOptions = [
 const ProductToolbar: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // 1. État local uniquement pour ce que l'utilisateur tape (avant validation)
+  // 1. Local state only for what the user types (before submission)
   const [searchValue, setSearchValue] = useState(searchParams.get("translations.name") || "");
 
-  // 2. Calculer la valeur de tri directement depuis l'URL (Pas besoin de useState ici !)
+  // 2. Derive sort value directly from the URL (no useState needed here)
   const sortValue =
     sortOptions.find((opt) => opt.value !== "" && searchParams.toString().includes(opt.value))
       ?.value || "";
@@ -57,11 +57,12 @@ const ProductToolbar: React.FC = () => {
     updateParams({ "translations.name": null });
   };
 
-  const handleSortChange = (selected: string) => {
+  const handleSortChange = (selected: string | null) => {
+    if (selected === null) return;
     const actualValue = selected === "__empty__" ? "" : selected;
     const newParams = new URLSearchParams(searchParams);
 
-    // Nettoyer les anciens tris
+    // Clear previous sort params
     sortOptions.forEach((opt) => {
       if (opt.value) {
         const [key] = opt.value.split("=");
@@ -69,7 +70,7 @@ const ProductToolbar: React.FC = () => {
       }
     });
 
-    // Appliquer le nouveau
+    // Apply the new sort param
     if (actualValue) {
       const [key, val] = actualValue.split("=");
       newParams.set(key, val);
