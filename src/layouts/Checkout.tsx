@@ -9,11 +9,11 @@ interface CheckoutLayoutProps {
 
 const CheckoutLayout: React.FC<CheckoutLayoutProps> = ({ children, sidebarOn = true }) => {
     return (
-        <div className="d-flex flex-column min-vh-100 overflow-hidden">
+        <div className="flex flex-col min-h-screen overflow-hidden">
             <Header />
-            <div className="flex-grow-1 d-flex align-items-stretch">
-                <div className="container">
-                    <div className="row h-100">
+            <div className="flex-1 flex items-stretch">
+                <div className="container mx-auto px-4">
+                    <div className="flex flex-wrap h-full">
                         {children}
                         {sidebarOn && <Sidebar />}
                     </div>

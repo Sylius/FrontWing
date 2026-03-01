@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from "react";
-import Default from "../../layouts/Default";
-import AccountLayout from "../../layouts/Account";
+import React, { useCallback, useEffect, useState } from "react";
+import Skeleton from "react-loading-skeleton";
 import { Link } from "react-router-dom";
-import { Address } from "../../types/Address";
+import AddressCards from "../../components/account/AddressCards";
 import { useCustomer } from "../../context/CustomerContext";
 import { useFlashMessages } from "../../context/FlashMessagesContext";
-import AddressCards from "../../components/account/AddressCards";
-import Skeleton from "react-loading-skeleton";
+import AccountLayout from "../../layouts/Account";
+import Default from "../../layouts/Default";
+import { Address } from "../../types/Address";
 
 const getDefaultAddressId = (
     defaultAddress?: string | { "@id": string } | null
@@ -24,7 +24,7 @@ const AddressBookPage: React.FC = () => {
     const [addresses, setAddresses] = useState<Address[]>([]);
     const [loading, setLoading] = useState(true);
 
-    const fetchAddresses = async () => {
+    const fetchAddresses = useCallback(async () => {
         setLoading(true);
         try {
             const token = localStorage.getItem("jwtToken");
@@ -47,7 +47,7 @@ const AddressBookPage: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [addMessage]);
 
     const handleDelete = async (id: number) => {
         try {
@@ -74,7 +74,7 @@ const AddressBookPage: React.FC = () => {
 
     useEffect(() => {
         fetchAddresses();
-    }, []);
+    }, [fetchAddresses]);
 
     const defaultId = getDefaultAddressId(customer?.defaultAddress);
 
@@ -93,13 +93,13 @@ const AddressBookPage: React.FC = () => {
                     { label: "Address book", url: "/account/address-book" },
                 ]}
             >
-                <div className="col-12 col-md-9">
-                    <div className="d-flex justify-content-between align-items-start mb-4">
+                <div className="w-full md:w-3/4">
+                    <div className="flex justify-between items-start mb-4">
                         <div>
                             <h1 className="mb-1">Address book</h1>
-                            <div className="text-muted">Manage your saved addresses</div>
+                            <div className="text-muted-foreground">Manage your saved addresses</div>
                         </div>
-                        <Link to="/account/address-book/add" className="btn btn-primary">
+                        <Link to="/account/address-book/add" className="inline-flex items-center justify-center px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90">
                             Add address
                         </Link>
                     </div>
@@ -107,8 +107,8 @@ const AddressBookPage: React.FC = () => {
                     {loading ? (
                         <Skeleton count={3} height={120} className="mb-3" />
                     ) : addresses.length === 0 ? (
-                        <div className="alert alert-info">
-                            <div className="fw-bold">Info</div>
+                        <div className="bg-blue-50 border border-blue-200 text-blue-800 rounded p-3">
+                            <div className="font-bold">Info</div>
                             You have no addresses defined
                         </div>
                     ) : (

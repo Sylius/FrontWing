@@ -1,20 +1,28 @@
-import { OrderItem } from '../../types/Order';
-import { formatPrice } from '../../utils/price';
+import { TableCell, TableRow } from '@/components/ui/table';
 import { useQuery } from '@tanstack/react-query';
-import {Link} from "react-router-dom";
 import React from "react";
+import { Link } from "react-router-dom";
+import { OrderItem } from '../../types/Order';
+import type { Product } from '../../types/Product';
+import { formatPrice } from '../../utils/price';
+
+interface OrderVariant {
+  product: string;
+  code?: string;
+  options?: string;
+}
 
 interface ProductRowProps {
   orderItem: OrderItem;
 }
 
 const ProductRow: React.FC<ProductRowProps> = ({ orderItem }) => {
-  const fetchVariant = async (): Promise<any> => {
+  const fetchVariant = async (): Promise<OrderVariant> => {
     const response = await fetch(
       `${import.meta.env.VITE_REACT_APP_API_URL}${orderItem.variant}`
     );
     if (!response.ok) {
-      throw new Error('Problem z pobieraniem wariantu');
+      throw new Error('Problem loading variant');
     }
 
     const data = await response.json();
@@ -22,17 +30,17 @@ const ProductRow: React.FC<ProductRowProps> = ({ orderItem }) => {
     return data['hydra:member'] || data;
   };
 
-  const { data: variant } = useQuery<any, Error>({
+  const { data: variant } = useQuery<OrderVariant, Error>({
     queryKey: ['variant', orderItem.id],
     queryFn: fetchVariant,
   });
 
-  const fetchProduct = async (): Promise<any> => {
+  const fetchProduct = async (): Promise<Product> => {
     const response = await fetch(
-      `${import.meta.env.VITE_REACT_APP_API_URL}${variant.product}`
+      `${import.meta.env.VITE_REACT_APP_API_URL}${variant!.product}`
     );
     if (!response.ok) {
-      throw new Error('Problem z pobieraniem wariantu');
+      throw new Error('Problem loading product');
     }
 
     const data = await response.json();
@@ -40,34 +48,34 @@ const ProductRow: React.FC<ProductRowProps> = ({ orderItem }) => {
     return data['hydra:member'] || data;
   };
 
-  const { data: product } = useQuery<any, Error>({
+  const { data: product } = useQuery<Product, Error>({
     queryKey: [orderItem.id],
     queryFn: fetchProduct,
   });
 
   return (
-    <tr>
-      <td>
-        <div className="d-flex align-items-center gap-4">
+    <TableRow>
+      <TableCell className="py-3">
+        <div className="flex items-center gap-4">
           <div style={{ width: '6rem' }}>
             <div
-              className="overflow-auto bg-light rounded-3"
+              className="overflow-auto bg-muted rounded-xl"
               style={{ aspectRatio: '3/4' }}
             >
               {product?.images[0]?.path && (
                 <img
-                  className="img-fluid w-100 h-100 object-fit-cover"
+                  className="max-w-full w-full h-full object-cover"
                   src={product?.images[0]?.path}
-                  alt={variant.code}
+                  alt={variant?.code}
                 />
               )}
             </div>
           </div>
           <div>
-            <div className="h6">
+            <div className="text-base font-semibold">
               {product?.code ? (
                   <Link
-                      className="link-reset text-break"
+                      className="link-reset wrap-break-words"
                       to={`/product/${product.code}`}
                   >
                     {orderItem?.productName}
@@ -77,22 +85,23 @@ const ProductRow: React.FC<ProductRowProps> = ({ orderItem }) => {
               )}
             </div>
 
-            <small className="text-body-tertiary">{variant?.code}</small>
+            <small className="text-muted-foreground">{variant?.code}</small>
+            <small className="text-muted-foreground block">{variant?.options}</small>
           </div>
         </div>
-      </td>
-      <td className="text-black-50 text-end">
+      </TableCell>
+      <TableCell className="text-muted-foreground text-right">
         <span>${formatPrice(orderItem.unitPrice)}</span>
-      </td>
+      </TableCell>
 
-      <td className={'text-end'}>
+      <TableCell className="text-right">
         <span>{orderItem.quantity}</span>
-      </td>
+      </TableCell>
 
-      <td className="text-end">
+      <TableCell className="text-right">
         <span>${formatPrice(orderItem.subtotal)}</span>
-      </td>
-    </tr>
+      </TableCell>
+    </TableRow>
   );
 };
 

@@ -7,6 +7,8 @@ import { IconPencil, IconLock, IconCheck } from "@tabler/icons-react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import Skeleton from "react-loading-skeleton";
 import { sendVerificationEmail, verifyToken } from "../../services/customerVerification";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 const DashboardPage: React.FC = () => {
     const { customer, refetchCustomer } = useCustomer();
@@ -67,32 +69,32 @@ const DashboardPage: React.FC = () => {
     return (
         <Default>
             <AccountLayout>
-                <div className="col-12 col-md-9">
+                <div className="w-full md:w-3/4">
                     <div className="mb-4">
                         <h1>My account</h1>
                         Manage your personal information and preferences
                     </div>
 
-                    <div className="card border-0 bg-body-tertiary">
-                        <div className="card-body">
-                            <div className="row mb-3">
-                                <div className="col-12 col-sm-auto mb-2 order-sm-1">
+                    <div className="bg-muted rounded-lg">
+                        <div className="p-4">
+                            <div className="flex flex-wrap mb-3 -mx-4">
+                                <div className="w-full sm:w-auto px-4 mb-2 sm:order-1">
                                     {!customer?.user ? (
                                         <Skeleton width={80} height={26} borderRadius={20} />
                                     ) : customer.user.verified ? (
-                                        <span className="badge text-bg-success">Verified</span>
+                                        <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Verified</Badge>
                                     ) : (
-                                        <span className="badge text-bg-danger">Not verified</span>
+                                        <Badge variant="destructive">Not verified</Badge>
                                     )}
                                 </div>
 
-                                <div className="col-12 col-sm">
+                                <div className="w-full sm:flex-1 px-4">
                                     <strong>{customer?.fullName || <Skeleton width={120} />}</strong>
                                     <div>{customer?.email || <Skeleton width={180} />}</div>
                                 </div>
                             </div>
 
-                            <div className="d-flex flex-column align-items-center flex-sm-row gap-2">
+                            <div className="flex flex-col sm:flex-row items-center gap-2">
                                 {!customer?.user ? (
                                     <>
                                         <Skeleton width={100} height={36} />
@@ -101,30 +103,32 @@ const DashboardPage: React.FC = () => {
                                     </>
                                 ) : (
                                     <>
-                                        <Link to="/account/profile/edit" className="btn btn-sm btn-icon btn-outline-gray">
+                                        <Button variant="outline" size="sm" render={<Link to="/account/profile/edit" />}>
                                             <IconPencil stroke={2} size={16} />
                                             Edit
-                                        </Link>
+                                        </Button>
 
-                                        <Link to="/account/change-password" className="btn btn-sm btn-icon btn-outline-gray">
+                                        <Button variant="outline" size="sm" render={<Link to="/account/change-password" />}>
                                             <IconLock stroke={2} size={16} />
                                             Change password
-                                        </Link>
+                                        </Button>
 
                                         {!customer.user.verified && (
-                                            <button
-                                                className="btn btn-sm btn-icon btn-outline-gray text-primary"
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
                                                 type="button"
                                                 onClick={handleVerifyClick}
                                                 disabled={isVerifying}
+                                                className="text-primary"
                                             >
                                                 {isVerifying ? (
                                                     <>
-                            <span
-                                className="spinner-border spinner-border-sm"
-                                role="status"
-                                aria-hidden="true"
-                            ></span>
+                                                        <span
+                                                            className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"
+                                                            role="status"
+                                                            aria-hidden="true"
+                                                        ></span>
                                                         Sending...
                                                     </>
                                                 ) : (
@@ -133,7 +137,7 @@ const DashboardPage: React.FC = () => {
                                                         Verify
                                                     </>
                                                 )}
-                                            </button>
+                                            </Button>
                                         )}
                                     </>
                                 )}

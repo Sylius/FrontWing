@@ -5,6 +5,8 @@ import { IconPencil, IconTrash } from "@tabler/icons-react";
 import { Address } from "../../types/Address";
 import { useCustomer } from "../../context/CustomerContext";
 import { useFlashMessages } from "../../context/FlashMessagesContext";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 interface AddressCardsProps {
     addresses: Address[];
@@ -61,21 +63,19 @@ const AddressCards: React.FC<AddressCardsProps> = ({
     })();
 
     return (
-        <div className="row">
+        <div className="flex flex-wrap -mx-4">
             {addresses.map((address) => (
-                <div key={address.id} className="card border-0 bg-body-tertiary mb-3">
-                    <div className="card-body">
+                <div key={address.id} className="w-full px-4 bg-muted/50 rounded-lg border-0 mb-3">
+                    <div className="p-4">
                         {String(address.id) === defaultId && (
-                            <div className="badge bg-primary text-white mb-3">
-                                Your default address
-                            </div>
+                            <Badge className="mb-3">Your default address</Badge>
                         )}
 
-                        <div className="d-flex flex-column mb-4">
+                        <div className="flex flex-col mb-4">
                             {address.company && <strong>{address.company}</strong>}
                             <div>
-                                <strong className="fw-bold mb-1">{address.firstName} </strong>
-                                <strong className="fw-bold mb-2">{address.lastName}</strong>
+                                <strong className="font-bold mb-1">{address.firstName} </strong>
+                                <strong className="font-bold mb-2">{address.lastName}</strong>
                             </div>
                             {address.phoneNumber && <strong>{address.phoneNumber}</strong>}
                             <span className="mb-1">{address.street}</span>
@@ -84,30 +84,29 @@ const AddressCards: React.FC<AddressCardsProps> = ({
                             <span>{address.countryCode}</span>
                         </div>
 
-                        <div className="d-flex flex-column flex-sm-row gap-2">
-                            <Link
-                                to={`/account/address-book/edit/${address.id}`}
-                                className="btn btn-sm btn-icon btn-outline-gray"
-                            >
+                        <div className="flex flex-col sm:flex-row gap-2">
+                            <Button variant="outline" size="sm" render={<Link to={`/account/address-book/edit/${address.id}`} />}>
                                 <IconPencil stroke={2} size={16} />
                                 Edit
-                            </Link>
+                            </Button>
 
-                            <button
-                                className="btn btn-sm btn-icon btn-outline-danger w-full"
+                            <Button
+                                variant="destructive"
+                                size="sm"
                                 onClick={() => onDelete(address.id!)}
                             >
                                 <IconTrash stroke={2} size={16} />
                                 Delete
-                            </button>
+                            </Button>
 
                             {String(address.id) !== defaultId && (
-                                <button
-                                    className="btn btn-sm btn-icon btn-outline-gray w-full"
+                                <Button
+                                    variant="outline"
+                                    size="sm"
                                     onClick={() => handleSetDefault(address.id!)}
                                 >
                                     Set as default
-                                </button>
+                                </Button>
                             )}
                         </div>
                     </div>

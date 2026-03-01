@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { useParams, useSearchParams, Link } from 'react-router-dom';
-import Layout from '../layouts/Default';
-import { Product } from '../types/Product';
+import React, { useCallback, useEffect, useState } from 'react';
+import Skeleton from 'react-loading-skeleton';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import Breadcrumbs from '../components/Breadcrumbs';
 import ProductCard from '../components/ProductCard';
-import Skeleton from 'react-loading-skeleton';
 import ProductToolbar from '../components/taxons/ProductToolbar';
+import Layout from '../layouts/Default';
+import { Product } from '../types/Product';
 
 interface TaxonDetails {
     name: string;
@@ -151,20 +151,24 @@ const ProductList: React.FC = () => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, [loadMore]);
 
-    if (error) return <div className="text-danger text-center">{error}</div>;
+    if (error) return <div className="text-destructive text-center">{error}</div>;
 
     const isInChildTaxon = !!childCode && !!taxonDetails?.parent;
 
     const breadcrumbs = [
         { label: 'Home', url: '/' },
-        { label: 'Category', url: '' },
+        
         ...(isInChildTaxon && parentTaxon
             ? [
+                { label: 'Category', url: `/${parentTaxon.code}` },
                 { label: parentTaxon.name, url: `/${parentTaxon.code}` },
                 { label: taxonDetails?.name || '', url: `/${parentTaxon.code}/${taxonDetails?.code}` },
             ]
             : taxonDetails
-                ? [{ label: taxonDetails.name, url: `/${taxonDetails.code}` }]
+                ? [
+                    { label: 'Category', url: `/${taxonDetails.code}` },
+                    { label: taxonDetails.name, url: `/${taxonDetails.code}` }
+                ]
                 : []),
     ];
 
@@ -173,11 +177,11 @@ const ProductList: React.FC = () => {
             <div className="container mt-4 mb-5">
                 <Breadcrumbs paths={breadcrumbs} />
 
-                <div className="row mt-5">
-                    <div className="col-12 col-lg-3">
+                <div className="flex flex-wrap mt-5 -mx-4">
+                    <div className="w-full lg:w-1/4 px-4">
                         {isInChildTaxon && parentTaxon && (
                             <div className="mb-3">
-                                <Link to={`/${parentTaxon.code}`} className="text-decoration-none">
+                                <Link to={`/${parentTaxon.code}`} className="no-underline hover:text-primary">
                                     Go level up
                                 </Link>
                             </div>
@@ -186,7 +190,7 @@ const ProductList: React.FC = () => {
                             <div className="mb-4">
                                 {taxonDetails.children.map(child => (
                                     <div key={child.code}>
-                                        <Link to={`/${taxonDetails.code}/${child.code}`} className="text-decoration-none d-block mb-1">
+                                        <Link to={`/${taxonDetails.code}/${child.code}`} className="no-underline hover:text-primary block mb-1">
                                             {child.name}
                                         </Link>
                                     </div>
@@ -195,7 +199,7 @@ const ProductList: React.FC = () => {
                         ) : null}
                     </div>
 
-                    <div className="col-12 col-lg-9">
+                    <div className="w-full lg:w-3/4 px-4">
                         <div className="mb-4">
                             <h1 className="mb-3">{loading ? <Skeleton /> : taxonDetails?.name}</h1>
                             <div>{loading ? <Skeleton count={2} /> : taxonDetails?.description || ''}</div>
@@ -211,7 +215,7 @@ const ProductList: React.FC = () => {
 
                         {loadingMore && (
                             <div className="text-center mt-4">
-                                <div className="spinner-border text-primary" role="status" />
+                                <div className="inline-block w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" role="status" />
                             </div>
                         )}
                     </div>

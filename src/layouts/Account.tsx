@@ -21,18 +21,18 @@ const AccountLayout: React.FC<AccountLayoutProps> = ({ children, breadcrumbs }) 
     ];
 
     return (
-        <div className="container mb-auto">
-            <div className="row my-4">
-                <div className="col-12">
+        <div className="container mx-auto px-4 mb-auto">
+            <div className="flex flex-wrap my-4">
+                <div className="w-full mb-4">
                     <Breadcrumbs paths={breadcrumbs ?? defaultBreadcrumbs} />
                 </div>
 
-        <div className="col-12 col-md-3 mb-4 mb-md-0">
+        <div className="w-full md:w-1/4 mb-4 md:mb-0 px-4">
           <div className="mb-3">
-            <div className="h3 mb-4">Your account</div>
-            <div className="d-inline-flex flex-column">
+            <div className="text-2xl font-semibold mb-4">Your account</div>
+            <div className="inline-flex flex-col">
               <Link
-                className="d-flex align-items-center gap-2 py-1 link-reset"
+                className="flex items-center gap-2 py-1 link-reset"
                 to="/account/dashboard"
               >
                 <IconHome stroke={1.25} size={28} />
@@ -40,7 +40,7 @@ const AccountLayout: React.FC<AccountLayoutProps> = ({ children, breadcrumbs }) 
               </Link>
 
               <a
-                className="d-flex align-items-center gap-2 py-1 link-reset"
+                className="flex items-center gap-2 py-1 link-reset"
                 href="/account/profile/edit"
               >
                 <IconUser stroke={1.25} size={28} />
@@ -48,7 +48,7 @@ const AccountLayout: React.FC<AccountLayoutProps> = ({ children, breadcrumbs }) 
               </a>
 
               <a
-                className="d-flex align-items-center gap-2 py-1 link-reset"
+                className="flex items-center gap-2 py-1 link-reset"
                 href="/account/change-password"
               >
                 <IconLock stroke={1.25} size={28} />
@@ -56,7 +56,7 @@ const AccountLayout: React.FC<AccountLayoutProps> = ({ children, breadcrumbs }) 
               </a>
 
               <a
-                className="d-flex align-items-center gap-2 py-1 link-reset"
+                className="flex items-center gap-2 py-1 link-reset"
                 href="/account/address-book/"
               >
                 <IconBook stroke={1.25} size={28} />
@@ -64,7 +64,7 @@ const AccountLayout: React.FC<AccountLayoutProps> = ({ children, breadcrumbs }) 
               </a>
 
               <a
-                className="d-flex align-items-center gap-2 py-1 link-reset"
+                className="flex items-center gap-2 py-1 link-reset"
                 href="/account/order-history"
               >
                 <IconShoppingCart stroke={1.25} size={28} />

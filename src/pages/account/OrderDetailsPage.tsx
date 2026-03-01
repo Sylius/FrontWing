@@ -9,6 +9,7 @@ import ProductRow from "../../components/order/ProductRow";
 import { OrderItem, Order } from "../../types/Order";
 import { formatPrice } from "../../utils/price";
 import Skeleton from "react-loading-skeleton";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const OrderDetailsPage: React.FC = () => {
     const { token } = useParams<{ token: string }>();
@@ -26,7 +27,7 @@ const OrderDetailsPage: React.FC = () => {
                     headers: { Authorization: `Bearer ${tokenJwt}` },
                 });
 
-                if (!orderRes.ok) throw new Error("Błąd pobierania zamówienia");
+                if (!orderRes.ok) throw new Error("Blad pobierania zamowienia");
                 const data = await orderRes.json();
 
                 if (data.payments?.[0]?.['@id']) {
@@ -67,24 +68,24 @@ const OrderDetailsPage: React.FC = () => {
                 }
             >
                 {loading ? (
-                    <div className="col-12 col-md-9 pt-4">
+                    <div className="w-full md:w-3/4 pt-4">
                         <Skeleton height={30} width={200} className="mb-4" />
                         <Skeleton height={100} className="mb-3" count={2} />
                         <Skeleton height={200} className="mb-4" />
                     </div>
                 ) : (
-                    <div className="col-12 col-md-9 pt-4">
-                        <h1 className="h5 mb-4">Order #{order?.number}</h1>
+                    <div className="w-full md:w-3/4 pt-4">
+                        <h1 className="text-lg font-semibold mb-4">Order #{order?.number}</h1>
 
-                        <div className="card border-0 bg-body-tertiary mb-3">
-                            <div className="card-body d-flex flex-column gap-1">
-                                <div className="row">
-                                    <div className="col-12 col-sm-4">State</div>
-                                    <div className="col">{order?.state || '-'}</div>
+                        <div className="bg-muted rounded-lg mb-3">
+                            <div className="p-4 flex flex-col gap-1">
+                                <div className="flex flex-wrap -mx-4">
+                                    <div className="w-full sm:w-1/3 px-4">State</div>
+                                    <div className="flex-1 px-4">{order?.state || '-'}</div>
                                 </div>
-                                <div className="row">
-                                    <div className="col-12 col-sm-4">Created at</div>
-                                    <div className="col">
+                                <div className="flex flex-wrap -mx-4">
+                                    <div className="w-full sm:w-1/3 px-4">Created at</div>
+                                    <div className="flex-1 px-4">
                                         {order?.createdAt
                                             ? new Date(order.createdAt).toLocaleString('en-GB', {
                                                 year: 'numeric',
@@ -96,21 +97,21 @@ const OrderDetailsPage: React.FC = () => {
                                             : '-'}
                                     </div>
                                 </div>
-                                <div className="row">
-                                    <div className="col-12 col-sm-4">Currency</div>
-                                    <div className="col">{order?.currencyCode || '-'}</div>
+                                <div className="flex flex-wrap -mx-4">
+                                    <div className="w-full sm:w-1/3 px-4">Currency</div>
+                                    <div className="flex-1 px-4">{order?.currencyCode || '-'}</div>
                                 </div>
                             </div>
                         </div>
 
                         <div className="mb-4">
-                            <div className="row">
-                                <div className="col-md-6 mb-3">
+                            <div className="flex flex-wrap -mx-4">
+                                <div className="w-full md:w-1/2 px-4 mb-3">
                                     {order?.billingAddress && (
                                         <Address sectionName="Billing address" address={order.billingAddress} />
                                     )}
                                 </div>
-                                <div className="col-md-6 mb-3">
+                                <div className="w-full md:w-1/2 px-4 mb-3">
                                     {order?.shippingAddress && (
                                         <Address sectionName="Shipping address" address={order.shippingAddress} />
                                     )}
@@ -126,57 +127,57 @@ const OrderDetailsPage: React.FC = () => {
                             />
                         )}
 
-                        <div className="card border-0 bg-body-tertiary mb-3">
-                            <div className="card-header d-flex align-items-center">
-                                <div className="me-auto">Shipments</div>
+                        <div className="bg-muted rounded-lg mb-3">
+                            <div className="p-4 flex items-center">
+                                <div className="flex-1">Shipments</div>
                                 <div>{order?.state}</div>
                             </div>
                         </div>
 
                         {order?.shipments?.[0] && <ShipmentsCard shipment={order.shipments[0]} />}
 
-                        <div className="table-responsive mt-4">
-                            <table className="table table-borderless align-middle">
-                                <thead>
-                                <tr>
-                                    <th>Item</th>
-                                    <th className="text-end">Unit price</th>
-                                    <th className="text-end">Qty</th>
-                                    <th className="text-end">Subtotal</th>
-                                </tr>
-                                </thead>
-                                <tbody>
+                        <div className="mt-4">
+                            <Table>
+                                <TableHeader>
+                                <TableRow>
+                                    <TableHead className="text-left">Item</TableHead>
+                                    <TableHead className="text-right">Unit price</TableHead>
+                                    <TableHead className="text-right">Qty</TableHead>
+                                    <TableHead className="text-right">Subtotal</TableHead>
+                                </TableRow>
+                                </TableHeader>
+                                <TableBody>
                                 {order?.items?.map((item: OrderItem) => (
                                     <ProductRow key={item.id} orderItem={item} />
                                 ))}
-                                </tbody>
-                            </table>
+                                </TableBody>
+                            </Table>
                         </div>
 
-                        <table className="table table-borderless align-middle ms-auto w-auto">
-                            <tbody>
-                            <tr>
-                                <td className="text-end">Items total:</td>
-                                <td className="text-end">${formatPrice(order?.itemsSubtotal)}</td>
-                            </tr>
-                            <tr>
-                                <td className="text-end">Tax total:</td>
-                                <td className="text-end">${formatPrice(order?.taxTotal)}</td>
-                            </tr>
-                            <tr>
-                                <td className="text-end">Discount:</td>
-                                <td className="text-end">${formatPrice(order?.orderPromotionTotal)}</td>
-                            </tr>
-                            <tr>
-                                <td className="text-end">Shipping total:</td>
-                                <td className="text-end">${formatPrice(order?.shippingTotal)}</td>
-                            </tr>
-                            <tr>
-                                <td className="text-end fw-bold">Total:</td>
-                                <td className="text-end fw-bold">${formatPrice(order?.total)}</td>
-                            </tr>
-                            </tbody>
-                        </table>
+                        <Table className="ml-auto w-auto mt-4">
+                            <TableBody>
+                            <TableRow>
+                                <TableCell className="text-right pr-4 py-1">Items total:</TableCell>
+                                <TableCell className="text-right py-1">${formatPrice(order?.itemsSubtotal)}</TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell className="text-right pr-4 py-1">Tax total:</TableCell>
+                                <TableCell className="text-right py-1">${formatPrice(order?.taxTotal)}</TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell className="text-right pr-4 py-1">Discount:</TableCell>
+                                <TableCell className="text-right py-1">${formatPrice(order?.orderPromotionTotal)}</TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell className="text-right pr-4 py-1">Shipping total:</TableCell>
+                                <TableCell className="text-right py-1">${formatPrice(order?.shippingTotal)}</TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell className="text-right font-bold pr-4 py-1">Total:</TableCell>
+                                <TableCell className="text-right font-bold py-1">${formatPrice(order?.total)}</TableCell>
+                            </TableRow>
+                            </TableBody>
+                        </Table>
                     </div>
                 )}
             </AccountLayout>

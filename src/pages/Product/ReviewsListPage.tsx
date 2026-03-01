@@ -88,8 +88,8 @@ const ReviewsListPage: React.FC = () => {
             <div className="container mt-4 mb-5">
                 <Breadcrumbs paths={breadcrumbs} />
 
-                <div className="row">
-                    <div className="col-12 col-md-5 col-lg-4">
+                <div className="flex flex-wrap -mx-4">
+                    <div className="w-full md:w-5/12 lg:w-4/12 px-4">
                         {loading ? (
                             <Skeleton height={400} />
                         ) : (
@@ -97,7 +97,7 @@ const ReviewsListPage: React.FC = () => {
                         )}
                     </div>
 
-                    <div className="col-12 col-md-7 col-lg-8">
+                    <div className="w-full md:w-7/12 lg:w-8/12 px-4">
                         {loading ? (
                             <>
                                 <Skeleton height={30} width={150} className="mb-2" />
@@ -106,13 +106,13 @@ const ReviewsListPage: React.FC = () => {
                             </>
                         ) : (
                             <>
-                                <div className="d-sm-flex gap-3">
-                                    <div className="flex-grow-1 mb-3">
+                                <div className="sm:flex gap-3">
+                                    <div className="flex-1 mb-3">
                                         <h1>Reviews</h1>
                                         <div>{reviews.length} vote{reviews.length !== 1 && 's'}</div>
                                     </div>
                                     <div className="mb-3">
-                                        <a href={`/product/${code}/review/new`} className="btn btn-primary">
+                                        <a href={`/product/${code}/review/new`} className="inline-flex items-center justify-center px-4 py-2 bg-primary text-white rounded hover:bg-primary/90">
                                             Add your review
                                         </a>
                                     </div>

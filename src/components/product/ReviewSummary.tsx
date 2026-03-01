@@ -1,6 +1,6 @@
+import { IconStar } from '@tabler/icons-react';
 import React from 'react';
 import { ProductReview } from '../../types/Product';
-import { IconStar } from '@tabler/icons-react';
 
 interface ReviewSummaryProps {
     reviews: ProductReview[];
@@ -15,7 +15,7 @@ const ReviewSummary: React.FC<ReviewSummaryProps> = ({ reviews, productCode, all
             : 0;
 
     const renderStars = (rating: number) => (
-        <div className="fs-4 review-stars d-flex gap-1">
+        <div className="text-2xl text-yellow-400 flex gap-1">
             {[...Array(5)].map((_, index) => (
                 <IconStar
                     key={index}
@@ -28,20 +28,20 @@ const ReviewSummary: React.FC<ReviewSummaryProps> = ({ reviews, productCode, all
     );
 
     return allReviewCount > 0 ? (
-        <div className="row mb-2">
-            <div className="col-md-auto">{renderStars(averageRating)}</div>
-            <div className="col-md-auto">
+        <div className="flex flex-wrap mb-2">
+            <div className="md:w-auto md:mr-4">{renderStars(averageRating)}</div>
+            <div className="md:w-auto md:mr-4">
                 {allReviewCount} review{allReviewCount !== 1 && 's'}
             </div>
-            <a href={`/product/${productCode}/review/new`} className="col-md-auto">
+            <a href={`/product/${productCode}/review/new`} className="md:w-auto hover:text-primary">
                 Add your review
             </a>
         </div>
     ) : (
-        <div className="row mb-2">
-            <div className="col-md-auto">{renderStars(0)}</div>
-            <div className="col-md-auto">0 reviews</div>
-            <a href={`/product/${productCode}/review/new`} className="col-md-auto">
+        <div className="flex flex-wrap mb-2">
+            <div className="md:w-auto md:mr-4">{renderStars(0)}</div>
+            <div className="md:w-auto md:mr-4">0 reviews</div>
+            <a href={`/product/${productCode}/review/new`} className="md:w-auto hover:text-primary">
                 Add your review
             </a>
         </div>

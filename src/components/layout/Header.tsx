@@ -1,4 +1,4 @@
-import { IconMenu2, IconShoppingBag } from "@tabler/icons-react";
+import { IconShoppingBag } from "@tabler/icons-react";
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useOrder } from "../../context/OrderContext";
@@ -9,11 +9,11 @@ const Header: React.FC =  () => {
     const { order } = useOrder();
 
     return (
-        <div className="border-bottom py-4">
-            <div className="container">
-                <div className="row align-items-center">
-                    <div className="col">
-                        <Link to="/" className="d-inline-block py-lg-2" style={{ width: '10rem' }}
+        <div className="border-b py-4">
+            <div className="container mx-auto px-4">
+                <div className="flex flex-wrap items-center">
+                    <div className="flex-1">
+                        <Link to="/" className="inline-block lg:py-2" style={{ width: '10rem' }}
                            aria-label="sylius logo">
                             <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 3512 1033"
                                  fillRule="evenodd" strokeLinejoin="round" strokeMiterlimit="2">
@@ -32,35 +32,20 @@ const Header: React.FC =  () => {
                         </Link>
                     </div>
 
-                    <UserNavigation />
+                    <div className="flex">
+                        <UserNavigation />
 
-                    <div className="col-auto position-relative" data-controller="live"
-                         data-live-name-value="sylius_shop:cart:widget"
-                         data-live-url-value="/en_US/_components/sylius_shop:cart:widget"
-                         data-live-listeners-value="[{&quot;action&quot;:&quot;refreshCart&quot;,&quot;event&quot;:&quot;sylius:shop:cart_changed&quot;},{&quot;action&quot;:&quot;refreshCart&quot;,&quot;event&quot;:&quot;sylius:shop:cart_cleared&quot;}]"
-                         id="live-3283976089-0"
-                         data-live-props-value="{&quot;cart&quot;:null,&quot;hookableMetadata&quot;:{&quot;renderedBy&quot;:&quot;sylius_shop.base.header.content&quot;,&quot;configuration&quot;:&quot;[]&quot;,&quot;prefixes&quot;:[&quot;sylius_shop.homepage.index.header.content&quot;,&quot;sylius_shop.base.header.content&quot;]},&quot;template&quot;:&quot;@SyliusShop\/shared\/components\/header\/cart.html.twig&quot;,&quot;@attributes&quot;:{&quot;id&quot;:&quot;live-3283976089-0&quot;},&quot;@checksum&quot;:&quot;A\/wFpwghMT1N4zipsyyCK80KlKkntZV2R57jmGDzxAU=&quot;}">
-                        <Link to="/cart">
-                            <div>
-                                <button className="btn btn-icon btn-transparent px-0 position-relative"
-                                        data-bs-toggle="offcanvas" data-bs-target="#offcanvasCart"
-                                        aria-label="cart button">
-                                    <IconShoppingBag stroke={1.25} size={28} />
-                                    {order && (
-                                        <div className="d-none d-md-block">${formatPrice(order.total)} </div>
-                                    )}
-                                </button>
-                            </div>
-                        </Link>
+                        <div className="flex-none lg:flex items-center relative pl-2">
+                            <small className="hidden lg:block text-muted-foreground px-1">|</small>
+                            <Link to="/cart" className="flex items-center gap-1 link-reset size-9" aria-label="cart link">
+                                <IconShoppingBag className="text-foreground" width="1em" stroke={1.25} size={28} />
+                                {order && (
+                                    <div className="hidden md:block">${formatPrice(order.total)}</div>
+                                )}
+                            </Link>
+                        </div>
                     </div>
-
-                    <div className="col-auto d-lg-none">
-                        <button className="navbar-toggler btn btn-icon btn-transparent px-0" type="button"
-                                data-bs-toggle="offcanvas" data-bs-target="#navbarNav" aria-controls="navbarNav"
-                                aria-expanded="false" aria-label="Toggle navigation">
-                            <IconMenu2 stroke={1.25} size={28} />
-                        </button>
-                    </div>
+                    
                 </div>
             </div>
         </div>

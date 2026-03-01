@@ -8,6 +8,7 @@ import { formatPrice } from '../../utils/price';
 import { useNavigate } from 'react-router-dom';
 import Steps from '../../components/checkout/Steps';
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
+import { Button } from '@/components/ui/button';
 
 interface ShippingMethod {
   id: number;
@@ -72,11 +73,11 @@ const ShippingPage: React.FC = () => {
 
   return (
       <CheckoutLayout>
-        <div className="col-12 col-lg-7 pt-4 pb-5">
+        <div className="w-full lg:w-7/12 pt-4 pb-5">
           <div>
             <Steps activeStep="shipping" />
 
-            <div className="pe-lg-6">
+            <div className="lg:pr-20">
               <form
                   name="sylius_shop_checkout_select_shipping"
                   method="post"
@@ -85,74 +86,71 @@ const ShippingPage: React.FC = () => {
               >
                 <input type="hidden" name="_method" value="PUT" />
 
-                <h5 className="mb-4">Shipment #1</h5>
+                <h5 className="text-base font-semibold mb-4">Shipment #1</h5>
 
                 <div className="mb-5">
                   {hasErrors && (
-                      <div className="invalid-feedback d-block">
+                      <div className="text-destructive text-sm mb-3">
                         Please select shipping method.
                       </div>
                   )}
 
                   {(shippingMethods ?? []).length === 0 && (
-                      <div className="card bg-body-tertiary border-0 mb-3">
-                        <div className="card-body">
-                          <h6 className="text-danger mb-1">Warning</h6>
-                          <p className="mb-0">
-                            There are currently no shipping methods available for your shipping address.
-                          </p>
-                        </div>
+                      <div className="bg-muted rounded-lg p-4 mb-3">
+                        <h6 className="text-destructive font-semibold mb-1">Warning</h6>
+                        <p className="mb-0 text-sm">
+                          There are currently no shipping methods available for your shipping address.
+                        </p>
                       </div>
                   )}
 
                   {(shippingMethods ?? []).map((method) => (
-                      <div key={method.id} className="card bg-body-tertiary border-0 mb-3">
-                        <label className="d-flex gap-3 card-body">
-                          <div className="flex-grow-1">
-                            <div className="form-check">
+                      <div key={method.id} className="bg-muted rounded-lg mb-3">
+                        <label className="flex gap-3 p-4 cursor-pointer">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
                               <input
                                   type="radio"
                                   id={`shipping-method-${method.id}`}
                                   name="shipping-methods"
                                   required
-                                  className="form-check-input"
+                                  className="accent-primary"
                                   onChange={() => setShippingMethod(method.code)}
                                   checked={shippingMethod === method.code}
                                   value={method.code}
                               />
                               <label
-                                  className="form-check-label required"
+                                  className="text-sm font-medium cursor-pointer"
                                   htmlFor={`shipping-method-${method.id}`}
                               >
                                 {method.name}
                               </label>
                             </div>
 
-                            <div className="ps-4">
-                              <small className="text-black-50">{method.description}</small>
+                            <div className="pl-6 mt-1">
+                              <small className="text-muted-foreground">{method.description}</small>
                             </div>
                           </div>
 
-                          <div>{formatPrice(method.price)}</div>
+                          <div className="text-sm">{formatPrice(method.price)}</div>
                         </label>
                       </div>
                   ))}
                 </div>
 
-                <div className="d-flex justify-content-between flex-column flex-sm-row gap-2">
-                  <Link className="btn btn-light btn-icon" to="/checkout/address">
+                <div className="flex justify-between flex-col sm:flex-row gap-2">
+                  <Button variant="outline" render={<Link to="/checkout/address" />}>
                     <IconChevronLeft stroke={2} />
                     Change address
-                  </Link>
+                  </Button>
 
-                  <button
+                  <Button
                       type="submit"
                       disabled={isSubmitting}
-                      className="btn btn-primary btn-icon"
                   >
                     Next
                     <IconChevronRight stroke={2} />
-                  </button>
+                  </Button>
                 </div>
               </form>
             </div>
