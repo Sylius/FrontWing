@@ -2,9 +2,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { IconLockOpen } from "@tabler/icons-react";
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { IconEye, IconEyeOff, IconLockOpen } from "@tabler/icons-react";
+import React, { useCallback, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useCustomer } from "../context/CustomerContext";
 import Default from "../layouts/Default";
 
@@ -13,10 +13,16 @@ const labelClass = "block text-sm font-medium mb-1";
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // State for password visibility
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { refetchCustomer } = useCustomer();
+
+  // Handle visibility toggle
+  const togglePasswordVisibility = useCallback(() => {
+    setShowPassword((prev) => !prev);
+  }, []);
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -83,12 +89,13 @@ const LoginPage: React.FC = () => {
                 <div className="mb-5">
                   <div className="mb-3">
                     <label htmlFor="_username" className={labelClass}>
-                      Username
+                      Username / Email
                     </label>
                     <Input
                       type="text"
                       id="_username"
                       name="_username"
+                      value={email}
                       required
                       onChange={(e) => setEmail(e.target.value)}
                     />
@@ -98,13 +105,29 @@ const LoginPage: React.FC = () => {
                     <label htmlFor="_password" className={labelClass}>
                       Password
                     </label>
-                    <Input
-                      type="password"
-                      id="_password"
-                      name="_password"
-                      required
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        id="_password"
+                        name="_password"
+                        value={password}
+                        required
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="pr-10" // Padding to avoid text overlap with icon
+                      />
+                      <button
+                        type="button"
+                        onClick={togglePasswordVisibility}
+                        className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 focus:outline-none"
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                      >
+                        {showPassword ? (
+                          <IconEyeOff size={20} stroke={1.5} />
+                        ) : (
+                          <IconEye size={20} stroke={1.5} />
+                        )}
+                      </button>
+                    </div>
                   </div>
 
                   <div className="flex items-center gap-2">
@@ -117,7 +140,7 @@ const LoginPage: React.FC = () => {
 
                 <div className="mb-2">
                   <Button type="submit" className="w-full" id="login-button" disabled={loading}>
-                    Login
+                    {loading ? "Logging in..." : "Login"}
                   </Button>
                 </div>
 
@@ -129,12 +152,9 @@ const LoginPage: React.FC = () => {
               </form>
 
               <div className="text-center">
-                <a
-                  className="text-primary text-sm hover:underline"
-                  href="/en_US/forgotten-password"
-                >
+                <Link to="/forgot-password" className="text-primary text-sm hover:underline">
                   Forgot password?
-                </a>
+                </Link>
               </div>
             </div>
           </div>
@@ -145,14 +165,14 @@ const LoginPage: React.FC = () => {
                 <div className="mb-3 flex justify-center">
                   <IconLockOpen stroke={2} size={144} color={"#22b99a"} />
                 </div>
-                <h2>Don't have an account?</h2>
-                <a
-                  className="text-primary hover:underline"
+                <h2 className="text-xl font-semibold">Don't have an account?</h2>
+                <Link
+                  to="/register"
+                  className="text-primary font-medium hover:underline"
                   id="register-here-button"
-                  href="/en_US/register"
                 >
                   Register here
-                </a>
+                </Link>
               </div>
             </div>
           </div>

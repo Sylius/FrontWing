@@ -87,7 +87,7 @@ const UserNavigation: React.FC = () => {
               </Link>
 
               <small className="text-muted-foreground px-1">|</small>
-              <a href="/en_US/register" className="link-reset" id="register-page-button">
+              <a href="/register" className="link-reset" id="register-page-button">
                 Register
               </a>
             </div>

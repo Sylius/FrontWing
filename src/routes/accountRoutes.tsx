@@ -7,7 +7,6 @@ import ProfilePage from "../pages/account/ProfilePage";
 import AddressBookPage from "../pages/account/AddressBookPage";
 import AddAddressPage from "../pages/account/AddAddressPage";
 import EditAddressPage from "../pages/account/EditAddressPage";
-import ChangePasswordPage from "../pages/account/ChangePasswordPage";
 import RequireAuth from "./guards/RequireAuth.tsx";
 
 export const accountRoutes: RouteObject = {
@@ -16,7 +15,6 @@ export const accountRoutes: RouteObject = {
   children: [
     { path: "dashboard", element: <DashboardPage /> },
     { path: "profile/edit", element: <ProfilePage /> },
-    { path: "change-password", element: <ChangePasswordPage /> },
     { path: "order-history", element: <OrderHistoryPage /> },
     { path: "orders/:token", element: <OrderDetailsPage /> },
     { path: "address-book", element: <AddressBookPage /> },
