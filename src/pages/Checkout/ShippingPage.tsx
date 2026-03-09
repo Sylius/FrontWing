@@ -139,7 +139,11 @@ const ShippingPage: React.FC = () => {
               </div>
 
               <div className="flex flex-col justify-between gap-2 sm:flex-row">
-                <Button variant="outline" render={<Link to="/checkout/address" />}>
+                <Button
+                  variant="outline"
+                  nativeButton={false}
+                  render={<Link to="/checkout/address" />}
+                >
                   <IconChevronLeft stroke={2} />
                   Change address
                 </Button>

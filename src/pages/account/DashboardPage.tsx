@@ -112,6 +112,7 @@ const DashboardPage: React.FC = () => {
                     <Button
                       variant="outline"
                       size="sm"
+                      nativeButton={false}
                       render={<Link to="/account/profile/edit" />}
                     >
                       <IconPencil stroke={2} size={16} />
@@ -121,6 +122,7 @@ const DashboardPage: React.FC = () => {
                     <Button
                       variant="outline"
                       size="sm"
+                      nativeButton={false}
                       render={<Link to="/account/change-password" />}
                     >
                       <IconLock stroke={2} size={16} />

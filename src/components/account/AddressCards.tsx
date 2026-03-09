@@ -83,6 +83,7 @@ const AddressCards: React.FC<AddressCardsProps> = ({ addresses, onDelete, refetc
               <Button
                 variant="outline"
                 size="sm"
+                nativeButton={false}
                 render={<Link to={`/account/address-book/edit/${address.id}`} />}
               >
                 <IconPencil stroke={2} size={16} />

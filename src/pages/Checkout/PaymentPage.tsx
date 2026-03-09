@@ -144,7 +144,11 @@ const PaymentPage: React.FC = () => {
             </div>
 
             <div className="flex flex-col justify-between gap-2 sm:flex-row">
-              <Button variant="outline" render={<Link to="/checkout/select-shipping" />}>
+              <Button
+                variant="outline"
+                nativeButton={false}
+                render={<Link to="/checkout/select-shipping" />}
+              >
                 <IconChevronLeft stroke={2} />
                 Change shipping method
               </Button>
