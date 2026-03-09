@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import Default from "../../layouts/Default";
 import AccountLayout from "../../layouts/Account";
 import { useCustomer } from "../../context/CustomerContext";
@@ -14,6 +14,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useForm } from "@tanstack/react-form";
+import { profileSchema } from "@/schemas/account";
+import { formError } from "@/lib/utils";
 
 const labelClass = "block text-sm font-medium mb-1";
 
@@ -21,73 +24,60 @@ const ProfilePage: React.FC = () => {
   const { customer, refetchCustomer } = useCustomer();
   const { addMessage } = useFlashMessages();
 
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    birthday: "",
-    gender: "u",
-    phoneNumber: "",
-    subscribedToNewsletter: false,
-  });
+  const form = useForm({
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      birthday: "",
+      gender: "u",
+      phoneNumber: "",
+      subscribedToNewsletter: false,
+    },
+    validators: {
+      onSubmit: profileSchema,
+    },
+    onSubmit: async ({ value }) => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_REACT_APP_API_URL}${customer?.["@id"]}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+          },
+          body: JSON.stringify({
+            ...value,
+            user: {
+              username: value.email,
+              enabled: true,
+            },
+          }),
+        });
 
-  const [loading, setLoading] = useState(true);
+        if (!res.ok) throw new Error("Failed to update profile");
+
+        await refetchCustomer();
+        addMessage("success", "Profile updated successfully");
+      } catch (err) {
+        addMessage("error", "Error updating profile");
+        console.error(err);
+      }
+    },
+  });
 
   useEffect(() => {
     if (!customer) return;
 
-    setFormData({
-      firstName: customer.firstName ?? "",
-      lastName: customer.lastName ?? "",
-      email: customer.email ?? "",
-      birthday: customer.birthday?.split(" ")[0] ?? "",
-      gender: customer.gender ?? "u",
-      phoneNumber: customer.phoneNumber ?? "",
-      subscribedToNewsletter: customer.subscribedToNewsletter ?? false,
-    });
-    setLoading(false);
-  }, [customer]);
+    form.setFieldValue("firstName", customer.firstName ?? "");
+    form.setFieldValue("lastName", customer.lastName ?? "");
+    form.setFieldValue("email", customer.email ?? "");
+    form.setFieldValue("birthday", customer.birthday?.split(" ")[0] ?? "");
+    form.setFieldValue("gender", customer.gender ?? "u");
+    form.setFieldValue("phoneNumber", customer.phoneNumber ?? "");
+    form.setFieldValue("subscribedToNewsletter", customer.subscribedToNewsletter ?? false);
+  }, [customer, form]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleGenderChange = (value: string) => {
-    setFormData((prev) => ({ ...prev, gender: value }));
-  };
-
-  const handleNewsletterChange = (checked: boolean | "indeterminate") => {
-    setFormData((prev) => ({ ...prev, subscribedToNewsletter: checked === true }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const res = await fetch(`${import.meta.env.VITE_REACT_APP_API_URL}${customer?.["@id"]}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-        },
-        body: JSON.stringify({
-          ...formData,
-          user: {
-            username: formData.email,
-            enabled: true,
-          },
-        }),
-      });
-
-      if (!res.ok) throw new Error("Failed to update profile");
-
-      await refetchCustomer();
-      addMessage("success", "Profile updated successfully");
-    } catch (err) {
-      addMessage("error", "Error updating profile");
-      console.error(err);
-    }
-  };
+  const loading = !customer;
 
   return (
     <Default>
@@ -107,77 +97,136 @@ const ProfilePage: React.FC = () => {
           {loading ? (
             <Skeleton count={12} height={36} className="mb-2" />
           ) : (
-            <form onSubmit={handleSubmit}>
+            <form
+              noValidate
+              onSubmit={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                form.handleSubmit();
+              }}
+            >
               <div className="-mx-3 flex flex-wrap">
                 <div className="mb-3 w-full px-3 md:w-1/2">
                   <label className={labelClass}>First name *</label>
-                  <Input
-                    name="firstName"
-                    value={formData.firstName}
-                    onChange={handleInputChange}
-                    required
-                  />
+                  <form.Field name="firstName">
+                    {(field) => (
+                      <>
+                        <Input
+                          value={field.state.value}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          onBlur={field.handleBlur}
+                          required
+                          aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
+                        />
+                        {(field.state.meta.errors?.length ?? 0) > 0 && (
+                          <p className="text-destructive mt-1 text-sm">
+                            {formError(field.state.meta.errors?.[0])}
+                          </p>
+                        )}
+                      </>
+                    )}
+                  </form.Field>
                 </div>
                 <div className="mb-3 w-full px-3 md:w-1/2">
                   <label className={labelClass}>Last name *</label>
-                  <Input
-                    name="lastName"
-                    value={formData.lastName}
-                    onChange={handleInputChange}
-                    required
-                  />
+                  <form.Field name="lastName">
+                    {(field) => (
+                      <>
+                        <Input
+                          value={field.state.value}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          onBlur={field.handleBlur}
+                          required
+                          aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
+                        />
+                        {(field.state.meta.errors?.length ?? 0) > 0 && (
+                          <p className="text-destructive mt-1 text-sm">
+                            {formError(field.state.meta.errors?.[0])}
+                          </p>
+                        )}
+                      </>
+                    )}
+                  </form.Field>
                 </div>
                 <div className="mb-3 w-full px-3">
                   <label className={labelClass}>Email *</label>
-                  <Input
-                    name="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    required
-                  />
+                  <form.Field name="email">
+                    {(field) => (
+                      <>
+                        <Input
+                          type="email"
+                          value={field.state.value}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          onBlur={field.handleBlur}
+                          required
+                          aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
+                        />
+                        {(field.state.meta.errors?.length ?? 0) > 0 && (
+                          <p className="text-destructive mt-1 text-sm">
+                            {formError(field.state.meta.errors?.[0])}
+                          </p>
+                        )}
+                      </>
+                    )}
+                  </form.Field>
                 </div>
                 <div className="mb-3 w-full px-3 md:w-1/2">
                   <label className={labelClass}>Birthday</label>
-                  <Input
-                    name="birthday"
-                    type="date"
-                    value={formData.birthday}
-                    onChange={handleInputChange}
-                  />
+                  <form.Field name="birthday">
+                    {(field) => (
+                      <Input
+                        type="date"
+                        value={field.state.value ?? ""}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                      />
+                    )}
+                  </form.Field>
                 </div>
                 <div className="mb-3 w-full px-3 md:w-1/2">
                   <label className={labelClass}>Gender *</label>
-                  <Select
-                    value={formData.gender}
-                    onValueChange={(v) => v && handleGenderChange(v)}
-                    required
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="m">Male</SelectItem>
-                      <SelectItem value="f">Female</SelectItem>
-                      <SelectItem value="u">Unknown</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <form.Field name="gender">
+                    {(field) => (
+                      <Select
+                        value={field.state.value ?? "u"}
+                        onValueChange={(v) => v && field.handleChange(v)}
+                        required
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="m">Male</SelectItem>
+                          <SelectItem value="f">Female</SelectItem>
+                          <SelectItem value="u">Unknown</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </form.Field>
                 </div>
                 <div className="mb-3 w-full px-3">
                   <label className={labelClass}>Phone number</label>
-                  <Input
-                    name="phoneNumber"
-                    value={formData.phoneNumber}
-                    onChange={handleInputChange}
-                  />
+                  <form.Field name="phoneNumber">
+                    {(field) => (
+                      <Input
+                        value={field.state.value ?? ""}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                      />
+                    )}
+                  </form.Field>
                 </div>
                 <div className="mb-4 w-full px-3">
                   <div className="flex items-center gap-2">
-                    <Checkbox
-                      id="newsletter"
-                      checked={formData.subscribedToNewsletter}
-                      onCheckedChange={handleNewsletterChange}
-                    />
+                    <form.Field name="subscribedToNewsletter">
+                      {(field) => (
+                        <Checkbox
+                          id="newsletter"
+                          checked={field.state.value ?? false}
+                          onCheckedChange={(checked) => field.handleChange(checked === true)}
+                        />
+                      )}
+                    </form.Field>
                     <label htmlFor="newsletter" className="text-sm">
                       Subscribe to the newsletter
                     </label>

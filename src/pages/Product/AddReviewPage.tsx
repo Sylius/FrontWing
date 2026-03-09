@@ -10,6 +10,9 @@ import ProductCard from "../../components/ProductCard";
 import { useFlashMessages } from "../../context/FlashMessagesContext";
 import Layout from "../../layouts/Default";
 import { Product } from "../../types/Product";
+import { useForm } from "@tanstack/react-form";
+import { reviewSchema } from "@/schemas/review";
+import { formError } from "@/lib/utils";
 
 const API_URL = import.meta.env.VITE_REACT_APP_API_URL;
 
@@ -24,10 +27,40 @@ const AddReviewPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [breadcrumbs, setBreadcrumbs] = useState<{ label: string; url: string }[]>([]);
 
-  const [title, setTitle] = useState("");
-  const [rating, setRating] = useState(5);
-  const [comment, setComment] = useState("");
-  const [email, setEmail] = useState("");
+  const form = useForm({
+    defaultValues: {
+      rating: 5,
+      title: "",
+      comment: "",
+      email: "",
+    },
+    validators: {
+      onSubmit: reviewSchema,
+    },
+    onSubmit: async ({ value }) => {
+      try {
+        const res = await fetch(`${API_URL}/api/v2/shop/product-reviews`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: value.title,
+            rating: value.rating,
+            comment: value.comment,
+            email: value.email,
+            product: `/api/v2/shop/products/${code}`,
+          }),
+        });
+
+        if (!res.ok) throw new Error("Failed to submit review");
+
+        addMessage("success", "Success — Your review is waiting for the acceptation.");
+        navigate(`/product/${code}`);
+      } catch (err) {
+        console.error("Error submitting review:", err);
+        addMessage("error", "Failed to submit your review");
+      }
+    },
+  });
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -83,31 +116,6 @@ const AddReviewPage: React.FC = () => {
     if (code) fetchProduct();
   }, [code]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const res = await fetch(`${API_URL}/api/v2/shop/product-reviews`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title,
-          rating,
-          comment,
-          email,
-          product: `/api/v2/shop/products/${code}`,
-        }),
-      });
-
-      if (!res.ok) throw new Error("Failed to submit review");
-
-      addMessage("success", "Success — Your review is waiting for the acceptation.");
-      navigate(`/product/${code}`);
-    } catch (err) {
-      console.error("Error submitting review:", err);
-      addMessage("error", "Failed to submit your review");
-    }
-  };
-
   return (
     <Layout>
       <div className="container mt-4 mb-5">
@@ -122,66 +130,123 @@ const AddReviewPage: React.FC = () => {
 
           <div className="w-full px-4 md:w-7/12 lg:w-8/12">
             <h1>Add Your Review</h1>
-            <form onSubmit={handleSubmit}>
+            <form
+              noValidate
+              onSubmit={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                form.handleSubmit();
+              }}
+            >
               <div className="mb-3">
                 <label className={labelClass}>
                   Rating <span className="text-destructive">*</span>
                 </label>
-                <div className="flex gap-1" role="radiogroup" aria-label="Rating">
-                  {[1, 2, 3, 4, 5].map((value) => (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      key={value}
-                      onClick={() => setRating(value)}
-                      aria-label={`${value} star`}
-                    >
-                      <IconStar
-                        className="text-yellow-400"
-                        stroke={2}
-                        size={20}
-                        fill={value <= rating ? "currentColor" : "none"}
-                      />
-                    </Button>
-                  ))}
-                </div>
+                <form.Field name="rating">
+                  {(field) => (
+                    <>
+                      <div className="flex gap-1" role="radiogroup" aria-label="Rating">
+                        {[1, 2, 3, 4, 5].map((value) => (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            key={value}
+                            onClick={() => field.handleChange(value)}
+                            aria-label={`${value} star`}
+                          >
+                            <IconStar
+                              className="text-yellow-400"
+                              stroke={2}
+                              size={20}
+                              fill={value <= field.state.value ? "currentColor" : "none"}
+                            />
+                          </Button>
+                        ))}
+                      </div>
+                      {(field.state.meta.errors?.length ?? 0) > 0 && (
+                        <p className="text-destructive mt-1 text-sm">
+                          {formError(field.state.meta.errors?.[0])}
+                        </p>
+                      )}
+                    </>
+                  )}
+                </form.Field>
               </div>
 
               <div className="mb-3">
                 <label className={labelClass}>
                   Title <span className="text-destructive">*</span>
                 </label>
-                <Input
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  required
-                />
+                <form.Field name="title">
+                  {(field) => (
+                    <>
+                      <Input
+                        type="text"
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        required
+                        aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
+                      />
+                      {(field.state.meta.errors?.length ?? 0) > 0 && (
+                        <p className="text-destructive mt-1 text-sm">
+                          {formError(field.state.meta.errors?.[0])}
+                        </p>
+                      )}
+                    </>
+                  )}
+                </form.Field>
               </div>
 
               <div className="mb-3">
                 <label className={labelClass}>
                   Comment <span className="text-destructive">*</span>
                 </label>
-                <Textarea
-                  rows={4}
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  required
-                />
+                <form.Field name="comment">
+                  {(field) => (
+                    <>
+                      <Textarea
+                        rows={4}
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        required
+                        aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
+                      />
+                      {(field.state.meta.errors?.length ?? 0) > 0 && (
+                        <p className="text-destructive mt-1 text-sm">
+                          {formError(field.state.meta.errors?.[0])}
+                        </p>
+                      )}
+                    </>
+                  )}
+                </form.Field>
               </div>
 
               <div className="mb-4">
                 <label className={labelClass}>
                   Email <span className="text-destructive">*</span>
                 </label>
-                <Input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
+                <form.Field name="email">
+                  {(field) => (
+                    <>
+                      <Input
+                        type="email"
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        required
+                        aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
+                      />
+                      {(field.state.meta.errors?.length ?? 0) > 0 && (
+                        <p className="text-destructive mt-1 text-sm">
+                          {formError(field.state.meta.errors?.[0])}
+                        </p>
+                      )}
+                    </>
+                  )}
+                </form.Field>
               </div>
 
               <Button type="submit">Add</Button>

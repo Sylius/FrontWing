@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import Default from "../../layouts/Default.tsx";
 import AccountLayout from "../../layouts/Account.tsx";
 import { useCustomer } from "../../context/CustomerContext.tsx";
@@ -7,6 +7,9 @@ import Loader from "../../components/layout/Loader.tsx";
 import { useFlashMessages } from "../../context/FlashMessagesContext.tsx";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useForm } from "@tanstack/react-form";
+import { changePasswordSchema, ChangePasswordPayload } from "@/schemas/account";
+import { formError } from "@/lib/utils";
 
 const labelClass = "block text-sm font-medium mb-1";
 
@@ -15,69 +18,73 @@ const ChangePasswordPage: React.FC = () => {
   const navigate = useNavigate();
   const { addMessage } = useFlashMessages();
 
-  const [currentPassword, setCurrentPassword] = useState<string>();
-  const [newPassword, setNewPassword] = useState<string>();
-  const [confirmation, setConfirmation] = useState<string>();
-  const [loading, setLoading] = useState<boolean>(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [submitted, setSubmitted] = useState(false);
+  const form = useForm({
+    defaultValues: {
+      currentPassword: "",
+      newPassword: "",
+      confirmation: "",
+    },
+    validators: {
+      onSubmit: changePasswordSchema,
+    },
+    onSubmit: async ({ value }) => {
+      const payload: ChangePasswordPayload = {
+        currentPassword: value.currentPassword,
+        newPassword: value.newPassword,
+        confirmNewPassword: value.confirmation,
+      };
 
-  const validate = (): boolean => {
-    const e: Record<string, string> = {};
-    if (!currentPassword?.trim()) e.currentPassword = "Required";
-    if (!newPassword?.trim()) e.newPassword = "Required";
-    if (!confirmation?.trim()) e.confirmNewPassword = "Required";
-    setErrors(e);
-    return Object.keys(e).length === 0;
-  };
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_REACT_APP_API_URL}${customer && customer["@id"]}/password`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+            },
+            body: JSON.stringify(payload),
+          }
+        );
 
-  const handleChangePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    setSubmitted(true);
-    if (!validate()) return;
-
-    setLoading(true);
-    setErrors({});
-
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_REACT_APP_API_URL}${customer && customer["@id"]}/password`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-          },
-          body: JSON.stringify({
-            newPassword,
-            confirmNewPassword: confirmation,
-            currentPassword,
-          }),
+        if (!response.ok) {
+          const data = await response.json();
+          const formattedErrors: Record<string, string> = {};
+          data.violations?.forEach((error: { propertyPath: string; message: string }) => {
+            formattedErrors[error.propertyPath] = error.message;
+          });
+          // Re-surface API errors via form field errors
+          if (formattedErrors.currentPassword) {
+            form.setFieldMeta("currentPassword", (prev) => ({
+              ...prev,
+              errors: [formattedErrors.currentPassword],
+              errorMap: { onSubmit: formattedErrors.currentPassword },
+            }));
+          }
+          if (formattedErrors.newPassword) {
+            form.setFieldMeta("newPassword", (prev) => ({
+              ...prev,
+              errors: [formattedErrors.newPassword],
+              errorMap: { onSubmit: formattedErrors.newPassword },
+            }));
+          }
+          if (formattedErrors.confirmNewPassword) {
+            form.setFieldMeta("confirmation", (prev) => ({
+              ...prev,
+              errors: [formattedErrors.confirmNewPassword],
+              errorMap: { onSubmit: formattedErrors.confirmNewPassword },
+            }));
+          }
+          throw new Error("Failed to change password");
         }
-      );
 
-      if (!response.ok) {
-        const data = await response.json();
-
-        const formattedErrors: Record<string, string> = {};
-
-        data.violations?.forEach((error: { propertyPath: string; message: string }) => {
-          formattedErrors[error.propertyPath] = error.message;
-        });
-
-        setErrors(formattedErrors || {});
-        throw new Error("Failed to submit order");
+        navigate("/account/dashboard");
+        addMessage("success", "Password changed successfully");
+      } catch (err) {
+        console.log(err);
       }
-
-      navigate("/account/dashboard");
-      addMessage("success", "Password changed successfully");
-    } catch (err) {
-      console.log(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+  });
 
   return (
     <Default>
@@ -89,56 +96,102 @@ const ChangePasswordPage: React.FC = () => {
           </div>
 
           <div className="relative mb-4">
-            <Loader loading={loading}>
-              <form method="post" onSubmit={handleChangePassword}>
-                <div className="mb-4">
-                  <div className="mb-3">
-                    <label className={labelClass}>Current password</label>
-                    <Input
-                      type="password"
-                      required={true}
-                      aria-invalid={(submitted && !!errors.currentPassword) || undefined}
-                      onChange={(e) => setCurrentPassword(e.target.value)}
-                    />
-                    {errors?.currentPassword && (
-                      <div className="text-destructive mt-1 text-sm">{errors.currentPassword}</div>
-                    )}
-                  </div>
-
-                  <div className="mb-3">
-                    <label className={labelClass}>New password</label>
-                    <Input
-                      type="password"
-                      required={true}
-                      aria-invalid={(submitted && !!errors.newPassword) || undefined}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                    />
-                    {errors?.newPassword && (
-                      <div className="text-destructive mt-1 text-sm">{errors.newPassword}</div>
-                    )}
-                  </div>
-
-                  <div className="mb-3">
-                    <label className={labelClass}>Confirmation</label>
-                    <Input
-                      type="password"
-                      required={true}
-                      aria-invalid={(submitted && !!errors.confirmNewPassword) || undefined}
-                      onChange={(e) => setConfirmation(e.target.value)}
-                    />
-                    {errors?.confirmNewPassword && (
-                      <div className="text-destructive mt-1 text-sm">
-                        {errors.confirmNewPassword}
+            <form.Subscribe selector={(state) => state.isSubmitting}>
+              {(isSubmitting) => (
+                <Loader loading={isSubmitting}>
+                  <form
+                    method="post"
+                    noValidate
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      form.handleSubmit();
+                    }}
+                  >
+                    <div className="mb-4">
+                      <div className="mb-3">
+                        <label className={labelClass}>Current password</label>
+                        <form.Field name="currentPassword">
+                          {(field) => (
+                            <>
+                              <Input
+                                type="password"
+                                required={true}
+                                value={field.state.value}
+                                onChange={(e) => field.handleChange(e.target.value)}
+                                onBlur={field.handleBlur}
+                                aria-invalid={
+                                  (field.state.meta.errors?.length ?? 0) > 0 || undefined
+                                }
+                              />
+                              {(field.state.meta.errors?.length ?? 0) > 0 && (
+                                <div className="text-destructive mt-1 text-sm">
+                                  {formError(field.state.meta.errors?.[0])}
+                                </div>
+                              )}
+                            </>
+                          )}
+                        </form.Field>
                       </div>
-                    )}
-                  </div>
-                </div>
 
-                <Button type="submit" id="save-changes">
-                  Save changes
-                </Button>
-              </form>
-            </Loader>
+                      <div className="mb-3">
+                        <label className={labelClass}>New password</label>
+                        <form.Field name="newPassword">
+                          {(field) => (
+                            <>
+                              <Input
+                                type="password"
+                                required={true}
+                                value={field.state.value}
+                                onChange={(e) => field.handleChange(e.target.value)}
+                                onBlur={field.handleBlur}
+                                aria-invalid={
+                                  (field.state.meta.errors?.length ?? 0) > 0 || undefined
+                                }
+                              />
+                              {(field.state.meta.errors?.length ?? 0) > 0 && (
+                                <div className="text-destructive mt-1 text-sm">
+                                  {formError(field.state.meta.errors?.[0])}
+                                </div>
+                              )}
+                            </>
+                          )}
+                        </form.Field>
+                      </div>
+
+                      <div className="mb-3">
+                        <label className={labelClass}>Confirmation</label>
+                        <form.Field name="confirmation">
+                          {(field) => (
+                            <>
+                              <Input
+                                type="password"
+                                required={true}
+                                value={field.state.value}
+                                onChange={(e) => field.handleChange(e.target.value)}
+                                onBlur={field.handleBlur}
+                                aria-invalid={
+                                  (field.state.meta.errors?.length ?? 0) > 0 || undefined
+                                }
+                              />
+                              {(field.state.meta.errors?.length ?? 0) > 0 && (
+                                <div className="text-destructive mt-1 text-sm">
+                                  {formError(field.state.meta.errors?.[0])}
+                                </div>
+                              )}
+                            </>
+                          )}
+                        </form.Field>
+                      </div>
+                    </div>
+
+                    <Button type="submit" id="save-changes">
+                      Save changes
+                    </Button>
+                  </form>
+                </Loader>
+              )}
+            </form.Subscribe>
           </div>
         </div>
       </AccountLayout>

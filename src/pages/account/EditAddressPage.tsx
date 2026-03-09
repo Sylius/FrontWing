@@ -2,15 +2,29 @@ import { Button } from "@/components/ui/button";
 import React, { useEffect, useState } from "react";
 import Skeleton from "react-loading-skeleton";
 import { useNavigate, useParams } from "react-router-dom";
-import AddressForm from "../../components/account/AddressForm";
+import AddressForm, { type AnyFormApi } from "../../components/account/AddressForm";
 import { useFlashMessages } from "../../context/FlashMessagesContext";
 import AccountLayout from "../../layouts/Account";
 import Default from "../../layouts/Default";
+import { useForm } from "@tanstack/react-form";
+import { addressSchema, AddressValues } from "@/schemas/address";
 
 interface Country {
   code: string;
   name: string;
 }
+
+const emptyAddressValues: AddressValues = {
+  firstName: "",
+  lastName: "",
+  company: "",
+  street: "",
+  countryCode: "",
+  provinceName: "",
+  city: "",
+  postcode: "",
+  phoneNumber: "",
+};
 
 const EditAddressPage: React.FC = () => {
   const navigate = useNavigate();
@@ -21,19 +35,39 @@ const EditAddressPage: React.FC = () => {
   const [loadingCountries, setLoadingCountries] = useState(true);
   const [loadingAddress, setLoadingAddress] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [submitted, setSubmitted] = useState(false);
 
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    company: "",
-    street: "",
-    countryCode: "",
-    provinceName: "",
-    city: "",
-    postcode: "",
-    phoneNumber: "",
+  const form = useForm({
+    defaultValues: emptyAddressValues,
+    validators: {
+      onSubmit: addressSchema,
+    },
+    onSubmit: async ({ value }) => {
+      setSubmitting(true);
+      try {
+        const token = localStorage.getItem("jwtToken");
+        const res = await fetch(
+          `${import.meta.env.VITE_REACT_APP_API_URL}/api/v2/shop/addresses/${id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(value),
+          }
+        );
+
+        if (!res.ok) throw new Error("Failed to update address");
+
+        addMessage("success", "Address updated successfully");
+        navigate("/account/address-book");
+      } catch (error) {
+        console.error("Error updating address", error);
+        addMessage("error", "Failed to update address");
+      } finally {
+        setSubmitting(false);
+      }
+    },
   });
 
   useEffect(() => {
@@ -60,7 +94,8 @@ const EditAddressPage: React.FC = () => {
         );
         if (!res.ok) throw new Error("Failed to fetch address");
         const data = await res.json();
-        setFormData({
+
+        const existingAddress: AddressValues = {
           firstName: data.firstName || "",
           lastName: data.lastName || "",
           company: data.company || "",
@@ -70,7 +105,17 @@ const EditAddressPage: React.FC = () => {
           city: data.city || "",
           postcode: data.postcode || "",
           phoneNumber: data.phoneNumber || "",
-        });
+        };
+
+        form.setFieldValue("firstName", existingAddress.firstName);
+        form.setFieldValue("lastName", existingAddress.lastName);
+        form.setFieldValue("company", existingAddress.company);
+        form.setFieldValue("street", existingAddress.street);
+        form.setFieldValue("countryCode", existingAddress.countryCode);
+        form.setFieldValue("provinceName", existingAddress.provinceName);
+        form.setFieldValue("city", existingAddress.city);
+        form.setFieldValue("postcode", existingAddress.postcode);
+        form.setFieldValue("phoneNumber", existingAddress.phoneNumber);
       } catch (err) {
         console.error("Error loading address", err);
         addMessage("error", "Failed to load address");
@@ -81,60 +126,7 @@ const EditAddressPage: React.FC = () => {
 
     fetchCountries();
     fetchAddress();
-  }, [id, addMessage]);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleCountryChange = (value: string) => {
-    setFormData((prev) => ({ ...prev, countryCode: value }));
-  };
-
-  const validate = (): boolean => {
-    const e: Record<string, string> = {};
-    if (!formData.firstName.trim()) e.firstName = "Required";
-    if (!formData.lastName.trim()) e.lastName = "Required";
-    if (!formData.street.trim()) e.street = "Required";
-    if (!formData.city.trim()) e.city = "Required";
-    if (!formData.postcode.trim()) e.postcode = "Required";
-    if (!formData.countryCode.trim()) e.countryCode = "Required";
-    setErrors(e);
-    return Object.keys(e).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitted(true);
-    if (!validate()) return;
-    setSubmitting(true);
-
-    try {
-      const token = localStorage.getItem("jwtToken");
-      const res = await fetch(
-        `${import.meta.env.VITE_REACT_APP_API_URL}/api/v2/shop/addresses/${id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(formData),
-        }
-      );
-
-      if (!res.ok) throw new Error("Failed to update address");
-
-      addMessage("success", "Address updated successfully");
-      navigate("/account/address-book");
-    } catch (error) {
-      console.error("Error updating address", error);
-      addMessage("error", "Failed to update address");
-    } finally {
-      setSubmitting(false);
-    }
-  };
+  }, [id, addMessage, form]);
 
   return (
     <Default>
@@ -155,16 +147,19 @@ const EditAddressPage: React.FC = () => {
           {loadingAddress ? (
             <Skeleton count={10} height={36} className="mb-2" />
           ) : (
-            <form onSubmit={handleSubmit}>
+            <form
+              noValidate
+              onSubmit={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                form.handleSubmit();
+              }}
+            >
               <div className="mb-4">
                 <AddressForm
-                  formData={formData}
+                  form={form as unknown as AnyFormApi}
                   countries={countries}
                   loadingCountries={loadingCountries}
-                  onChange={handleChange}
-                  onCountryChange={handleCountryChange}
-                  errors={errors}
-                  submitted={submitted}
                 />
               </div>
 

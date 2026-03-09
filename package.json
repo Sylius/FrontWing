@@ -16,7 +16,9 @@
     "@base-ui/react": "^1.2.0",
     "@tabler/icons-react": "^3.36.1",
     "@tailwindcss/vite": "^4.2.0",
+    "@tanstack/react-form": "^1.28.4",
     "@tanstack/react-query": "^5.90.21",
+    "@tanstack/zod-form-adapter": "^0.42.1",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
@@ -38,7 +40,8 @@
     "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.2.0",
     "web-vitals": "^5.1.0",
-    "yet-another-react-lightbox": "^3.29.1"
+    "yet-another-react-lightbox": "^3.29.1",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",

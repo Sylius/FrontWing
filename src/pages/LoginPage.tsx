@@ -2,6 +2,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { loginSchema } from "@/schemas/auth";
+import { formError } from "@/lib/utils";
+import { useForm } from "@tanstack/react-form";
 import { IconEye, IconEyeOff, IconLockOpen } from "@tabler/icons-react";
 import React, { useCallback, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -11,11 +14,8 @@ import Default from "../layouts/Default";
 const labelClass = "block text-sm font-medium mb-1";
 
 const LoginPage: React.FC = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // State for password visibility
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { refetchCustomer } = useCustomer();
 
@@ -24,50 +24,53 @@ const LoginPage: React.FC = () => {
     setShowPassword((prev) => !prev);
   }, []);
 
-  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
+  const form = useForm({
+    defaultValues: {
+      email: "",
+      password: "",
+      remember_me: false,
+    },
+    validators: { onSubmit: loginSchema },
+    onSubmit: async ({ value }) => {
+      setError(null);
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_REACT_APP_API_URL}/api/v2/shop/customers/token`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email: value.email, password: value.password }),
+          }
+        );
 
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_REACT_APP_API_URL}/api/v2/shop/customers/token`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email, password }),
+        if (!response.ok) {
+          const contentType = response.headers.get("content-type");
+          if (contentType?.includes("application/json")) {
+            const errData: { message?: string } = await response.json();
+            throw new Error(errData.message || "Invalid credentials");
+          }
+          throw new Error("Invalid credentials");
         }
-      );
 
-      if (!response.ok) {
-        const contentType = response.headers.get("content-type");
-        if (contentType?.includes("application/json")) {
-          const errData: { message?: string } = await response.json();
-          throw new Error(errData.message || "Invalid credentials");
+        const data: { token: string; customer: string } = await response.json();
+
+        localStorage.setItem("jwtToken", data.token);
+        localStorage.setItem("userUrl", data.customer);
+
+        await refetchCustomer();
+
+        navigate("/account/dashboard", { replace: true });
+      } catch (err) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("Unexpected error occurred");
         }
-        throw new Error("Invalid credentials");
       }
-
-      const data: { token: string; customer: string } = await response.json();
-
-      localStorage.setItem("jwtToken", data.token);
-      localStorage.setItem("userUrl", data.customer);
-
-      await refetchCustomer();
-
-      navigate("/account/dashboard", { replace: true });
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("Unexpected error occurred");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+  });
 
   return (
     <Default>
@@ -76,7 +79,13 @@ const LoginPage: React.FC = () => {
           <div className="flex items-center justify-center lg:order-2">
             <div className="w-full max-w-md py-8 lg:py-20">
               <h1 className="mb-5 text-2xl font-bold">Login</h1>
-              <form onSubmit={handleLogin} noValidate>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  form.handleSubmit();
+                }}
+                noValidate
+              >
                 {error && (
                   <Alert variant="destructive" className="mb-4">
                     <AlertDescription>
@@ -91,47 +100,82 @@ const LoginPage: React.FC = () => {
                     <label htmlFor="_username" className={labelClass}>
                       Username / Email
                     </label>
-                    <Input
-                      type="text"
-                      id="_username"
-                      name="_username"
-                      value={email}
-                      required
-                      onChange={(e) => setEmail(e.target.value)}
-                    />
+                    <form.Field name="email">
+                      {(field) => (
+                        <>
+                          <Input
+                            type="text"
+                            id="_username"
+                            name="_username"
+                            value={field.state.value}
+                            required
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            onBlur={field.handleBlur}
+                            aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
+                          />
+                          {(field.state.meta.errors?.length ?? 0) > 0 && (
+                            <span className="text-destructive text-sm">
+                              {formError(field.state.meta.errors?.[0])}
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </form.Field>
                   </div>
 
                   <div className="mb-3">
                     <label htmlFor="_password" className={labelClass}>
                       Password
                     </label>
-                    <div className="relative">
-                      <Input
-                        type={showPassword ? "text" : "password"}
-                        id="_password"
-                        name="_password"
-                        value={password}
-                        required
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="pr-10" // Padding to avoid text overlap with icon
-                      />
-                      <button
-                        type="button"
-                        onClick={togglePasswordVisibility}
-                        className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 focus:outline-none"
-                        aria-label={showPassword ? "Hide password" : "Show password"}
-                      >
-                        {showPassword ? (
-                          <IconEyeOff size={20} stroke={1.5} />
-                        ) : (
-                          <IconEye size={20} stroke={1.5} />
-                        )}
-                      </button>
-                    </div>
+                    <form.Field name="password">
+                      {(field) => (
+                        <>
+                          <div className="relative">
+                            <Input
+                              type={showPassword ? "text" : "password"}
+                              id="_password"
+                              name="_password"
+                              value={field.state.value}
+                              required
+                              onChange={(e) => field.handleChange(e.target.value)}
+                              onBlur={field.handleBlur}
+                              className="pr-10"
+                              aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
+                            />
+                            <button
+                              type="button"
+                              onClick={togglePasswordVisibility}
+                              className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 focus:outline-none"
+                              aria-label={showPassword ? "Hide password" : "Show password"}
+                            >
+                              {showPassword ? (
+                                <IconEyeOff size={20} stroke={1.5} />
+                              ) : (
+                                <IconEye size={20} stroke={1.5} />
+                              )}
+                            </button>
+                          </div>
+                          {(field.state.meta.errors?.length ?? 0) > 0 && (
+                            <span className="text-destructive text-sm">
+                              {formError(field.state.meta.errors?.[0])}
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </form.Field>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <Checkbox id="_remember_me" name="_remember_me" value="1" />
+                    <form.Field name="remember_me">
+                      {(field) => (
+                        <Checkbox
+                          id="_remember_me"
+                          name="_remember_me"
+                          checked={field.state.value ?? false}
+                          onCheckedChange={(checked) => field.handleChange(!!checked)}
+                        />
+                      )}
+                    </form.Field>
                     <label className="text-sm" htmlFor="_remember_me">
                       Remember me
                     </label>
@@ -139,8 +183,13 @@ const LoginPage: React.FC = () => {
                 </div>
 
                 <div className="mb-2">
-                  <Button type="submit" className="w-full" id="login-button" disabled={loading}>
-                    {loading ? "Logging in..." : "Login"}
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    id="login-button"
+                    disabled={form.state.isSubmitting}
+                  >
+                    {form.state.isSubmitting ? "Logging in..." : "Login"}
                   </Button>
                 </div>
 

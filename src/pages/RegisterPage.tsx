@@ -9,9 +9,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { registerSchema } from "@/schemas/auth";
+import { formError } from "@/lib/utils";
+import { useForm, useStore } from "@tanstack/react-form";
 import { IconEye, IconEyeOff, IconLockOpen } from "@tabler/icons-react";
 import { AlertCircleIcon } from "lucide-react";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import Default from "../layouts/Default";
@@ -32,21 +35,72 @@ const genderLabel = (gender: string) => {
 const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    gender: "u",
-    password: "",
-    confirmPassword: "",
-    subscribedToNewsletter: false,
-  });
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
 
-  // Memoized function to calculate password strength (0 to 4)
+  const form = useForm({
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      gender: "u",
+      password: "",
+      confirmPassword: "",
+      subscribedToNewsletter: false,
+    },
+    validators: { onSubmit: registerSchema },
+    onSubmit: async ({ value }) => {
+      setError(null);
+
+      // Strict strength validation (Score 4 required)
+      const pw = value.password;
+      let score = 0;
+      if (pw.length >= 8) score++;
+      if (/[A-Z]/.test(pw)) score++;
+      if (/[0-9]/.test(pw)) score++;
+      if (/[^A-Za-z0-9]/.test(pw)) score++;
+
+      if (score < 4) {
+        setError("Password is too weak. Please follow the requirements.");
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_REACT_APP_API_URL}/api/v2/shop/customers`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              firstName: value.firstName,
+              lastName: value.lastName,
+              email: value.email,
+              gender: value.gender,
+              password: value.password,
+              subscribedToNewsletter: value.subscribedToNewsletter,
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          const errData = await response.json();
+          throw new Error(errData["hydra:description"] ?? errData.message ?? "Registration failed");
+        }
+
+        toast.success("Account created successfully!");
+        navigate("/login");
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "An unexpected error occurred");
+      }
+    },
+  });
+
+  // Subscribe to password field value for strength indicator
+  const passwordValue = useStore(form.store, (s) => s.values.password);
+
+  // Memoized password strength calculation (0 to 4)
   const passwordStrength = useMemo(() => {
-    const pw = formData.password;
+    const pw = passwordValue;
     if (!pw) return 0;
     let score = 0;
     if (pw.length >= 8) score++;
@@ -54,7 +108,7 @@ const RegisterPage: React.FC = () => {
     if (/[0-9]/.test(pw)) score++;
     if (/[^A-Za-z0-9]/.test(pw)) score++;
     return score;
-  }, [formData.password]);
+  }, [passwordValue]);
 
   // Helper to get bar color based on strength
   const getStrengthColor = (score: number) => {
@@ -72,64 +126,6 @@ const RegisterPage: React.FC = () => {
     }
   };
 
-  // Stabilize input changes to comply with ESLint exhaustive-deps
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  }, []);
-
-  const handleGenderChange = (value: string) => {
-    setFormData((prev) => ({ ...prev, gender: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError(null);
-
-    // 1. Match validation
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
-
-    // 2. Strict strength validation (Score 4 required)
-    if (passwordStrength < 4) {
-      setError("Password is too weak. Please follow the requirements.");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_REACT_APP_API_URL}/api/v2/shop/customers`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            email: formData.email,
-            gender: formData.gender,
-            password: formData.password,
-            subscribedToNewsletter: formData.subscribedToNewsletter,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData["hydra:description"] ?? errData.message ?? "Registration failed");
-      }
-
-      toast.success("Account created successfully!");
-      navigate("/login");
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "An unexpected error occurred");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <Default>
       <div className="container my-auto">
@@ -138,7 +134,14 @@ const RegisterPage: React.FC = () => {
             <div className="w-full max-w-md py-8 lg:py-20">
               <h1 className="mb-5 text-center text-2xl font-bold">Create an account</h1>
 
-              <form onSubmit={handleSubmit} noValidate className="space-y-4">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  form.handleSubmit();
+                }}
+                noValidate
+                className="space-y-4"
+              >
                 {error && (
                   <Alert variant="destructive">
                     <AlertCircleIcon />
@@ -150,62 +153,107 @@ const RegisterPage: React.FC = () => {
                   {/* Personal Info */}
                   <div className="md:col-span-2">
                     <label className={labelClass}>Gender *</label>
-                    <Select
-                      value={formData.gender}
-                      onValueChange={(v) => v && handleGenderChange(v)}
-                      required
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue aria-label={formData.gender}>
-                          {genderLabel(formData.gender)}
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {genderOptions.map((opt) => (
-                          <SelectItem key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <form.Field name="gender">
+                      {(field) => (
+                        <Select
+                          value={field.state.value}
+                          onValueChange={(val) => field.handleChange(val ?? "")}
+                          required
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue aria-label={field.state.value}>
+                              {genderLabel(field.state.value)}
+                            </SelectValue>
+                          </SelectTrigger>
+                          <SelectContent>
+                            {genderOptions.map((opt) => (
+                              <SelectItem key={opt.value} value={opt.value}>
+                                {opt.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    </form.Field>
                   </div>
+
                   <div>
                     <label htmlFor="firstName" className={labelClass}>
                       First name *
                     </label>
-                    <Input
-                      id="firstName"
-                      name="firstName"
-                      value={formData.firstName}
-                      onChange={handleInputChange}
-                      required
-                    />
+                    <form.Field name="firstName">
+                      {(field) => (
+                        <>
+                          <Input
+                            id="firstName"
+                            name="firstName"
+                            value={field.state.value}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            onBlur={field.handleBlur}
+                            required
+                            aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
+                          />
+                          {(field.state.meta.errors?.length ?? 0) > 0 && (
+                            <span className="text-destructive text-sm">
+                              {formError(field.state.meta.errors?.[0])}
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </form.Field>
                   </div>
+
                   <div>
                     <label htmlFor="lastName" className={labelClass}>
                       Last name *
                     </label>
-                    <Input
-                      id="lastName"
-                      name="lastName"
-                      value={formData.lastName}
-                      onChange={handleInputChange}
-                      required
-                    />
+                    <form.Field name="lastName">
+                      {(field) => (
+                        <>
+                          <Input
+                            id="lastName"
+                            name="lastName"
+                            value={field.state.value}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            onBlur={field.handleBlur}
+                            required
+                            aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
+                          />
+                          {(field.state.meta.errors?.length ?? 0) > 0 && (
+                            <span className="text-destructive text-sm">
+                              {formError(field.state.meta.errors?.[0])}
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </form.Field>
                   </div>
 
                   <div className="md:col-span-2">
                     <label htmlFor="email" className={labelClass}>
                       Email address *
                     </label>
-                    <Input
-                      id="email"
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      required
-                    />
+                    <form.Field name="email">
+                      {(field) => (
+                        <>
+                          <Input
+                            id="email"
+                            type="email"
+                            name="email"
+                            value={field.state.value}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            onBlur={field.handleBlur}
+                            required
+                            aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
+                          />
+                          {(field.state.meta.errors?.length ?? 0) > 0 && (
+                            <span className="text-destructive text-sm">
+                              {formError(field.state.meta.errors?.[0])}
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </form.Field>
                   </div>
 
                   {/* Password Field & Strength Bar */}
@@ -213,24 +261,37 @@ const RegisterPage: React.FC = () => {
                     <label htmlFor="password" className={labelClass}>
                       Password *
                     </label>
-                    <div className="relative">
-                      <Input
-                        id="password"
-                        type={showPassword ? "text" : "password"}
-                        name="password"
-                        value={formData.password}
-                        onChange={handleInputChange}
-                        className="pr-10"
-                        required
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                      >
-                        {showPassword ? <IconEyeOff size={18} /> : <IconEye size={18} />}
-                      </button>
-                    </div>
+                    <form.Field name="password">
+                      {(field) => (
+                        <>
+                          <div className="relative">
+                            <Input
+                              id="password"
+                              type={showPassword ? "text" : "password"}
+                              name="password"
+                              value={field.state.value}
+                              onChange={(e) => field.handleChange(e.target.value)}
+                              onBlur={field.handleBlur}
+                              className="pr-10"
+                              required
+                              aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                            >
+                              {showPassword ? <IconEyeOff size={18} /> : <IconEye size={18} />}
+                            </button>
+                          </div>
+                          {(field.state.meta.errors?.length ?? 0) > 0 && (
+                            <span className="text-destructive text-sm">
+                              {formError(field.state.meta.errors?.[0])}
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </form.Field>
 
                     {/* Visual Strength Indicator */}
                     <div className="mt-2 flex h-1 gap-1">
@@ -254,41 +315,60 @@ const RegisterPage: React.FC = () => {
                     <label htmlFor="confirmPassword" className={labelClass}>
                       Confirm password *
                     </label>
-                    <div className="relative">
-                      <Input
-                        id="confirmPassword"
-                        type={showPassword ? "text" : "password"}
-                        name="confirmPassword"
-                        value={formData.confirmPassword}
-                        onChange={handleInputChange}
-                        required
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                      >
-                        {showPassword ? <IconEyeOff size={18} /> : <IconEye size={18} />}
-                      </button>
-                    </div>
+                    <form.Field name="confirmPassword">
+                      {(field) => (
+                        <>
+                          <div className="relative">
+                            <Input
+                              id="confirmPassword"
+                              type={showConfirmPassword ? "text" : "password"}
+                              name="confirmPassword"
+                              value={field.state.value}
+                              onChange={(e) => field.handleChange(e.target.value)}
+                              onBlur={field.handleBlur}
+                              required
+                              aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                              className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                            >
+                              {showConfirmPassword ? (
+                                <IconEyeOff size={18} />
+                              ) : (
+                                <IconEye size={18} />
+                              )}
+                            </button>
+                          </div>
+                          {(field.state.meta.errors?.length ?? 0) > 0 && (
+                            <span className="text-destructive text-sm">
+                              {formError(field.state.meta.errors?.[0])}
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </form.Field>
                   </div>
                 </div>
 
                 <div className="flex items-center space-x-2 pt-2">
-                  <Checkbox
-                    id="newsletter"
-                    checked={formData.subscribedToNewsletter}
-                    onCheckedChange={(checked) =>
-                      setFormData((p) => ({ ...p, subscribedToNewsletter: !!checked }))
-                    }
-                  />
+                  <form.Field name="subscribedToNewsletter">
+                    {(field) => (
+                      <Checkbox
+                        id="newsletter"
+                        checked={field.state.value ?? false}
+                        onCheckedChange={(checked) => field.handleChange(!!checked)}
+                      />
+                    )}
+                  </form.Field>
                   <label htmlFor="newsletter" className="text-sm font-normal">
                     Subscribe to our newsletter
                   </label>
                 </div>
 
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Creating account..." : "Register"}
+                <Button type="submit" className="w-full" disabled={form.state.isSubmitting}>
+                  {form.state.isSubmitting ? "Creating account..." : "Register"}
                 </Button>
 
                 <p className="text-muted-foreground text-center text-sm">

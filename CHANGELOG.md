@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-03-09
+
+### Added
+
+- `@tanstack/react-form` v1.28.4 and `zod` v3.25.76 as production dependencies (SPEC-REFACTOR-001)
+- `src/schemas/` directory with centralized Zod schemas: `auth.ts`, `address.ts`, `account.ts`, `review.ts`, `index.ts`
+- `formError()` utility in `src/lib/utils.ts` — safely extracts error message from TanStack Form v1 error values (handles both Zod `ZodIssue` objects and plain strings)
+- `noValidate` attribute on all form elements — disables browser-native HTML5 validation in favour of TanStack Form inline errors
+- `aria-invalid` attribute on all validated inputs and `SelectTrigger` components across 10 form pages (accessibility improvement)
+- Form-level pre-fill timing guard (`canInitialize`) on `AddressPage` — waits for async customer/order data before populating form fields
+
+### Changed
+
+- All 10 form pages migrated from raw `useState` to TanStack Form `useForm` + `form.Field` render-prop pattern (SPEC-REFACTOR-001)
+  - Auth pages: `LoginPage`, `RegisterPage`, `ForgotPasswordPage`, `ResetPasswordPage`
+  - Account pages: `ProfilePage`, `ChangePasswordPage`, `AddAddressPage`, `EditAddressPage`
+  - Checkout: `AddressPage`
+  - Product: `AddReviewPage`
+- `AddressForm` refactored to receive TanStack Form field API via render-prop — parent `useForm` instance now controls validation and submission for account address pages
+- `AddressPage` nested address fields (`billingAddress.*`, `shippingAddress.*`) validated via form-level `validators.onSubmit` using `addressSchema.safeParse()` with `{ fields: {} }` error map format
+- `RegisterPage` password strength indicator and show/hide toggles preserved; strength score computed via `useMemo` from `useStore`-subscribed password value
+- Zod schemas replace all hand-written `if` checks, `validateAddress()` function, and `Record<string, string>` form data objects; TypeScript types derived via `z.infer<>` enforce type safety between form values and API payloads
+
+### Removed
+
+- `validateAddress()` ad-hoc validation function (replaced by `addressSchema`)
+- All `useState`-based manual field tracking and error state across migrated pages
+- `@tanstack/zod-form-adapter` runtime dependency (TanStack Form v1 uses native StandardSchema — adapter installed but not used)
+
 ## [0.3.0] - 2026-03-01
 
 ### Added

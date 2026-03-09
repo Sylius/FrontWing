@@ -8,26 +8,29 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { formError } from "@/lib/utils";
+import { addressSchema, AddressValues } from "@/schemas/address";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
+import { useForm } from "@tanstack/react-form";
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Steps from "../../components/checkout/Steps";
 import { useCustomer } from "../../context/CustomerContext";
 import { useOrder } from "../../context/OrderContext";
 import CheckoutLayout from "../../layouts/Checkout";
-import { AddressInterface } from "../../types/Order";
 
 interface Country {
   code: string;
   name: string;
 }
 
-const emptyAddress: AddressInterface = {
+const emptyAddress: AddressValues = {
   firstName: "",
   lastName: "",
   company: "",
   street: "",
   countryCode: "",
+  provinceName: "",
   city: "",
   postcode: "",
   phoneNumber: "",
@@ -40,20 +43,75 @@ const AddressPage: React.FC = () => {
   const { order, fetchOrder } = useOrder();
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState("");
-  const [billingAddress, setBillingAddress] = useState<AddressInterface>(emptyAddress);
-  const [shippingAddress, setShippingAddress] = useState<AddressInterface>(emptyAddress);
-  const [useDifferentShipping, setUseDifferentShipping] = useState(false);
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [addresses, setAddresses] = useState<AddressInterface[]>([]);
+  const [addresses, setAddresses] = useState<(AddressValues & { id?: number })[]>([]);
   const [countries, setCountries] = useState<Country[]>([]);
-  const [billingErrors, setBillingErrors] = useState<Record<string, string>>({});
-  const [shippingErrors, setShippingErrors] = useState<Record<string, string>>({});
-  const [emailError, setEmailError] = useState("");
-  const [submitted, setSubmitted] = useState(false);
 
   const isInitialized = useRef(false);
+
+  const form = useForm({
+    defaultValues: {
+      email: "",
+      billingAddress: emptyAddress,
+      useDifferentShipping: false,
+      shippingAddress: emptyAddress,
+    },
+    validators: {
+      onSubmit: ({ value }) => {
+        const fields: Record<string, string> = {};
+
+        if (!customer && !value.email?.trim()) {
+          fields["email"] = "Email is required";
+        }
+
+        const billingResult = addressSchema.safeParse(value.billingAddress);
+        if (!billingResult.success) {
+          for (const issue of billingResult.error.issues) {
+            const key = issue.path[0];
+            if (key) fields[`billingAddress.${key}`] = issue.message;
+          }
+        }
+
+        if (value.useDifferentShipping) {
+          const shippingResult = addressSchema.safeParse(value.shippingAddress);
+          if (!shippingResult.success) {
+            for (const issue of shippingResult.error.issues) {
+              const key = issue.path[0];
+              if (key) fields[`shippingAddress.${key}`] = issue.message;
+            }
+          }
+        }
+
+        if (Object.keys(fields).length > 0) return { fields };
+        return undefined;
+      },
+    },
+    onSubmit: async ({ value }) => {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_REACT_APP_API_URL}/api/v2/shop/orders/${localStorage.getItem("orderToken")}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: customer?.email ?? value.email,
+              billingAddress: value.billingAddress,
+              shippingAddress: value.useDifferentShipping
+                ? value.shippingAddress
+                : value.billingAddress,
+              couponCode: null,
+            }),
+          }
+        );
+
+        if (!response.ok) throw new Error("Failed to submit order");
+
+        await fetchOrder();
+        navigate("/checkout/select-shipping");
+      } catch (err) {
+        console.error("Order submission error:", err);
+      }
+    },
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -72,32 +130,70 @@ const AddressPage: React.FC = () => {
         const addressData = await addressesRes.json();
         const countryData = await countriesRes.json();
 
-        const addressItems = addressData["hydra:member"] as AddressInterface[];
-        const countryItems = countryData["hydra:member"] as Country[];
+        const addressItems = (addressData["hydra:member"] ?? []) as (AddressValues & {
+          id?: number;
+        })[];
+        const countryItems = (countryData["hydra:member"] ?? []) as Country[];
 
         setAddresses(addressItems);
         setCountries(countryItems);
 
         if (!isInitialized.current) {
+          // Wait until we have enough context to decide (order loaded or customer loaded or guest)
+          const canInitialize = order !== undefined || customer !== null || !token;
+          if (!canInitialize) return;
+
           if (order?.billingAddress) {
-            setBillingAddress(order.billingAddress);
+            const ba = order.billingAddress;
+            form.setFieldValue("billingAddress", {
+              firstName: ba.firstName ?? "",
+              lastName: ba.lastName ?? "",
+              company: ba.company ?? "",
+              street: ba.street ?? "",
+              countryCode: ba.countryCode ?? "",
+              provinceName: ba.provinceName ?? "",
+              city: ba.city ?? "",
+              postcode: ba.postcode ?? "",
+              phoneNumber: ba.phoneNumber ?? "",
+            });
           } else if (token && customer) {
             const defaultAddressId =
               typeof customer.defaultAddress === "string"
                 ? customer.defaultAddress.split("/").pop()
                 : customer.defaultAddress?.["@id"]?.split("/").pop();
 
-            const defaultAddress = addressItems.find(
-              (addr) => String(addr.id) === defaultAddressId
-            );
+            const defaultAddress =
+              addressItems.find((addr) => String(addr.id) === defaultAddressId) ?? addressItems[0];
+
             if (defaultAddress) {
-              setBillingAddress({ ...defaultAddress });
+              form.setFieldValue("billingAddress", {
+                firstName: defaultAddress.firstName ?? "",
+                lastName: defaultAddress.lastName ?? "",
+                company: defaultAddress.company ?? "",
+                street: defaultAddress.street ?? "",
+                countryCode: defaultAddress.countryCode ?? "",
+                provinceName: defaultAddress.provinceName ?? "",
+                city: defaultAddress.city ?? "",
+                postcode: defaultAddress.postcode ?? "",
+                phoneNumber: defaultAddress.phoneNumber ?? "",
+              });
             }
           }
 
           if (order?.shippingAddress) {
-            setUseDifferentShipping(true);
-            setShippingAddress(order.shippingAddress);
+            const sa = order.shippingAddress;
+            form.setFieldValue("useDifferentShipping", true);
+            form.setFieldValue("shippingAddress", {
+              firstName: sa.firstName ?? "",
+              lastName: sa.lastName ?? "",
+              company: sa.company ?? "",
+              street: sa.street ?? "",
+              countryCode: sa.countryCode ?? "",
+              provinceName: sa.provinceName ?? "",
+              city: sa.city ?? "",
+              postcode: sa.postcode ?? "",
+              phoneNumber: sa.phoneNumber ?? "",
+            });
           }
 
           isInitialized.current = true;
@@ -108,95 +204,34 @@ const AddressPage: React.FC = () => {
     };
 
     fetchData();
-  }, [customer, order]);
+  }, [customer, order, form]);
 
-  const handleChange =
-    (setter: React.Dispatch<React.SetStateAction<AddressInterface>>) =>
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const { name, value } = e.target;
-      setter((prev) => ({ ...prev, [name]: value }));
-    };
-
-  const handleAddressSelect =
-    (setter: React.Dispatch<React.SetStateAction<AddressInterface>>) => (selectedId: string) => {
+  const handleAddressBookSelect =
+    (prefix: "billingAddress" | "shippingAddress") => (selectedId: string) => {
       const selected = addresses.find((addr) => String(addr.id) === selectedId);
       if (selected) {
-        setter({ ...selected });
+        form.setFieldValue(prefix, {
+          firstName: selected.firstName ?? "",
+          lastName: selected.lastName ?? "",
+          company: selected.company ?? "",
+          street: selected.street ?? "",
+          countryCode: selected.countryCode ?? "",
+          provinceName: selected.provinceName ?? "",
+          city: selected.city ?? "",
+          postcode: selected.postcode ?? "",
+          phoneNumber: selected.phoneNumber ?? "",
+        });
       }
     };
 
-  const handleCountryChange =
-    (setter: React.Dispatch<React.SetStateAction<AddressInterface>>) => (value: string) => {
-      setter((prev) => ({ ...prev, countryCode: value }));
-    };
-
-  const validateAddress = (address: AddressInterface): Record<string, string> => {
-    const e: Record<string, string> = {};
-    if (!address.firstName?.trim()) e.firstName = "Required";
-    if (!address.lastName?.trim()) e.lastName = "Required";
-    if (!address.street?.trim()) e.street = "Required";
-    if (!address.city?.trim()) e.city = "Required";
-    if (!address.postcode?.trim()) e.postcode = "Required";
-    if (!address.countryCode?.trim()) e.countryCode = "Required";
-    return e;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitted(true);
-
-    const bErrors = validateAddress(billingAddress);
-    const sErrors = useDifferentShipping ? validateAddress(shippingAddress) : {};
-    const eError = !customer && !email.trim() ? "Required" : "";
-
-    setBillingErrors(bErrors);
-    setShippingErrors(sErrors);
-    setEmailError(eError);
-
-    if (Object.keys(bErrors).length > 0 || Object.keys(sErrors).length > 0 || eError) {
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_REACT_APP_API_URL}/api/v2/shop/orders/${localStorage.getItem("orderToken")}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: customer?.email ?? email,
-            billingAddress,
-            shippingAddress: useDifferentShipping ? shippingAddress : billingAddress,
-            couponCode: null,
-          }),
-        }
-      );
-
-      if (!response.ok) throw new Error("Failed to submit order");
-
-      await fetchOrder();
-      navigate("/checkout/select-shipping");
-    } catch (err) {
-      console.error("Order submission error:", err);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const renderAddressForm = (
-    address: AddressInterface,
-    setAddress: React.Dispatch<React.SetStateAction<AddressInterface>>,
-    errors: Record<string, string>
-  ) => (
+  const renderAddressFields = (prefix: "billingAddress" | "shippingAddress") => (
     <>
       {addresses.length > 0 && (
         <div className="mb-3">
           <label className={labelClass}>Select address from my book</label>
           <Select
             onValueChange={(v) => {
-              if (typeof v === "string") handleAddressSelect(setAddress)(v);
+              if (typeof v === "string") handleAddressBookSelect(prefix)(v);
             }}
           >
             <SelectTrigger>
@@ -225,16 +260,24 @@ const AddressPage: React.FC = () => {
           >
             First name
           </label>
-          <Input
-            name="firstName"
-            required
-            value={address.firstName}
-            onChange={handleChange(setAddress)}
-            aria-invalid={(submitted && !!errors.firstName) || undefined}
-          />
-          {submitted && errors.firstName && (
-            <p className="text-destructive mt-1 text-sm">{errors.firstName}</p>
-          )}
+          <form.Field name={`${prefix}.firstName`}>
+            {(field) => (
+              <>
+                <Input
+                  required
+                  value={field.state.value}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  onBlur={field.handleBlur}
+                  aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
+                />
+                {(field.state.meta.errors?.length ?? 0) > 0 && (
+                  <p className="text-destructive mt-1 text-sm">
+                    {formError(field.state.meta.errors?.[0])}
+                  </p>
+                )}
+              </>
+            )}
+          </form.Field>
         </div>
         <div className="mb-3 w-full px-3 md:w-1/2">
           <label
@@ -242,98 +285,158 @@ const AddressPage: React.FC = () => {
           >
             Last name
           </label>
-          <Input
-            name="lastName"
-            required
-            value={address.lastName}
-            onChange={handleChange(setAddress)}
-            aria-invalid={(submitted && !!errors.lastName) || undefined}
-          />
-          {submitted && errors.lastName && (
-            <p className="text-destructive mt-1 text-sm">{errors.lastName}</p>
-          )}
+          <form.Field name={`${prefix}.lastName`}>
+            {(field) => (
+              <>
+                <Input
+                  required
+                  value={field.state.value}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  onBlur={field.handleBlur}
+                  aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
+                />
+                {(field.state.meta.errors?.length ?? 0) > 0 && (
+                  <p className="text-destructive mt-1 text-sm">
+                    {formError(field.state.meta.errors?.[0])}
+                  </p>
+                )}
+              </>
+            )}
+          </form.Field>
         </div>
       </div>
 
       <div className="mb-3">
         <label className={labelClass}>Company</label>
-        <Input name="company" value={address.company} onChange={handleChange(setAddress)} />
+        <form.Field name={`${prefix}.company`}>
+          {(field) => (
+            <Input
+              value={field.state.value ?? ""}
+              onChange={(e) => field.handleChange(e.target.value)}
+              onBlur={field.handleBlur}
+            />
+          )}
+        </form.Field>
       </div>
 
       <div className="mb-3">
         <label className={`${labelClass} after:text-destructive after:ml-0.5 after:content-['*']`}>
           Street address
         </label>
-        <Input
-          name="street"
-          required
-          value={address.street}
-          onChange={handleChange(setAddress)}
-          aria-invalid={(submitted && !!errors.street) || undefined}
-        />
-        {submitted && errors.street && (
-          <p className="text-destructive mt-1 text-sm">{errors.street}</p>
-        )}
+        <form.Field name={`${prefix}.street`}>
+          {(field) => (
+            <>
+              <Input
+                required
+                value={field.state.value}
+                onChange={(e) => field.handleChange(e.target.value)}
+                onBlur={field.handleBlur}
+                aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
+              />
+              {(field.state.meta.errors?.length ?? 0) > 0 && (
+                <p className="text-destructive mt-1 text-sm">
+                  {formError(field.state.meta.errors?.[0])}
+                </p>
+              )}
+            </>
+          )}
+        </form.Field>
       </div>
 
       <div className="mb-3">
         <label className={`${labelClass} after:text-destructive after:ml-0.5 after:content-['*']`}>
           Country
         </label>
-        <Select
-          value={address.countryCode}
-          onValueChange={(v) => v && handleCountryChange(setAddress)(v)}
-          required
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select" />
-          </SelectTrigger>
-          <SelectContent>
-            {countries.map((country) => (
-              <SelectItem key={country.code} value={country.code}>
-                {country.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {submitted && errors.countryCode && (
-          <p className="text-destructive mt-1 text-sm">{errors.countryCode}</p>
-        )}
+        <form.Field name={`${prefix}.countryCode`}>
+          {(field) => (
+            <>
+              <Select
+                value={field.state.value}
+                onValueChange={(val) => field.handleChange(val ?? "")}
+                required
+              >
+                <SelectTrigger
+                  aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
+                >
+                  <SelectValue placeholder="Select" />
+                </SelectTrigger>
+                <SelectContent>
+                  {countries.map((country) => (
+                    <SelectItem key={country.code} value={country.code}>
+                      {country.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {(field.state.meta.errors?.length ?? 0) > 0 && (
+                <p className="text-destructive mt-1 text-sm">
+                  {formError(field.state.meta.errors?.[0])}
+                </p>
+              )}
+            </>
+          )}
+        </form.Field>
       </div>
 
       <div className="mb-3">
         <label className={`${labelClass} after:text-destructive after:ml-0.5 after:content-['*']`}>
           City
         </label>
-        <Input
-          name="city"
-          required
-          value={address.city}
-          onChange={handleChange(setAddress)}
-          aria-invalid={(submitted && !!errors.city) || undefined}
-        />
-        {submitted && errors.city && <p className="text-destructive mt-1 text-sm">{errors.city}</p>}
+        <form.Field name={`${prefix}.city`}>
+          {(field) => (
+            <>
+              <Input
+                required
+                value={field.state.value}
+                onChange={(e) => field.handleChange(e.target.value)}
+                onBlur={field.handleBlur}
+                aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
+              />
+              {(field.state.meta.errors?.length ?? 0) > 0 && (
+                <p className="text-destructive mt-1 text-sm">
+                  {formError(field.state.meta.errors?.[0])}
+                </p>
+              )}
+            </>
+          )}
+        </form.Field>
       </div>
 
       <div className="mb-3">
         <label className={`${labelClass} after:text-destructive after:ml-0.5 after:content-['*']`}>
           Postcode
         </label>
-        <Input
-          name="postcode"
-          required
-          value={address.postcode}
-          onChange={handleChange(setAddress)}
-          aria-invalid={(submitted && !!errors.postcode) || undefined}
-        />
-        {submitted && errors.postcode && (
-          <p className="text-destructive mt-1 text-sm">{errors.postcode}</p>
-        )}
+        <form.Field name={`${prefix}.postcode`}>
+          {(field) => (
+            <>
+              <Input
+                required
+                value={field.state.value}
+                onChange={(e) => field.handleChange(e.target.value)}
+                onBlur={field.handleBlur}
+                aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
+              />
+              {(field.state.meta.errors?.length ?? 0) > 0 && (
+                <p className="text-destructive mt-1 text-sm">
+                  {formError(field.state.meta.errors?.[0])}
+                </p>
+              )}
+            </>
+          )}
+        </form.Field>
       </div>
 
       <div className="mb-4">
         <label className={labelClass}>Phone number</label>
-        <Input name="phoneNumber" value={address.phoneNumber} onChange={handleChange(setAddress)} />
+        <form.Field name={`${prefix}.phoneNumber`}>
+          {(field) => (
+            <Input
+              value={field.state.value ?? ""}
+              onChange={(e) => field.handleChange(e.target.value)}
+              onBlur={field.handleBlur}
+            />
+          )}
+        </form.Field>
       </div>
     </>
   );
@@ -342,7 +445,14 @@ const AddressPage: React.FC = () => {
     <CheckoutLayout>
       <div className="flex-1 pt-4 pb-5 lg:pr-20">
         <Steps activeStep="address" />
-        <form onSubmit={handleSubmit}>
+        <form
+          noValidate
+          onSubmit={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            form.handleSubmit();
+          }}
+        >
           <div className="mb-4 text-2xl font-bold">Address</div>
 
           {!customer && (
@@ -352,59 +462,83 @@ const AddressPage: React.FC = () => {
               >
                 Email
               </label>
-              <Input
-                type="email"
-                name="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                aria-invalid={(submitted && !!emailError) || undefined}
-              />
-              {submitted && emailError && (
-                <p className="text-destructive mt-1 text-sm">{emailError}</p>
-              )}
+              <form.Field name="email">
+                {(field) => (
+                  <>
+                    <Input
+                      type="email"
+                      required
+                      value={field.state.value ?? ""}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      onBlur={field.handleBlur}
+                      aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
+                    />
+                    {(field.state.meta.errors?.length ?? 0) > 0 && (
+                      <p className="text-destructive mt-1 text-sm">
+                        {formError(field.state.meta.errors?.[0])}
+                      </p>
+                    )}
+                  </>
+                )}
+              </form.Field>
             </div>
           )}
 
           <div className="mb-4">
             <div className="mb-4 text-xl font-semibold">Billing address</div>
-            {renderAddressForm(billingAddress, setBillingAddress, billingErrors)}
+            {renderAddressFields("billingAddress")}
           </div>
 
-          <div className="mb-4 flex items-center gap-2">
-            <Checkbox
-              id="differentShipping"
-              checked={useDifferentShipping}
-              onCheckedChange={(checked) => {
-                const next = checked === true;
-                setUseDifferentShipping(next);
-                if (next && !shippingAddress.firstName) {
-                  setShippingAddress({ ...billingAddress });
-                }
-              }}
-            />
-            <label className="text-sm" htmlFor="differentShipping">
-              Use different address for shipping?
-            </label>
-          </div>
+          <form.Field name="useDifferentShipping">
+            {(field) => (
+              <div className="mb-4 flex items-center gap-2">
+                <Checkbox
+                  id="differentShipping"
+                  checked={field.state.value ?? false}
+                  onCheckedChange={(checked) => {
+                    const next = checked === true;
+                    field.handleChange(next);
+                    if (next) {
+                      const billing = form.getFieldValue("billingAddress");
+                      const shipping = form.getFieldValue("shippingAddress");
+                      if (!shipping?.firstName) {
+                        form.setFieldValue("shippingAddress", { ...billing });
+                      }
+                    }
+                  }}
+                />
+                <label className="text-sm" htmlFor="differentShipping">
+                  Use different address for shipping?
+                </label>
+              </div>
+            )}
+          </form.Field>
 
-          {useDifferentShipping && (
-            <div className="mb-4">
-              <div className="mb-4 text-xl font-semibold">Shipping address</div>
-              {renderAddressForm(shippingAddress, setShippingAddress, shippingErrors)}
-            </div>
-          )}
+          <form.Subscribe selector={(state) => state.values.useDifferentShipping}>
+            {(useDifferentShipping) =>
+              useDifferentShipping ? (
+                <div className="mb-4">
+                  <div className="mb-4 text-xl font-semibold">Shipping address</div>
+                  {renderAddressFields("shippingAddress")}
+                </div>
+              ) : null
+            }
+          </form.Subscribe>
 
-          <div className="flex flex-col justify-between gap-2 sm:flex-row">
-            <Button variant="outline" render={<Link to="/" />}>
-              <IconChevronLeft stroke={2} />
-              Back to store
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              Next
-              <IconChevronRight stroke={2} />
-            </Button>
-          </div>
+          <form.Subscribe selector={(state) => state.isSubmitting}>
+            {(isSubmitting) => (
+              <div className="flex flex-col justify-between gap-2 sm:flex-row">
+                <Button variant="outline" nativeButton={false} render={<Link to="/" />}>
+                  <IconChevronLeft stroke={2} />
+                  Back to store
+                </Button>
+                <Button type="submit" disabled={isSubmitting}>
+                  Next
+                  <IconChevronRight stroke={2} />
+                </Button>
+              </div>
+            )}
+          </form.Subscribe>
         </form>
       </div>
     </CheckoutLayout>
