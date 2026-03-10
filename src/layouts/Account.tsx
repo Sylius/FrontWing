@@ -30,28 +30,28 @@ const AccountLayout: React.FC<AccountLayoutProps> = ({ children, breadcrumbs }) 
                 Dashboard
               </Link>
 
-              <a className="link-reset flex items-center gap-2 py-1" href="/account/profile/edit">
+              <Link className="link-reset flex items-center gap-2 py-1" to="/account/profile/edit">
                 <IconUser stroke={1.25} size={28} />
                 Personal information
-              </a>
+              </Link>
 
-              <a
+              <Link
                 className="link-reset flex items-center gap-2 py-1"
-                href="/account/change-password"
+                to="/account/change-password"
               >
                 <IconLock stroke={1.25} size={28} />
                 Change password
-              </a>
+              </Link>
 
-              <a className="link-reset flex items-center gap-2 py-1" href="/account/address-book/">
+              <Link className="link-reset flex items-center gap-2 py-1" to="/account/address-book">
                 <IconBook stroke={1.25} size={28} />
                 Address book
-              </a>
+              </Link>
 
-              <a className="link-reset flex items-center gap-2 py-1" href="/account/order-history">
+              <Link className="link-reset flex items-center gap-2 py-1" to="/account/order-history">
                 <IconShoppingCart stroke={1.25} size={28} />
                 Order history
-              </a>
+              </Link>
             </div>
           </div>
         </div>
