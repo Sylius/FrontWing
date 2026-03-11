@@ -1,12 +1,12 @@
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { FieldError } from "@/components/ui/field-error";
 import { Input } from "@/components/ui/input";
 import { loginSchema } from "@/schemas/auth";
-import { formError } from "@/lib/utils";
+import { applyServerErrors, submitForm } from "@/lib/utils";
 import { useForm } from "@tanstack/react-form";
 import { IconEye, IconEyeOff, IconLockOpen } from "@tabler/icons-react";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCustomer } from "../context/CustomerContext";
 import Default from "../layouts/Default";
@@ -15,9 +15,9 @@ const labelClass = "block text-sm font-medium mb-1";
 
 const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { refetchCustomer } = useCustomer();
+  const formRef = useRef<HTMLFormElement>(null);
 
   // Handle visibility toggle
   const togglePasswordVisibility = useCallback(() => {
@@ -32,7 +32,6 @@ const LoginPage: React.FC = () => {
     },
     validators: { onSubmit: loginSchema },
     onSubmit: async ({ value }) => {
-      setError(null);
       try {
         const response = await fetch(
           `${import.meta.env.VITE_REACT_APP_API_URL}/api/v2/shop/customers/token`,
@@ -63,11 +62,8 @@ const LoginPage: React.FC = () => {
 
         navigate("/account/dashboard", { replace: true });
       } catch (err) {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError("Unexpected error occurred");
-        }
+        const message = err instanceof Error ? err.message : "Unexpected error occurred";
+        applyServerErrors(form, { email: message });
       }
     },
   });
@@ -80,27 +76,25 @@ const LoginPage: React.FC = () => {
             <div className="w-full max-w-md py-8 lg:py-20">
               <h1 className="mb-5 text-2xl font-bold">Login</h1>
               <form
+                ref={formRef}
                 onSubmit={(e) => {
                   e.preventDefault();
-                  form.handleSubmit();
+                  void submitForm(form, formRef.current);
                 }}
                 noValidate
               >
-                {error && (
-                  <Alert variant="destructive" className="mb-4">
-                    <AlertDescription>
-                      <div className="font-bold">Error</div>
-                      {error}
-                    </AlertDescription>
-                  </Alert>
-                )}
-
                 <div className="mb-5">
                   <div className="mb-3">
                     <label htmlFor="_username" className={labelClass}>
                       Username / Email
                     </label>
-                    <form.Field name="email">
+                    <form.Field
+                      name="email"
+                      validators={{
+                        onSubmit: loginSchema.shape.email,
+                        onBlur: loginSchema.shape.email,
+                      }}
+                    >
                       {(field) => (
                         <>
                           <Input
@@ -111,13 +105,15 @@ const LoginPage: React.FC = () => {
                             required
                             onChange={(e) => field.handleChange(e.target.value)}
                             onBlur={field.handleBlur}
+                            aria-describedby="email-error"
                             aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
                           />
-                          {(field.state.meta.errors?.length ?? 0) > 0 && (
-                            <span className="text-destructive text-sm">
-                              {formError(field.state.meta.errors?.[0])}
-                            </span>
-                          )}
+                          <FieldError
+                            id="email-error"
+                            errors={field.state.meta.errors}
+                            isTouched={field.state.meta.isTouched}
+                            isSubmitted={form.state.isSubmitted}
+                          />
                         </>
                       )}
                     </form.Field>
@@ -127,7 +123,13 @@ const LoginPage: React.FC = () => {
                     <label htmlFor="_password" className={labelClass}>
                       Password
                     </label>
-                    <form.Field name="password">
+                    <form.Field
+                      name="password"
+                      validators={{
+                        onSubmit: loginSchema.shape.password,
+                        onBlur: loginSchema.shape.password,
+                      }}
+                    >
                       {(field) => (
                         <>
                           <div className="relative">
@@ -140,6 +142,7 @@ const LoginPage: React.FC = () => {
                               onChange={(e) => field.handleChange(e.target.value)}
                               onBlur={field.handleBlur}
                               className="pr-10"
+                              aria-describedby="password-error"
                               aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
                             />
                             <button
@@ -155,11 +158,12 @@ const LoginPage: React.FC = () => {
                               )}
                             </button>
                           </div>
-                          {(field.state.meta.errors?.length ?? 0) > 0 && (
-                            <span className="text-destructive text-sm">
-                              {formError(field.state.meta.errors?.[0])}
-                            </span>
-                          )}
+                          <FieldError
+                            id="password-error"
+                            errors={field.state.meta.errors}
+                            isTouched={field.state.meta.isTouched}
+                            isSubmitted={form.state.isSubmitted}
+                          />
                         </>
                       )}
                     </form.Field>

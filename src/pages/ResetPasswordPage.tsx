@@ -1,10 +1,12 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { resetPasswordSchema } from "@/schemas/auth";
-import { formError } from "@/lib/utils";
+import { resetPasswordSchema, passwordComplexity } from "@/schemas/auth";
+import { FieldError } from "@/components/ui/field-error";
+import { submitForm } from "@/lib/utils";
+import { z } from "zod";
 import { useForm } from "@tanstack/react-form";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import Default from "../layouts/Default";
@@ -15,6 +17,7 @@ const ResetPasswordPage: React.FC = () => {
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   const form = useForm({
     defaultValues: {
@@ -60,9 +63,10 @@ const ResetPasswordPage: React.FC = () => {
         <div className="mx-auto my-8 w-full max-w-md">
           <h1 className="mb-5 text-2xl font-bold">Reset your password</h1>
           <form
+            ref={formRef}
             onSubmit={(e) => {
               e.preventDefault();
-              form.handleSubmit();
+              void submitForm(form, formRef.current);
             }}
             noValidate
           >
@@ -76,7 +80,10 @@ const ResetPasswordPage: React.FC = () => {
               <label htmlFor="newPassword" className={labelClass}>
                 New password
               </label>
-              <form.Field name="newPassword">
+              <form.Field
+                name="newPassword"
+                validators={{ onSubmit: passwordComplexity, onBlur: passwordComplexity }}
+              >
                 {(field) => (
                   <>
                     <Input
@@ -87,13 +94,15 @@ const ResetPasswordPage: React.FC = () => {
                       value={field.state.value}
                       onChange={(e) => field.handleChange(e.target.value)}
                       onBlur={field.handleBlur}
+                      aria-describedby="newPassword-error"
                       aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
                     />
-                    {(field.state.meta.errors?.length ?? 0) > 0 && (
-                      <span className="text-destructive text-sm">
-                        {formError(field.state.meta.errors?.[0])}
-                      </span>
-                    )}
+                    <FieldError
+                      id="newPassword-error"
+                      errors={field.state.meta.errors}
+                      isTouched={field.state.meta.isTouched}
+                      isSubmitted={form.state.isSubmitted}
+                    />
                   </>
                 )}
               </form.Field>
@@ -103,7 +112,13 @@ const ResetPasswordPage: React.FC = () => {
               <label htmlFor="confirmNewPassword" className={labelClass}>
                 Confirm new password
               </label>
-              <form.Field name="confirmNewPassword">
+              <form.Field
+                name="confirmNewPassword"
+                validators={{
+                  onSubmit: z.string().min(1, "Please confirm your password"),
+                  onBlur: z.string().min(1, "Please confirm your password"),
+                }}
+              >
                 {(field) => (
                   <>
                     <Input
@@ -114,13 +129,15 @@ const ResetPasswordPage: React.FC = () => {
                       value={field.state.value}
                       onChange={(e) => field.handleChange(e.target.value)}
                       onBlur={field.handleBlur}
+                      aria-describedby="confirmNewPassword-error"
                       aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
                     />
-                    {(field.state.meta.errors?.length ?? 0) > 0 && (
-                      <span className="text-destructive text-sm">
-                        {formError(field.state.meta.errors?.[0])}
-                      </span>
-                    )}
+                    <FieldError
+                      id="confirmNewPassword-error"
+                      errors={field.state.meta.errors}
+                      isTouched={field.state.meta.isTouched}
+                      isSubmitted={form.state.isSubmitted}
+                    />
                   </>
                 )}
               </form.Field>

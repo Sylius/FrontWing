@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { IconStar } from "@tabler/icons-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Skeleton from "react-loading-skeleton";
 import { useNavigate, useParams } from "react-router-dom";
 import Breadcrumbs from "../../components/Breadcrumbs";
@@ -12,7 +12,8 @@ import Layout from "../../layouts/Default";
 import { Product } from "../../types/Product";
 import { useForm } from "@tanstack/react-form";
 import { reviewSchema } from "@/schemas/review";
-import { formError } from "@/lib/utils";
+import { FieldError } from "@/components/ui/field-error";
+import { submitForm } from "@/lib/utils";
 
 const API_URL = import.meta.env.VITE_REACT_APP_API_URL;
 
@@ -22,6 +23,7 @@ const AddReviewPage: React.FC = () => {
   const { code } = useParams<{ code: string }>();
   const navigate = useNavigate();
   const { addMessage } = useFlashMessages();
+  const formRef = useRef<HTMLFormElement>(null);
 
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -131,21 +133,33 @@ const AddReviewPage: React.FC = () => {
           <div className="w-full px-4 md:w-7/12 lg:w-8/12">
             <h1>Add Your Review</h1>
             <form
+              ref={formRef}
               noValidate
               onSubmit={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                form.handleSubmit();
+                void submitForm(form, formRef.current);
               }}
             >
               <div className="mb-3">
                 <label className={labelClass}>
                   Rating <span className="text-destructive">*</span>
                 </label>
-                <form.Field name="rating">
+                <form.Field
+                  name="rating"
+                  validators={{
+                    onSubmit: reviewSchema.shape.rating,
+                    onBlur: reviewSchema.shape.rating,
+                  }}
+                >
                   {(field) => (
                     <>
-                      <div className="flex gap-1" role="radiogroup" aria-label="Rating">
+                      <div
+                        className="flex gap-1"
+                        role="radiogroup"
+                        aria-label="Rating"
+                        aria-describedby="rating-error"
+                      >
                         {[1, 2, 3, 4, 5].map((value) => (
                           <Button
                             type="button"
@@ -164,11 +178,12 @@ const AddReviewPage: React.FC = () => {
                           </Button>
                         ))}
                       </div>
-                      {(field.state.meta.errors?.length ?? 0) > 0 && (
-                        <p className="text-destructive mt-1 text-sm">
-                          {formError(field.state.meta.errors?.[0])}
-                        </p>
-                      )}
+                      <FieldError
+                        id="rating-error"
+                        errors={field.state.meta.errors}
+                        isTouched={field.state.meta.isTouched}
+                        isSubmitted={form.state.isSubmitted}
+                      />
                     </>
                   )}
                 </form.Field>
@@ -178,7 +193,13 @@ const AddReviewPage: React.FC = () => {
                 <label className={labelClass}>
                   Title <span className="text-destructive">*</span>
                 </label>
-                <form.Field name="title">
+                <form.Field
+                  name="title"
+                  validators={{
+                    onSubmit: reviewSchema.shape.title,
+                    onBlur: reviewSchema.shape.title,
+                  }}
+                >
                   {(field) => (
                     <>
                       <Input
@@ -187,13 +208,15 @@ const AddReviewPage: React.FC = () => {
                         onChange={(e) => field.handleChange(e.target.value)}
                         onBlur={field.handleBlur}
                         required
+                        aria-describedby="title-error"
                         aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
                       />
-                      {(field.state.meta.errors?.length ?? 0) > 0 && (
-                        <p className="text-destructive mt-1 text-sm">
-                          {formError(field.state.meta.errors?.[0])}
-                        </p>
-                      )}
+                      <FieldError
+                        id="title-error"
+                        errors={field.state.meta.errors}
+                        isTouched={field.state.meta.isTouched}
+                        isSubmitted={form.state.isSubmitted}
+                      />
                     </>
                   )}
                 </form.Field>
@@ -203,7 +226,13 @@ const AddReviewPage: React.FC = () => {
                 <label className={labelClass}>
                   Comment <span className="text-destructive">*</span>
                 </label>
-                <form.Field name="comment">
+                <form.Field
+                  name="comment"
+                  validators={{
+                    onSubmit: reviewSchema.shape.comment,
+                    onBlur: reviewSchema.shape.comment,
+                  }}
+                >
                   {(field) => (
                     <>
                       <Textarea
@@ -212,13 +241,15 @@ const AddReviewPage: React.FC = () => {
                         onChange={(e) => field.handleChange(e.target.value)}
                         onBlur={field.handleBlur}
                         required
+                        aria-describedby="comment-error"
                         aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
                       />
-                      {(field.state.meta.errors?.length ?? 0) > 0 && (
-                        <p className="text-destructive mt-1 text-sm">
-                          {formError(field.state.meta.errors?.[0])}
-                        </p>
-                      )}
+                      <FieldError
+                        id="comment-error"
+                        errors={field.state.meta.errors}
+                        isTouched={field.state.meta.isTouched}
+                        isSubmitted={form.state.isSubmitted}
+                      />
                     </>
                   )}
                 </form.Field>
@@ -228,7 +259,13 @@ const AddReviewPage: React.FC = () => {
                 <label className={labelClass}>
                   Email <span className="text-destructive">*</span>
                 </label>
-                <form.Field name="email">
+                <form.Field
+                  name="email"
+                  validators={{
+                    onSubmit: reviewSchema.shape.email,
+                    onBlur: reviewSchema.shape.email,
+                  }}
+                >
                   {(field) => (
                     <>
                       <Input
@@ -237,13 +274,15 @@ const AddReviewPage: React.FC = () => {
                         onChange={(e) => field.handleChange(e.target.value)}
                         onBlur={field.handleBlur}
                         required
+                        aria-describedby="email-error"
                         aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
                       />
-                      {(field.state.meta.errors?.length ?? 0) > 0 && (
-                        <p className="text-destructive mt-1 text-sm">
-                          {formError(field.state.meta.errors?.[0])}
-                        </p>
-                      )}
+                      <FieldError
+                        id="email-error"
+                        errors={field.state.meta.errors}
+                        isTouched={field.state.meta.isTouched}
+                        isSubmitted={form.state.isSubmitted}
+                      />
                     </>
                   )}
                 </form.Field>

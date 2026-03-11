@@ -8,8 +8,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { formError } from "@/lib/utils";
 import { addressSchema, AddressValues } from "@/schemas/address";
+import { FieldError } from "@/components/ui/field-error";
+import { submitForm } from "@/lib/utils";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import { useForm } from "@tanstack/react-form";
 import React, { useEffect, useRef, useState } from "react";
@@ -42,6 +43,7 @@ const AddressPage: React.FC = () => {
   const { customer } = useCustomer();
   const { order, fetchOrder } = useOrder();
   const navigate = useNavigate();
+  const formRef = useRef<HTMLFormElement>(null);
 
   const [addresses, setAddresses] = useState<(AddressValues & { id?: number })[]>([]);
   const [countries, setCountries] = useState<Country[]>([]);
@@ -260,7 +262,13 @@ const AddressPage: React.FC = () => {
           >
             First name
           </label>
-          <form.Field name={`${prefix}.firstName`}>
+          <form.Field
+            name={`${prefix}.firstName`}
+            validators={{
+              onBlur: addressSchema.shape.firstName,
+              onSubmit: addressSchema.shape.firstName,
+            }}
+          >
             {(field) => (
               <>
                 <Input
@@ -268,13 +276,15 @@ const AddressPage: React.FC = () => {
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
+                  aria-describedby={`${prefix}-firstName-error`}
                   aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
                 />
-                {(field.state.meta.errors?.length ?? 0) > 0 && (
-                  <p className="text-destructive mt-1 text-sm">
-                    {formError(field.state.meta.errors?.[0])}
-                  </p>
-                )}
+                <FieldError
+                  id={`${prefix}-firstName-error`}
+                  errors={field.state.meta.errors}
+                  isTouched={field.state.meta.isTouched}
+                  isSubmitted={form.state.isSubmitted}
+                />
               </>
             )}
           </form.Field>
@@ -285,7 +295,13 @@ const AddressPage: React.FC = () => {
           >
             Last name
           </label>
-          <form.Field name={`${prefix}.lastName`}>
+          <form.Field
+            name={`${prefix}.lastName`}
+            validators={{
+              onBlur: addressSchema.shape.lastName,
+              onSubmit: addressSchema.shape.lastName,
+            }}
+          >
             {(field) => (
               <>
                 <Input
@@ -293,13 +309,15 @@ const AddressPage: React.FC = () => {
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
+                  aria-describedby={`${prefix}-lastName-error`}
                   aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
                 />
-                {(field.state.meta.errors?.length ?? 0) > 0 && (
-                  <p className="text-destructive mt-1 text-sm">
-                    {formError(field.state.meta.errors?.[0])}
-                  </p>
-                )}
+                <FieldError
+                  id={`${prefix}-lastName-error`}
+                  errors={field.state.meta.errors}
+                  isTouched={field.state.meta.isTouched}
+                  isSubmitted={form.state.isSubmitted}
+                />
               </>
             )}
           </form.Field>
@@ -323,7 +341,10 @@ const AddressPage: React.FC = () => {
         <label className={`${labelClass} after:text-destructive after:ml-0.5 after:content-['*']`}>
           Street address
         </label>
-        <form.Field name={`${prefix}.street`}>
+        <form.Field
+          name={`${prefix}.street`}
+          validators={{ onBlur: addressSchema.shape.street, onSubmit: addressSchema.shape.street }}
+        >
           {(field) => (
             <>
               <Input
@@ -331,13 +352,15 @@ const AddressPage: React.FC = () => {
                 value={field.state.value}
                 onChange={(e) => field.handleChange(e.target.value)}
                 onBlur={field.handleBlur}
+                aria-describedby={`${prefix}-street-error`}
                 aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
               />
-              {(field.state.meta.errors?.length ?? 0) > 0 && (
-                <p className="text-destructive mt-1 text-sm">
-                  {formError(field.state.meta.errors?.[0])}
-                </p>
-              )}
+              <FieldError
+                id={`${prefix}-street-error`}
+                errors={field.state.meta.errors}
+                isTouched={field.state.meta.isTouched}
+                isSubmitted={form.state.isSubmitted}
+              />
             </>
           )}
         </form.Field>
@@ -347,7 +370,13 @@ const AddressPage: React.FC = () => {
         <label className={`${labelClass} after:text-destructive after:ml-0.5 after:content-['*']`}>
           Country
         </label>
-        <form.Field name={`${prefix}.countryCode`}>
+        <form.Field
+          name={`${prefix}.countryCode`}
+          validators={{
+            onBlur: addressSchema.shape.countryCode,
+            onSubmit: addressSchema.shape.countryCode,
+          }}
+        >
           {(field) => (
             <>
               <Select
@@ -356,6 +385,7 @@ const AddressPage: React.FC = () => {
                 required
               >
                 <SelectTrigger
+                  aria-describedby={`${prefix}-countryCode-error`}
                   aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
                 >
                   <SelectValue placeholder="Select" />
@@ -368,11 +398,12 @@ const AddressPage: React.FC = () => {
                   ))}
                 </SelectContent>
               </Select>
-              {(field.state.meta.errors?.length ?? 0) > 0 && (
-                <p className="text-destructive mt-1 text-sm">
-                  {formError(field.state.meta.errors?.[0])}
-                </p>
-              )}
+              <FieldError
+                id={`${prefix}-countryCode-error`}
+                errors={field.state.meta.errors}
+                isTouched={field.state.meta.isTouched}
+                isSubmitted={form.state.isSubmitted}
+              />
             </>
           )}
         </form.Field>
@@ -382,7 +413,10 @@ const AddressPage: React.FC = () => {
         <label className={`${labelClass} after:text-destructive after:ml-0.5 after:content-['*']`}>
           City
         </label>
-        <form.Field name={`${prefix}.city`}>
+        <form.Field
+          name={`${prefix}.city`}
+          validators={{ onBlur: addressSchema.shape.city, onSubmit: addressSchema.shape.city }}
+        >
           {(field) => (
             <>
               <Input
@@ -390,13 +424,15 @@ const AddressPage: React.FC = () => {
                 value={field.state.value}
                 onChange={(e) => field.handleChange(e.target.value)}
                 onBlur={field.handleBlur}
+                aria-describedby={`${prefix}-city-error`}
                 aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
               />
-              {(field.state.meta.errors?.length ?? 0) > 0 && (
-                <p className="text-destructive mt-1 text-sm">
-                  {formError(field.state.meta.errors?.[0])}
-                </p>
-              )}
+              <FieldError
+                id={`${prefix}-city-error`}
+                errors={field.state.meta.errors}
+                isTouched={field.state.meta.isTouched}
+                isSubmitted={form.state.isSubmitted}
+              />
             </>
           )}
         </form.Field>
@@ -406,7 +442,13 @@ const AddressPage: React.FC = () => {
         <label className={`${labelClass} after:text-destructive after:ml-0.5 after:content-['*']`}>
           Postcode
         </label>
-        <form.Field name={`${prefix}.postcode`}>
+        <form.Field
+          name={`${prefix}.postcode`}
+          validators={{
+            onBlur: addressSchema.shape.postcode,
+            onSubmit: addressSchema.shape.postcode,
+          }}
+        >
           {(field) => (
             <>
               <Input
@@ -414,13 +456,15 @@ const AddressPage: React.FC = () => {
                 value={field.state.value}
                 onChange={(e) => field.handleChange(e.target.value)}
                 onBlur={field.handleBlur}
+                aria-describedby={`${prefix}-postcode-error`}
                 aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
               />
-              {(field.state.meta.errors?.length ?? 0) > 0 && (
-                <p className="text-destructive mt-1 text-sm">
-                  {formError(field.state.meta.errors?.[0])}
-                </p>
-              )}
+              <FieldError
+                id={`${prefix}-postcode-error`}
+                errors={field.state.meta.errors}
+                isTouched={field.state.meta.isTouched}
+                isSubmitted={form.state.isSubmitted}
+              />
             </>
           )}
         </form.Field>
@@ -446,11 +490,12 @@ const AddressPage: React.FC = () => {
       <div className="flex-1 pt-4 pb-5 lg:pr-20">
         <Steps activeStep="address" />
         <form
+          ref={formRef}
           noValidate
           onSubmit={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            form.handleSubmit();
+            void submitForm(form, formRef.current);
           }}
         >
           <div className="mb-4 text-2xl font-bold">Address</div>
@@ -471,13 +516,15 @@ const AddressPage: React.FC = () => {
                       value={field.state.value ?? ""}
                       onChange={(e) => field.handleChange(e.target.value)}
                       onBlur={field.handleBlur}
+                      aria-describedby="email-error"
                       aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
                     />
-                    {(field.state.meta.errors?.length ?? 0) > 0 && (
-                      <p className="text-destructive mt-1 text-sm">
-                        {formError(field.state.meta.errors?.[0])}
-                      </p>
-                    )}
+                    <FieldError
+                      id="email-error"
+                      errors={field.state.meta.errors}
+                      isTouched={field.state.meta.isTouched}
+                      isSubmitted={form.state.isSubmitted}
+                    />
                   </>
                 )}
               </form.Field>

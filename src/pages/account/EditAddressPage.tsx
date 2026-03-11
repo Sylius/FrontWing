@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Skeleton from "react-loading-skeleton";
 import { useNavigate, useParams } from "react-router-dom";
 import AddressForm, { type AnyFormApi } from "../../components/account/AddressForm";
@@ -8,6 +8,7 @@ import AccountLayout from "../../layouts/Account";
 import Default from "../../layouts/Default";
 import { useForm } from "@tanstack/react-form";
 import { addressSchema, AddressValues } from "@/schemas/address";
+import { submitForm } from "@/lib/utils";
 
 interface Country {
   code: string;
@@ -30,6 +31,7 @@ const EditAddressPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { addMessage } = useFlashMessages();
+  const formRef = useRef<HTMLFormElement>(null);
 
   const [countries, setCountries] = useState<Country[]>([]);
   const [loadingCountries, setLoadingCountries] = useState(true);
@@ -40,6 +42,7 @@ const EditAddressPage: React.FC = () => {
     defaultValues: emptyAddressValues,
     validators: {
       onSubmit: addressSchema,
+      onBlur: addressSchema,
     },
     onSubmit: async ({ value }) => {
       setSubmitting(true);
@@ -148,11 +151,12 @@ const EditAddressPage: React.FC = () => {
             <Skeleton count={10} height={36} className="mb-2" />
           ) : (
             <form
+              ref={formRef}
               noValidate
               onSubmit={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                form.handleSubmit();
+                void submitForm(form, formRef.current);
               }}
             >
               <div className="mb-4">

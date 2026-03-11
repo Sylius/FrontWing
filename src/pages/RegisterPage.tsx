@@ -9,12 +9,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { registerSchema } from "@/schemas/auth";
-import { formError } from "@/lib/utils";
-import { useForm, useStore } from "@tanstack/react-form";
+import { registerSchema, passwordComplexity } from "@/schemas/auth";
+import { FieldError } from "@/components/ui/field-error";
+import { PasswordStrength } from "@/components/ui/password-strength";
+import { submitForm } from "@/lib/utils";
+import { z } from "zod";
+import { useForm } from "@tanstack/react-form";
 import { IconEye, IconEyeOff, IconLockOpen } from "@tabler/icons-react";
 import { AlertCircleIcon } from "lucide-react";
-import React, { useMemo, useState } from "react";
+import React, { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import Default from "../layouts/Default";
@@ -37,6 +40,7 @@ const RegisterPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   const form = useForm({
     defaultValues: {
@@ -95,37 +99,6 @@ const RegisterPage: React.FC = () => {
     },
   });
 
-  // Subscribe to password field value for strength indicator
-  const passwordValue = useStore(form.store, (s) => s.values.password);
-
-  // Memoized password strength calculation (0 to 4)
-  const passwordStrength = useMemo(() => {
-    const pw = passwordValue;
-    if (!pw) return 0;
-    let score = 0;
-    if (pw.length >= 8) score++;
-    if (/[A-Z]/.test(pw)) score++;
-    if (/[0-9]/.test(pw)) score++;
-    if (/[^A-Za-z0-9]/.test(pw)) score++;
-    return score;
-  }, [passwordValue]);
-
-  // Helper to get bar color based on strength
-  const getStrengthColor = (score: number) => {
-    switch (score) {
-      case 1:
-        return "bg-red-500";
-      case 2:
-        return "bg-orange-500";
-      case 3:
-        return "bg-yellow-500";
-      case 4:
-        return "bg-green-500";
-      default:
-        return "bg-gray-200";
-    }
-  };
-
   return (
     <Default>
       <div className="container my-auto">
@@ -135,9 +108,10 @@ const RegisterPage: React.FC = () => {
               <h1 className="mb-5 text-center text-2xl font-bold">Create an account</h1>
 
               <form
+                ref={formRef}
                 onSubmit={(e) => {
                   e.preventDefault();
-                  form.handleSubmit();
+                  void submitForm(form, formRef.current);
                 }}
                 noValidate
                 className="space-y-4"
@@ -181,7 +155,13 @@ const RegisterPage: React.FC = () => {
                     <label htmlFor="firstName" className={labelClass}>
                       First name *
                     </label>
-                    <form.Field name="firstName">
+                    <form.Field
+                      name="firstName"
+                      validators={{
+                        onSubmit: z.string().min(1, "First name is required"),
+                        onBlur: z.string().min(1, "First name is required"),
+                      }}
+                    >
                       {(field) => (
                         <>
                           <Input
@@ -191,13 +171,15 @@ const RegisterPage: React.FC = () => {
                             onChange={(e) => field.handleChange(e.target.value)}
                             onBlur={field.handleBlur}
                             required
+                            aria-describedby="firstName-error"
                             aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
                           />
-                          {(field.state.meta.errors?.length ?? 0) > 0 && (
-                            <span className="text-destructive text-sm">
-                              {formError(field.state.meta.errors?.[0])}
-                            </span>
-                          )}
+                          <FieldError
+                            id="firstName-error"
+                            errors={field.state.meta.errors}
+                            isTouched={field.state.meta.isTouched}
+                            isSubmitted={form.state.isSubmitted}
+                          />
                         </>
                       )}
                     </form.Field>
@@ -207,7 +189,13 @@ const RegisterPage: React.FC = () => {
                     <label htmlFor="lastName" className={labelClass}>
                       Last name *
                     </label>
-                    <form.Field name="lastName">
+                    <form.Field
+                      name="lastName"
+                      validators={{
+                        onSubmit: z.string().min(1, "Last name is required"),
+                        onBlur: z.string().min(1, "Last name is required"),
+                      }}
+                    >
                       {(field) => (
                         <>
                           <Input
@@ -217,13 +205,15 @@ const RegisterPage: React.FC = () => {
                             onChange={(e) => field.handleChange(e.target.value)}
                             onBlur={field.handleBlur}
                             required
+                            aria-describedby="lastName-error"
                             aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
                           />
-                          {(field.state.meta.errors?.length ?? 0) > 0 && (
-                            <span className="text-destructive text-sm">
-                              {formError(field.state.meta.errors?.[0])}
-                            </span>
-                          )}
+                          <FieldError
+                            id="lastName-error"
+                            errors={field.state.meta.errors}
+                            isTouched={field.state.meta.isTouched}
+                            isSubmitted={form.state.isSubmitted}
+                          />
                         </>
                       )}
                     </form.Field>
@@ -233,7 +223,13 @@ const RegisterPage: React.FC = () => {
                     <label htmlFor="email" className={labelClass}>
                       Email address *
                     </label>
-                    <form.Field name="email">
+                    <form.Field
+                      name="email"
+                      validators={{
+                        onSubmit: z.string().email("Invalid email address"),
+                        onBlur: z.string().email("Invalid email address"),
+                      }}
+                    >
                       {(field) => (
                         <>
                           <Input
@@ -244,13 +240,15 @@ const RegisterPage: React.FC = () => {
                             onChange={(e) => field.handleChange(e.target.value)}
                             onBlur={field.handleBlur}
                             required
+                            aria-describedby="email-error"
                             aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
                           />
-                          {(field.state.meta.errors?.length ?? 0) > 0 && (
-                            <span className="text-destructive text-sm">
-                              {formError(field.state.meta.errors?.[0])}
-                            </span>
-                          )}
+                          <FieldError
+                            id="email-error"
+                            errors={field.state.meta.errors}
+                            isTouched={field.state.meta.isTouched}
+                            isSubmitted={form.state.isSubmitted}
+                          />
                         </>
                       )}
                     </form.Field>
@@ -261,7 +259,15 @@ const RegisterPage: React.FC = () => {
                     <label htmlFor="password" className={labelClass}>
                       Password *
                     </label>
-                    <form.Field name="password">
+                    <form.Field
+                      name="password"
+                      validators={{
+                        onSubmit: passwordComplexity,
+                        onBlur: passwordComplexity,
+                        onChangeListenTo: ["confirmPassword"],
+                        onBlurListenTo: ["confirmPassword"],
+                      }}
+                    >
                       {(field) => (
                         <>
                           <div className="relative">
@@ -274,6 +280,7 @@ const RegisterPage: React.FC = () => {
                               onBlur={field.handleBlur}
                               className="pr-10"
                               required
+                              aria-describedby="password-error"
                               aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
                             />
                             <button
@@ -284,28 +291,17 @@ const RegisterPage: React.FC = () => {
                               {showPassword ? <IconEyeOff size={18} /> : <IconEye size={18} />}
                             </button>
                           </div>
-                          {(field.state.meta.errors?.length ?? 0) > 0 && (
-                            <span className="text-destructive text-sm">
-                              {formError(field.state.meta.errors?.[0])}
-                            </span>
-                          )}
+                          <PasswordStrength value={field.state.value} />
+                          <FieldError
+                            id="password-error"
+                            errors={field.state.meta.errors}
+                            isTouched={field.state.meta.isTouched}
+                            isSubmitted={form.state.isSubmitted}
+                          />
                         </>
                       )}
                     </form.Field>
 
-                    {/* Visual Strength Indicator */}
-                    <div className="mt-2 flex h-1 gap-1">
-                      {[1, 2, 3, 4].map((step) => (
-                        <div
-                          key={step}
-                          className={`h-full flex-1 rounded-full transition-colors duration-300 ${
-                            passwordStrength >= step
-                              ? getStrengthColor(passwordStrength)
-                              : "bg-gray-200"
-                          }`}
-                        />
-                      ))}
-                    </div>
                     <p className="text-muted-foreground mt-1 text-xs">
                       Use 8+ characters with mixed case, numbers, and symbols.
                     </p>
@@ -315,7 +311,24 @@ const RegisterPage: React.FC = () => {
                     <label htmlFor="confirmPassword" className={labelClass}>
                       Confirm password *
                     </label>
-                    <form.Field name="confirmPassword">
+                    <form.Field
+                      name="confirmPassword"
+                      validators={{
+                        onBlur: ({ value, fieldApi }) => {
+                          const password = fieldApi.form.getFieldValue("password");
+                          if (value !== password) return "Passwords do not match";
+                          return undefined;
+                        },
+                        onSubmit: ({ value, fieldApi }) => {
+                          const password = fieldApi.form.getFieldValue("password");
+                          if (!value) return "Please confirm your password";
+                          if (value !== password) return "Passwords do not match";
+                          return undefined;
+                        },
+                        onChangeListenTo: ["password"],
+                        onBlurListenTo: ["password"],
+                      }}
+                    >
                       {(field) => (
                         <>
                           <div className="relative">
@@ -327,6 +340,7 @@ const RegisterPage: React.FC = () => {
                               onChange={(e) => field.handleChange(e.target.value)}
                               onBlur={field.handleBlur}
                               required
+                              aria-describedby="confirmPassword-error"
                               aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
                             />
                             <button
@@ -341,11 +355,12 @@ const RegisterPage: React.FC = () => {
                               )}
                             </button>
                           </div>
-                          {(field.state.meta.errors?.length ?? 0) > 0 && (
-                            <span className="text-destructive text-sm">
-                              {formError(field.state.meta.errors?.[0])}
-                            </span>
-                          )}
+                          <FieldError
+                            id="confirmPassword-error"
+                            errors={field.state.meta.errors}
+                            isTouched={field.state.meta.isTouched}
+                            isSubmitted={form.state.isSubmitted}
+                          />
                         </>
                       )}
                     </form.Field>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import Default from "../../layouts/Default.tsx";
 import AccountLayout from "../../layouts/Account.tsx";
 import { useCustomer } from "../../context/CustomerContext.tsx";
@@ -9,7 +9,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useForm } from "@tanstack/react-form";
 import { changePasswordSchema, ChangePasswordPayload } from "@/schemas/account";
-import { formError } from "@/lib/utils";
+import { passwordComplexity } from "@/schemas/auth";
+import { applyServerErrors, submitForm } from "@/lib/utils";
+import { FieldError } from "@/components/ui/field-error";
+import { PasswordStrength } from "@/components/ui/password-strength";
+import { z } from "zod";
 
 const labelClass = "block text-sm font-medium mb-1";
 
@@ -17,6 +21,7 @@ const ChangePasswordPage: React.FC = () => {
   const { customer } = useCustomer();
   const navigate = useNavigate();
   const { addMessage } = useFlashMessages();
+  const formRef = useRef<HTMLFormElement>(null);
 
   const form = useForm({
     defaultValues: {
@@ -31,7 +36,6 @@ const ChangePasswordPage: React.FC = () => {
       const payload: ChangePasswordPayload = {
         currentPassword: value.currentPassword,
         newPassword: value.newPassword,
-        confirmNewPassword: value.confirmation,
       };
 
       try {
@@ -53,35 +57,20 @@ const ChangePasswordPage: React.FC = () => {
           data.violations?.forEach((error: { propertyPath: string; message: string }) => {
             formattedErrors[error.propertyPath] = error.message;
           });
-          // Re-surface API errors via form field errors
-          if (formattedErrors.currentPassword) {
-            form.setFieldMeta("currentPassword", (prev) => ({
-              ...prev,
-              errors: [formattedErrors.currentPassword],
-              errorMap: { onSubmit: formattedErrors.currentPassword },
-            }));
-          }
-          if (formattedErrors.newPassword) {
-            form.setFieldMeta("newPassword", (prev) => ({
-              ...prev,
-              errors: [formattedErrors.newPassword],
-              errorMap: { onSubmit: formattedErrors.newPassword },
-            }));
-          }
-          if (formattedErrors.confirmNewPassword) {
-            form.setFieldMeta("confirmation", (prev) => ({
-              ...prev,
-              errors: [formattedErrors.confirmNewPassword],
-              errorMap: { onSubmit: formattedErrors.confirmNewPassword },
-            }));
-          }
+          const mappedErrors: Partial<Record<string, string>> = {};
+          if (formattedErrors.currentPassword)
+            mappedErrors.currentPassword = formattedErrors.currentPassword;
+          if (formattedErrors.newPassword) mappedErrors.newPassword = formattedErrors.newPassword;
+          if (formattedErrors.confirmNewPassword)
+            mappedErrors.confirmation = formattedErrors.confirmNewPassword;
+          applyServerErrors(form, mappedErrors);
           throw new Error("Failed to change password");
         }
 
         navigate("/account/dashboard");
         addMessage("success", "Password changed successfully");
-      } catch (err) {
-        console.log(err);
+      } catch {
+        // Server error already handled via applyServerErrors above
       }
     },
   });
@@ -100,18 +89,25 @@ const ChangePasswordPage: React.FC = () => {
               {(isSubmitting) => (
                 <Loader loading={isSubmitting}>
                   <form
+                    ref={formRef}
                     method="post"
                     noValidate
                     onSubmit={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      form.handleSubmit();
+                      void submitForm(form, formRef.current);
                     }}
                   >
                     <div className="mb-4">
                       <div className="mb-3">
                         <label className={labelClass}>Current password</label>
-                        <form.Field name="currentPassword">
+                        <form.Field
+                          name="currentPassword"
+                          validators={{
+                            onSubmit: z.string().min(1, "Current password is required"),
+                            onBlur: z.string().min(1, "Current password is required"),
+                          }}
+                        >
                           {(field) => (
                             <>
                               <Input
@@ -120,15 +116,17 @@ const ChangePasswordPage: React.FC = () => {
                                 value={field.state.value}
                                 onChange={(e) => field.handleChange(e.target.value)}
                                 onBlur={field.handleBlur}
+                                aria-describedby="currentPassword-error"
                                 aria-invalid={
                                   (field.state.meta.errors?.length ?? 0) > 0 || undefined
                                 }
                               />
-                              {(field.state.meta.errors?.length ?? 0) > 0 && (
-                                <div className="text-destructive mt-1 text-sm">
-                                  {formError(field.state.meta.errors?.[0])}
-                                </div>
-                              )}
+                              <FieldError
+                                id="currentPassword-error"
+                                errors={field.state.meta.errors}
+                                isTouched={field.state.meta.isTouched}
+                                isSubmitted={form.state.isSubmitted}
+                              />
                             </>
                           )}
                         </form.Field>
@@ -136,7 +134,15 @@ const ChangePasswordPage: React.FC = () => {
 
                       <div className="mb-3">
                         <label className={labelClass}>New password</label>
-                        <form.Field name="newPassword">
+                        <form.Field
+                          name="newPassword"
+                          validators={{
+                            onSubmit: passwordComplexity,
+                            onBlur: passwordComplexity,
+                            onChangeListenTo: ["confirmation"],
+                            onBlurListenTo: ["confirmation"],
+                          }}
+                        >
                           {(field) => (
                             <>
                               <Input
@@ -145,15 +151,18 @@ const ChangePasswordPage: React.FC = () => {
                                 value={field.state.value}
                                 onChange={(e) => field.handleChange(e.target.value)}
                                 onBlur={field.handleBlur}
+                                aria-describedby="newPassword-error"
                                 aria-invalid={
                                   (field.state.meta.errors?.length ?? 0) > 0 || undefined
                                 }
                               />
-                              {(field.state.meta.errors?.length ?? 0) > 0 && (
-                                <div className="text-destructive mt-1 text-sm">
-                                  {formError(field.state.meta.errors?.[0])}
-                                </div>
-                              )}
+                              <PasswordStrength value={field.state.value} />
+                              <FieldError
+                                id="newPassword-error"
+                                errors={field.state.meta.errors}
+                                isTouched={field.state.meta.isTouched}
+                                isSubmitted={form.state.isSubmitted}
+                              />
                             </>
                           )}
                         </form.Field>
@@ -161,7 +170,24 @@ const ChangePasswordPage: React.FC = () => {
 
                       <div className="mb-3">
                         <label className={labelClass}>Confirmation</label>
-                        <form.Field name="confirmation">
+                        <form.Field
+                          name="confirmation"
+                          validators={{
+                            onBlur: ({ value, fieldApi }) => {
+                              const newPassword = fieldApi.form.getFieldValue("newPassword");
+                              if (value !== newPassword) return "Passwords do not match";
+                              return undefined;
+                            },
+                            onSubmit: ({ value, fieldApi }) => {
+                              const newPassword = fieldApi.form.getFieldValue("newPassword");
+                              if (value !== newPassword) return "Passwords do not match";
+                              if (!value) return "Please confirm your password";
+                              return undefined;
+                            },
+                            onChangeListenTo: ["newPassword"],
+                            onBlurListenTo: ["newPassword"],
+                          }}
+                        >
                           {(field) => (
                             <>
                               <Input
@@ -170,15 +196,17 @@ const ChangePasswordPage: React.FC = () => {
                                 value={field.state.value}
                                 onChange={(e) => field.handleChange(e.target.value)}
                                 onBlur={field.handleBlur}
+                                aria-describedby="confirmation-error"
                                 aria-invalid={
                                   (field.state.meta.errors?.length ?? 0) > 0 || undefined
                                 }
                               />
-                              {(field.state.meta.errors?.length ?? 0) > 0 && (
-                                <div className="text-destructive mt-1 text-sm">
-                                  {formError(field.state.meta.errors?.[0])}
-                                </div>
-                              )}
+                              <FieldError
+                                id="confirmation-error"
+                                errors={field.state.meta.errors}
+                                isTouched={field.state.meta.isTouched}
+                                isSubmitted={form.state.isSubmitted}
+                              />
                             </>
                           )}
                         </form.Field>

@@ -1,9 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { forgotPasswordSchema } from "@/schemas/auth";
-import { formError } from "@/lib/utils";
+import { FieldError } from "@/components/ui/field-error";
+import { submitForm } from "@/lib/utils";
 import { useForm } from "@tanstack/react-form";
-import React from "react";
+import React, { useRef } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import Default from "../layouts/Default";
@@ -11,6 +12,8 @@ import Default from "../layouts/Default";
 const labelClass = "block text-sm font-medium mb-1";
 
 const ForgotPasswordPage: React.FC = () => {
+  const formRef = useRef<HTMLFormElement>(null);
+
   const form = useForm({
     defaultValues: {
       email: "",
@@ -43,9 +46,10 @@ const ForgotPasswordPage: React.FC = () => {
             Enter your email and we will send you a reset link.
           </p>
           <form
+            ref={formRef}
             onSubmit={(e) => {
               e.preventDefault();
-              form.handleSubmit();
+              void submitForm(form, formRef.current);
             }}
             noValidate
           >
@@ -53,7 +57,13 @@ const ForgotPasswordPage: React.FC = () => {
               <label htmlFor="email" className={labelClass}>
                 Email
               </label>
-              <form.Field name="email">
+              <form.Field
+                name="email"
+                validators={{
+                  onSubmit: forgotPasswordSchema.shape.email,
+                  onBlur: forgotPasswordSchema.shape.email,
+                }}
+              >
                 {(field) => (
                   <>
                     <Input
@@ -64,13 +74,15 @@ const ForgotPasswordPage: React.FC = () => {
                       value={field.state.value}
                       onChange={(e) => field.handleChange(e.target.value)}
                       onBlur={field.handleBlur}
+                      aria-describedby="email-error"
                       aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
                     />
-                    {(field.state.meta.errors?.length ?? 0) > 0 && (
-                      <span className="text-destructive text-sm">
-                        {formError(field.state.meta.errors?.[0])}
-                      </span>
-                    )}
+                    <FieldError
+                      id="email-error"
+                      errors={field.state.meta.errors}
+                      isTouched={field.state.meta.isTouched}
+                      isSubmitted={form.state.isSubmitted}
+                    />
                   </>
                 )}
               </form.Field>

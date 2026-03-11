@@ -1,7 +1,8 @@
 import React from "react";
 import Skeleton from "react-loading-skeleton";
 import { Input } from "@/components/ui/input";
-import { formError } from "@/lib/utils";
+import { FieldError } from "@/components/ui/field-error";
+import type { ValidationError } from "@tanstack/react-form";
 import {
   Select,
   SelectContent,
@@ -14,7 +15,7 @@ import {
 // assignable here via TypeScript's contravariance rules.
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type FieldApi = {
-  state: { value: any; meta: { errors: unknown[] } };
+  state: { value: any; meta: { errors: ValidationError[]; isTouched: boolean } };
   handleChange: (v: any) => void;
   handleBlur: () => void;
 };
@@ -42,11 +43,17 @@ interface AddressFormProps {
   loadingCountries: boolean;
   errors?: Record<string, string>;
   submitted?: boolean;
+  isSubmitted?: boolean;
 }
 
 const labelClass = "block text-sm font-medium mb-1";
 
-const AddressForm: React.FC<AddressFormProps> = ({ form, countries, loadingCountries }) => (
+const AddressForm: React.FC<AddressFormProps> = ({
+  form,
+  countries,
+  loadingCountries,
+  isSubmitted = false,
+}) => (
   <div className="-mx-3 flex flex-wrap">
     <div className="mb-4 w-full px-3 md:w-1/2">
       <label className={labelClass}>First name *</label>
@@ -58,13 +65,15 @@ const AddressForm: React.FC<AddressFormProps> = ({ form, countries, loadingCount
               onChange={(e) => field.handleChange(e.target.value)}
               onBlur={field.handleBlur}
               required
+              aria-describedby="firstName-error"
               aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
             />
-            {(field.state.meta.errors?.length ?? 0) > 0 && (
-              <p className="text-destructive mt-1 text-sm">
-                {formError(field.state.meta.errors?.[0])}
-              </p>
-            )}
+            <FieldError
+              id="firstName-error"
+              errors={field.state.meta.errors}
+              isTouched={field.state.meta.isTouched}
+              isSubmitted={isSubmitted}
+            />
           </>
         )}
       </form.Field>
@@ -79,13 +88,15 @@ const AddressForm: React.FC<AddressFormProps> = ({ form, countries, loadingCount
               onChange={(e) => field.handleChange(e.target.value)}
               onBlur={field.handleBlur}
               required
+              aria-describedby="lastName-error"
               aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
             />
-            {(field.state.meta.errors?.length ?? 0) > 0 && (
-              <p className="text-destructive mt-1 text-sm">
-                {formError(field.state.meta.errors?.[0])}
-              </p>
-            )}
+            <FieldError
+              id="lastName-error"
+              errors={field.state.meta.errors}
+              isTouched={field.state.meta.isTouched}
+              isSubmitted={isSubmitted}
+            />
           </>
         )}
       </form.Field>
@@ -112,13 +123,15 @@ const AddressForm: React.FC<AddressFormProps> = ({ form, countries, loadingCount
               onChange={(e) => field.handleChange(e.target.value)}
               onBlur={field.handleBlur}
               required
+              aria-describedby="street-error"
               aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
             />
-            {(field.state.meta.errors?.length ?? 0) > 0 && (
-              <p className="text-destructive mt-1 text-sm">
-                {formError(field.state.meta.errors?.[0])}
-              </p>
-            )}
+            <FieldError
+              id="street-error"
+              errors={field.state.meta.errors}
+              isTouched={field.state.meta.isTouched}
+              isSubmitted={isSubmitted}
+            />
           </>
         )}
       </form.Field>
@@ -136,7 +149,10 @@ const AddressForm: React.FC<AddressFormProps> = ({ form, countries, loadingCount
                 onValueChange={(val) => field.handleChange(val ?? "")}
                 required
               >
-                <SelectTrigger>
+                <SelectTrigger
+                  aria-describedby="countryCode-error"
+                  aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
+                >
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
                 <SelectContent>
@@ -147,11 +163,12 @@ const AddressForm: React.FC<AddressFormProps> = ({ form, countries, loadingCount
                   ))}
                 </SelectContent>
               </Select>
-              {(field.state.meta.errors?.length ?? 0) > 0 && (
-                <p className="text-destructive mt-1 text-sm">
-                  {formError(field.state.meta.errors?.[0])}
-                </p>
-              )}
+              <FieldError
+                id="countryCode-error"
+                errors={field.state.meta.errors}
+                isTouched={field.state.meta.isTouched}
+                isSubmitted={isSubmitted}
+              />
             </>
           )}
         </form.Field>
@@ -185,13 +202,15 @@ const AddressForm: React.FC<AddressFormProps> = ({ form, countries, loadingCount
               onChange={(e) => field.handleChange(e.target.value)}
               onBlur={field.handleBlur}
               required
+              aria-describedby="city-error"
               aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
             />
-            {(field.state.meta.errors?.length ?? 0) > 0 && (
-              <p className="text-destructive mt-1 text-sm">
-                {formError(field.state.meta.errors?.[0])}
-              </p>
-            )}
+            <FieldError
+              id="city-error"
+              errors={field.state.meta.errors}
+              isTouched={field.state.meta.isTouched}
+              isSubmitted={isSubmitted}
+            />
           </>
         )}
       </form.Field>
@@ -206,13 +225,15 @@ const AddressForm: React.FC<AddressFormProps> = ({ form, countries, loadingCount
               onChange={(e) => field.handleChange(e.target.value)}
               onBlur={field.handleBlur}
               required
+              aria-describedby="postcode-error"
               aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
             />
-            {(field.state.meta.errors?.length ?? 0) > 0 && (
-              <p className="text-destructive mt-1 text-sm">
-                {formError(field.state.meta.errors?.[0])}
-              </p>
-            )}
+            <FieldError
+              id="postcode-error"
+              errors={field.state.meta.errors}
+              isTouched={field.state.meta.isTouched}
+              isSubmitted={isSubmitted}
+            />
           </>
         )}
       </form.Field>

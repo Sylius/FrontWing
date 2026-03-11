@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import Default from "../../layouts/Default";
 import AccountLayout from "../../layouts/Account";
 import { useCustomer } from "../../context/CustomerContext";
@@ -16,13 +16,15 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { useForm } from "@tanstack/react-form";
 import { profileSchema } from "@/schemas/account";
-import { formError } from "@/lib/utils";
+import { FieldError } from "@/components/ui/field-error";
+import { submitForm } from "@/lib/utils";
 
 const labelClass = "block text-sm font-medium mb-1";
 
 const ProfilePage: React.FC = () => {
   const { customer, refetchCustomer } = useCustomer();
   const { addMessage } = useFlashMessages();
+  const formRef = useRef<HTMLFormElement>(null);
 
   const form = useForm({
     defaultValues: {
@@ -98,17 +100,24 @@ const ProfilePage: React.FC = () => {
             <Skeleton count={12} height={36} className="mb-2" />
           ) : (
             <form
+              ref={formRef}
               noValidate
               onSubmit={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                form.handleSubmit();
+                void submitForm(form, formRef.current);
               }}
             >
               <div className="-mx-3 flex flex-wrap">
                 <div className="mb-3 w-full px-3 md:w-1/2">
                   <label className={labelClass}>First name *</label>
-                  <form.Field name="firstName">
+                  <form.Field
+                    name="firstName"
+                    validators={{
+                      onSubmit: profileSchema.shape.firstName,
+                      onBlur: profileSchema.shape.firstName,
+                    }}
+                  >
                     {(field) => (
                       <>
                         <Input
@@ -116,20 +125,28 @@ const ProfilePage: React.FC = () => {
                           onChange={(e) => field.handleChange(e.target.value)}
                           onBlur={field.handleBlur}
                           required
+                          aria-describedby="firstName-error"
                           aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
                         />
-                        {(field.state.meta.errors?.length ?? 0) > 0 && (
-                          <p className="text-destructive mt-1 text-sm">
-                            {formError(field.state.meta.errors?.[0])}
-                          </p>
-                        )}
+                        <FieldError
+                          id="firstName-error"
+                          errors={field.state.meta.errors}
+                          isTouched={field.state.meta.isTouched}
+                          isSubmitted={form.state.isSubmitted}
+                        />
                       </>
                     )}
                   </form.Field>
                 </div>
                 <div className="mb-3 w-full px-3 md:w-1/2">
                   <label className={labelClass}>Last name *</label>
-                  <form.Field name="lastName">
+                  <form.Field
+                    name="lastName"
+                    validators={{
+                      onSubmit: profileSchema.shape.lastName,
+                      onBlur: profileSchema.shape.lastName,
+                    }}
+                  >
                     {(field) => (
                       <>
                         <Input
@@ -137,20 +154,28 @@ const ProfilePage: React.FC = () => {
                           onChange={(e) => field.handleChange(e.target.value)}
                           onBlur={field.handleBlur}
                           required
+                          aria-describedby="lastName-error"
                           aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
                         />
-                        {(field.state.meta.errors?.length ?? 0) > 0 && (
-                          <p className="text-destructive mt-1 text-sm">
-                            {formError(field.state.meta.errors?.[0])}
-                          </p>
-                        )}
+                        <FieldError
+                          id="lastName-error"
+                          errors={field.state.meta.errors}
+                          isTouched={field.state.meta.isTouched}
+                          isSubmitted={form.state.isSubmitted}
+                        />
                       </>
                     )}
                   </form.Field>
                 </div>
                 <div className="mb-3 w-full px-3">
                   <label className={labelClass}>Email *</label>
-                  <form.Field name="email">
+                  <form.Field
+                    name="email"
+                    validators={{
+                      onSubmit: profileSchema.shape.email,
+                      onBlur: profileSchema.shape.email,
+                    }}
+                  >
                     {(field) => (
                       <>
                         <Input
@@ -159,27 +184,45 @@ const ProfilePage: React.FC = () => {
                           onChange={(e) => field.handleChange(e.target.value)}
                           onBlur={field.handleBlur}
                           required
+                          aria-describedby="email-error"
                           aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
                         />
-                        {(field.state.meta.errors?.length ?? 0) > 0 && (
-                          <p className="text-destructive mt-1 text-sm">
-                            {formError(field.state.meta.errors?.[0])}
-                          </p>
-                        )}
+                        <FieldError
+                          id="email-error"
+                          errors={field.state.meta.errors}
+                          isTouched={field.state.meta.isTouched}
+                          isSubmitted={form.state.isSubmitted}
+                        />
                       </>
                     )}
                   </form.Field>
                 </div>
                 <div className="mb-3 w-full px-3 md:w-1/2">
                   <label className={labelClass}>Birthday</label>
-                  <form.Field name="birthday">
+                  <form.Field
+                    name="birthday"
+                    validators={{
+                      onSubmit: profileSchema.shape.birthday,
+                      onBlur: profileSchema.shape.birthday,
+                    }}
+                  >
                     {(field) => (
-                      <Input
-                        type="date"
-                        value={field.state.value ?? ""}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        onBlur={field.handleBlur}
-                      />
+                      <>
+                        <Input
+                          type="date"
+                          value={field.state.value ?? ""}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          onBlur={field.handleBlur}
+                          aria-describedby="birthday-error"
+                          aria-invalid={(field.state.meta.errors?.length ?? 0) > 0 || undefined}
+                        />
+                        <FieldError
+                          id="birthday-error"
+                          errors={field.state.meta.errors}
+                          isTouched={field.state.meta.isTouched}
+                          isSubmitted={form.state.isSubmitted}
+                        />
+                      </>
                     )}
                   </form.Field>
                 </div>
