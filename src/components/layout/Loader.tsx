@@ -48,10 +48,7 @@ const spinnerStyle: React.CSSProperties = {
   animation: "spin 1s linear infinite",
 };
 
-if (
-  typeof document !== "undefined" &&
-  !document.getElementById("loader-spinner-style")
-) {
+if (typeof document !== "undefined" && !document.getElementById("loader-spinner-style")) {
   const style = document.createElement("style");
   style.id = "loader-spinner-style";
   style.innerHTML = `

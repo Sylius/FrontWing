@@ -1,13 +1,13 @@
 import { RouteObject } from "react-router-dom";
 
-import DashboardPage from "../pages/account/DashboardPage";
-import OrderHistoryPage from "../pages/account/OrderHistoryPage";
-import OrderDetailsPage from "../pages/account/OrderDetailsPage";
-import ProfilePage from "../pages/account/ProfilePage";
-import AddressBookPage from "../pages/account/AddressBookPage";
 import AddAddressPage from "../pages/account/AddAddressPage";
-import EditAddressPage from "../pages/account/EditAddressPage";
+import AddressBookPage from "../pages/account/AddressBookPage";
 import ChangePasswordPage from "../pages/account/ChangePasswordPage";
+import DashboardPage from "../pages/account/DashboardPage";
+import EditAddressPage from "../pages/account/EditAddressPage";
+import OrderDetailsPage from "../pages/account/OrderDetailsPage";
+import OrderHistoryPage from "../pages/account/OrderHistoryPage";
+import ProfilePage from "../pages/account/ProfilePage";
 import RequireAuth from "./guards/RequireAuth.tsx";
 
 export const accountRoutes: RouteObject = {

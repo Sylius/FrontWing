@@ -1,20 +1,20 @@
 export interface ProductTaxon {
-    taxon: string;
+  taxon: string;
 }
 
 export interface Taxon {
-    id: number;
-    code: string;
-    slug: string;
-    name: string;
-    description: string;
-    children: string[];
-    parent?: string;
+  id: number;
+  code: string;
+  slug: string;
+  name: string;
+  description: string;
+  children: string[];
+  parent?: string;
 }
 export interface TaxonChild {
-    id: number;
-    name: string;
-    slug: string;
-    code: string;
-    description: string;
+  id: number;
+  name: string;
+  slug: string;
+  code: string;
+  description: string;
 }

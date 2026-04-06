@@ -9,13 +9,9 @@ interface CustomerContextType {
   clearCustomer: () => void;
 }
 
-const CustomerContext = createContext<CustomerContextType | undefined>(
-  undefined,
-);
+const CustomerContext = createContext<CustomerContextType | undefined>(undefined);
 
-export const CustomerProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const CustomerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,12 +27,9 @@ export const CustomerProvider: React.FC<{ children: React.ReactNode }> = ({
 
     try {
       setLoading(true);
-      const response = await fetch(
-        `${import.meta.env.VITE_REACT_APP_API_URL}${userUrl}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
+      const response = await fetch(`${import.meta.env.VITE_REACT_APP_API_URL}${userUrl}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       if (!response.ok) {
         throw new Error("Unauthorized");
@@ -45,9 +38,9 @@ export const CustomerProvider: React.FC<{ children: React.ReactNode }> = ({
       const data = await response.json();
 
       setCustomer(data);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setCustomer(null);
-      setError(err.message || "Failed to load user");
+      setError(err instanceof Error ? err.message : "Failed to load user");
     } finally {
       setLoading(false);
     }

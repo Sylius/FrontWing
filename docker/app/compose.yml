@@ -1,0 +1,33 @@
+name: frontwing
+
+services:
+  app:
+    image: frontwing-app-dev
+    build:
+      context: ../..
+      dockerfile: docker/app/Dockerfile
+      target: dev
+    container_name: frontwing-app
+    ports:
+      - "5173:5173"
+    volumes:
+      - ../..:/app
+      - /app/node_modules
+      - ./certs:/certs:ro
+    environment:
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: 0
+      NODE_ENV: development
+      VITE_REACT_APP_API_URL: ${VITE_REACT_APP_API_URL:-https://localhost}
+    stdin_open: true
+    tty: true
+
+  tools:
+    build:
+      context: ../..
+      dockerfile: docker/app/Dockerfile
+      target: dev
+    volumes:
+      - ../..:/app
+      - /app/node_modules
+    profiles:
+      - tools
