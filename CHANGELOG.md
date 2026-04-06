@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Vitest v4 unit test suite — 48 tests across schemas, utilities, and UI components (SPEC-TEST-001)
+  - `src/schemas/__tests__/` — auth, account, review schema validation (28 tests)
+  - `src/lib/__tests__/` — `formError`, `applyServerErrors`, `clearServerErrors` utilities (6 tests)
+  - `src/components/ui/__tests__/` — `FieldError`, `PasswordStrength` components (14 tests)
+- Playwright v1.58 E2E test suite with Page Object Model pattern (SPEC-TEST-001)
+  - Auth flows: login, register, logout
+  - Form validation: inline errors, onBlur/onSubmit behaviour
+  - Account pages: profile update, change password
+  - Auth fixture with JWT seed via Sylius API (`e2e/fixtures/auth.ts`)
+- Docker multi-stage test infrastructure (`docker/Dockerfile.test`) with isolated stages per concern (SPEC-TEST-001)
+- `docker/compose.test.yml` — fully self-contained test environment (unit-tests, app-serve, e2e-tests services)
+- `docker/compose.yml` — React dev container with hot-reload (node:22-alpine)
+- `docker/Dockerfile` — multi-stage app image (dev, builder, production)
+- `Makefile` — unified command interface for development, Docker, and all test scenarios
+- GitHub Actions CI workflow (`.github/workflows/test.yml`) — unit job (blocking) then E2E job on `main`, `dev`, and `feat/**` branches
+- `FieldError` component (`src/components/ui/field-error.tsx`) — accessible inline field error with `id`, `aria-live` (SPEC-UPDATE-001)
+- `applyServerErrors` utility — maps Sylius API error payloads to TanStack Form server errors (SPEC-UPDATE-001)
+- `clearServerErrors` utility — clears `onServer` errors before re-submission to unblock `canSubmit` (SPEC-UPDATE-001)
+- `onBlur` validators on all form fields using the same Zod schemas as `onSubmit` (SPEC-UPDATE-001)
+- `aria-describedby` linking all inputs to their `FieldError` component (SPEC-UPDATE-001)
+
+### Changed
+
+- All form fields updated with `aria-invalid` driven by TanStack Form field state (SPEC-UPDATE-001)
+- `submitForm()` utility extended to call `clearServerErrors` before submission (SPEC-UPDATE-001)
+
 ## [0.4.0] - 2026-03-09
 
 ### Added
