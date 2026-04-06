@@ -1,0 +1,15 @@
+name: frontwing-prod
+
+services:
+  app:
+    image: frontwing-app-prod
+    build:
+      context: ../..
+      dockerfile: docker/app/Dockerfile
+      target: production
+      args:
+        COREPACK_ENABLE_DOWNLOAD_PROMPT: 0
+        VITE_REACT_APP_API_URL: ${VITE_REACT_APP_API_URL}
+    ports:
+      - "80:80"
+    restart: unless-stopped
