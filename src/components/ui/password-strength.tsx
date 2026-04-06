@@ -33,7 +33,11 @@ export function PasswordStrength({ value }: PasswordStrengthProps) {
           />
         ))}
       </div>
-      {label && <p className="text-muted-foreground text-xs">{label}</p>}
+      {label && (
+        <p className="text-muted-foreground text-xs" data-testid="password-strength-label">
+          {label}
+        </p>
+      )}
     </div>
   );
 }

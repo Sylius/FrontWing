@@ -62,4 +62,8 @@ export const changePasswordSchema = z
     path: ["confirmation"],
   });
 export type ChangePasswordValues = z.infer<typeof changePasswordSchema>;
-export type ChangePasswordPayload = Omit<z.infer<typeof changePasswordSchema>, "confirmation">;
+export type ChangePasswordPayload = {
+  currentPassword: string;
+  newPassword: string;
+  confirmNewPassword: string;
+};

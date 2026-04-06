@@ -34,6 +34,14 @@ export default tseslint.config(
       'react-refresh/only-export-components': 'off',
     },
   },
+  {
+    // Playwright E2E files are not React components — disable React-specific rules
+    files: ['e2e/**/*.ts'],
+    rules: {
+      'react-hooks/rules-of-hooks': 'off',
+      'react-refresh/only-export-components': 'off',
+    },
+  },
   // Prettier config must be last to disable conflicting rules
   prettier,
 )

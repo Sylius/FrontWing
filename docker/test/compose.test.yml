@@ -1,0 +1,55 @@
+name: frontwing-test
+
+services:
+  unit-tests:
+    build:
+      context: ../..
+      dockerfile: docker/app/Dockerfile
+      target: unit-tests
+    volumes:
+      - ../../coverage:/app/coverage
+
+  api-proxy:
+    build:
+      context: ../..
+      dockerfile: docker/app/Dockerfile
+      target: api-proxy
+    networks:
+      - default
+      - sylius
+
+  app:
+    image: frontwing-app-test
+    build:
+      context: ../..
+      dockerfile: docker/app/Dockerfile
+      target: app-serve
+      args:
+        VITE_REACT_APP_API_URL: ${VITE_REACT_APP_API_URL:-http://api-proxy}
+    ports:
+      - "4174:4174"
+    depends_on:
+      - api-proxy
+
+  e2e-tests:
+    build:
+      context: ../..
+      dockerfile: docker/app/Dockerfile
+      target: e2e-tests
+    depends_on:
+      app:
+        condition: service_healthy
+    environment:
+      PLAYWRIGHT_BASE_URL: http://app:4174
+      PLAYWRIGHT_TEST_EMAIL: ${PLAYWRIGHT_TEST_EMAIL:-}
+      PLAYWRIGHT_TEST_PASSWORD: ${PLAYWRIGHT_TEST_PASSWORD:-}
+      VITE_REACT_APP_API_URL: ${VITE_REACT_APP_API_URL:-http://api-proxy}
+      CI: "true"
+    volumes:
+      - ../../playwright-report:/app/playwright-report
+
+networks:
+  default: {}
+  sylius:
+    external: true
+    name: sylius-standard_default

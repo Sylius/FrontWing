@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import Default from "../../layouts/Default.tsx";
 import AccountLayout from "../../layouts/Account.tsx";
 import { useCustomer } from "../../context/CustomerContext.tsx";
@@ -8,12 +8,13 @@ import { useFlashMessages } from "../../context/FlashMessagesContext.tsx";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useForm } from "@tanstack/react-form";
-import { changePasswordSchema, ChangePasswordPayload } from "@/schemas/account";
+import { ChangePasswordPayload } from "@/schemas/account";
 import { passwordComplexity } from "@/schemas/auth";
 import { applyServerErrors, submitForm } from "@/lib/utils";
 import { FieldError } from "@/components/ui/field-error";
 import { PasswordStrength } from "@/components/ui/password-strength";
 import { z } from "zod";
+import { IconEye, IconEyeOff } from "@tabler/icons-react";
 
 const labelClass = "block text-sm font-medium mb-1";
 
@@ -22,6 +23,9 @@ const ChangePasswordPage: React.FC = () => {
   const navigate = useNavigate();
   const { addMessage } = useFlashMessages();
   const formRef = useRef<HTMLFormElement>(null);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
   const form = useForm({
     defaultValues: {
@@ -29,13 +33,11 @@ const ChangePasswordPage: React.FC = () => {
       newPassword: "",
       confirmation: "",
     },
-    validators: {
-      onSubmit: changePasswordSchema,
-    },
     onSubmit: async ({ value }) => {
       const payload: ChangePasswordPayload = {
         currentPassword: value.currentPassword,
         newPassword: value.newPassword,
+        confirmNewPassword: value.confirmation,
       };
 
       try {
@@ -110,17 +112,34 @@ const ChangePasswordPage: React.FC = () => {
                         >
                           {(field) => (
                             <>
-                              <Input
-                                type="password"
-                                required={true}
-                                value={field.state.value}
-                                onChange={(e) => field.handleChange(e.target.value)}
-                                onBlur={field.handleBlur}
-                                aria-describedby="currentPassword-error"
-                                aria-invalid={
-                                  (field.state.meta.errors?.length ?? 0) > 0 || undefined
-                                }
-                              />
+                              <div className="relative">
+                                <Input
+                                  type={showCurrentPassword ? "text" : "password"}
+                                  required={true}
+                                  className="pr-10"
+                                  value={field.state.value}
+                                  onChange={(e) => field.handleChange(e.target.value)}
+                                  onBlur={field.handleBlur}
+                                  aria-describedby="currentPassword-error"
+                                  aria-invalid={
+                                    (field.state.meta.errors?.length ?? 0) > 0 || undefined
+                                  }
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => setShowCurrentPassword((v) => !v)}
+                                  className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 focus:outline-none"
+                                  aria-label={
+                                    showCurrentPassword ? "Hide password" : "Show password"
+                                  }
+                                >
+                                  {showCurrentPassword ? (
+                                    <IconEyeOff size={18} />
+                                  ) : (
+                                    <IconEye size={18} />
+                                  )}
+                                </button>
+                              </div>
                               <FieldError
                                 id="currentPassword-error"
                                 errors={field.state.meta.errors}
@@ -145,17 +164,32 @@ const ChangePasswordPage: React.FC = () => {
                         >
                           {(field) => (
                             <>
-                              <Input
-                                type="password"
-                                required={true}
-                                value={field.state.value}
-                                onChange={(e) => field.handleChange(e.target.value)}
-                                onBlur={field.handleBlur}
-                                aria-describedby="newPassword-error"
-                                aria-invalid={
-                                  (field.state.meta.errors?.length ?? 0) > 0 || undefined
-                                }
-                              />
+                              <div className="relative">
+                                <Input
+                                  type={showNewPassword ? "text" : "password"}
+                                  required={true}
+                                  className="pr-10"
+                                  value={field.state.value}
+                                  onChange={(e) => field.handleChange(e.target.value)}
+                                  onBlur={field.handleBlur}
+                                  aria-describedby="newPassword-error"
+                                  aria-invalid={
+                                    (field.state.meta.errors?.length ?? 0) > 0 || undefined
+                                  }
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => setShowNewPassword((v) => !v)}
+                                  className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 focus:outline-none"
+                                  aria-label={showNewPassword ? "Hide password" : "Show password"}
+                                >
+                                  {showNewPassword ? (
+                                    <IconEyeOff size={18} />
+                                  ) : (
+                                    <IconEye size={18} />
+                                  )}
+                                </button>
+                              </div>
                               <PasswordStrength value={field.state.value} />
                               <FieldError
                                 id="newPassword-error"
@@ -190,17 +224,32 @@ const ChangePasswordPage: React.FC = () => {
                         >
                           {(field) => (
                             <>
-                              <Input
-                                type="password"
-                                required={true}
-                                value={field.state.value}
-                                onChange={(e) => field.handleChange(e.target.value)}
-                                onBlur={field.handleBlur}
-                                aria-describedby="confirmation-error"
-                                aria-invalid={
-                                  (field.state.meta.errors?.length ?? 0) > 0 || undefined
-                                }
-                              />
+                              <div className="relative">
+                                <Input
+                                  type={showConfirmation ? "text" : "password"}
+                                  required={true}
+                                  className="pr-10"
+                                  value={field.state.value}
+                                  onChange={(e) => field.handleChange(e.target.value)}
+                                  onBlur={field.handleBlur}
+                                  aria-describedby="confirmation-error"
+                                  aria-invalid={
+                                    (field.state.meta.errors?.length ?? 0) > 0 || undefined
+                                  }
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => setShowConfirmation((v) => !v)}
+                                  className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 focus:outline-none"
+                                  aria-label={showConfirmation ? "Hide password" : "Show password"}
+                                >
+                                  {showConfirmation ? (
+                                    <IconEyeOff size={18} />
+                                  ) : (
+                                    <IconEye size={18} />
+                                  )}
+                                </button>
+                              </div>
                               <FieldError
                                 id="confirmation-error"
                                 errors={field.state.meta.errors}

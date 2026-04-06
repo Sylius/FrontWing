@@ -27,3 +27,7 @@ dist-ssr
 # AI directories and files
 .claude
 .moai
+
+# Test artifacts
+playwright-report/
+test-results/
