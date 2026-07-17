@@ -1,5 +1,20 @@
 import type { AddressInterface } from "./Order";
 
+export interface Country {
+    code: string;
+    name: string;
+}
+
+export type AddressFieldName =
+    | "firstName"
+    | "lastName"
+    | "company"
+    | "street"
+    | "countryCode"
+    | "city"
+    | "postcode"
+    | "phoneNumber";
+
 export interface DeliveryEstimate {
     from: string;
     to: string;

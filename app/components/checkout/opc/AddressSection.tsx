@@ -1,12 +1,18 @@
 import React from "react";
 import type { AddressInterface } from "~/types/Order";
+import type { Country } from "~/types/Checkout";
+import { useCheckout } from "~/context/CheckoutContext";
+import AddressBookSelect from "./AddressBookSelect";
+import AddressFields from "./AddressFields";
 
 interface Props {
     addresses: AddressInterface[];
+    countries: Country[];
 }
 
-const AddressSection: React.FC<Props> = ({ addresses }) => {
-    const address: AddressInterface = addresses[0] ?? {};
+const AddressSection: React.FC<Props> = ({ addresses, countries }) => {
+    const { state, setEmail, setAddressField, selectAddress, setUseDifferentShipping } =
+        useCheckout();
 
     return (
         <fieldset className="mb-5">
@@ -21,142 +27,61 @@ const AddressSection: React.FC<Props> = ({ addresses }) => {
                     type="email"
                     className="form-control"
                     placeholder="your@email.com"
-                    value={address.email ?? ""}
-                    readOnly
+                    value={state.email}
+                    onChange={(event) => setEmail(event.target.value)}
                 />
             </div>
 
-            {addresses.length > 0 && (
-                <div className="mb-3">
-                    <label className="form-label" htmlFor="opc-address-book">
-                        Select address from my book
-                    </label>
-                    <select
-                        id="opc-address-book"
-                        className="form-select"
-                        value={address.id ?? ""}
-                        disabled
-                    >
-                        {addresses.map((entry) => (
-                            <option key={entry.id} value={entry.id}>
-                                {entry.firstName} {entry.lastName} — {entry.street}, {entry.city}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-            )}
+            {state.useDifferentShipping && <div className="h6 mb-3">Billing address</div>}
 
-            <div className="row">
-                <div className="col-md-6 mb-3">
-                    <label className="form-label" htmlFor="opc-firstName">
-                        First name
-                    </label>
-                    <input
-                        id="opc-firstName"
-                        className="form-control"
-                        value={address.firstName ?? ""}
-                        readOnly
-                    />
-                </div>
-                <div className="col-md-6 mb-3">
-                    <label className="form-label" htmlFor="opc-lastName">
-                        Last name
-                    </label>
-                    <input
-                        id="opc-lastName"
-                        className="form-control"
-                        value={address.lastName ?? ""}
-                        readOnly
-                    />
-                </div>
-            </div>
+            <AddressBookSelect
+                id="opc-billing-book"
+                label="Select address from my book"
+                addresses={addresses}
+                selectedId={state.billingAddress.id}
+                onSelect={(address) => selectAddress("billing", address)}
+            />
 
-            <div className="mb-3">
-                <label className="form-label" htmlFor="opc-company">
-                    Company
-                </label>
-                <input
-                    id="opc-company"
-                    className="form-control"
-                    value={address.company ?? ""}
-                    readOnly
-                />
-            </div>
-
-            <div className="mb-3">
-                <label className="form-label" htmlFor="opc-street">
-                    Street
-                </label>
-                <input
-                    id="opc-street"
-                    className="form-control"
-                    value={address.street ?? ""}
-                    readOnly
-                />
-            </div>
-
-            <div className="row">
-                <div className="col-md-6 mb-3">
-                    <label className="form-label" htmlFor="opc-country">
-                        Country
-                    </label>
-                    <input
-                        id="opc-country"
-                        className="form-control"
-                        value={address.countryCode ?? ""}
-                        readOnly
-                    />
-                </div>
-                <div className="col-md-6 mb-3">
-                    <label className="form-label" htmlFor="opc-postcode">
-                        Postcode
-                    </label>
-                    <input
-                        id="opc-postcode"
-                        className="form-control"
-                        value={address.postcode ?? ""}
-                        readOnly
-                    />
-                </div>
-            </div>
-
-            <div className="mb-3">
-                <label className="form-label" htmlFor="opc-city">
-                    City
-                </label>
-                <input
-                    id="opc-city"
-                    className="form-control"
-                    value={address.city ?? ""}
-                    readOnly
-                />
-            </div>
-
-            <div className="mb-4">
-                <label className="form-label" htmlFor="opc-phone">
-                    Phone
-                </label>
-                <input
-                    id="opc-phone"
-                    className="form-control"
-                    value={address.phoneNumber ?? ""}
-                    readOnly
-                />
-            </div>
+            <AddressFields
+                idPrefix="opc-billing"
+                address={state.billingAddress}
+                countries={countries}
+                onChange={(field, value) => setAddressField("billing", field, value)}
+            />
 
             <div className="form-check">
                 <input
                     id="opc-different-shipping"
                     type="checkbox"
                     className="form-check-input"
-                    checked={false}
-                    disabled
-                    readOnly
+                    checked={state.useDifferentShipping}
+                    onChange={(event) => setUseDifferentShipping(event.target.checked)}
                 />
                 <label className="form-check-label" htmlFor="opc-different-shipping">
                     Use a different address for shipping
                 </label>
             </div>
+
+            {state.useDifferentShipping && (
+                <div className="mt-4">
+                    <div className="h6 mb-3">Shipping address</div>
+
+                    <AddressBookSelect
+                        id="opc-shipping-book"
+                        label="Select address from my book"
+                        addresses={addresses}
+                        selectedId={state.shippingAddress.id}
+                        onSelect={(address) => selectAddress("shipping", address)}
+                    />
+
+                    <AddressFields
+                        idPrefix="opc-shipping"
+                        address={state.shippingAddress}
+                        countries={countries}
+                        onChange={(field, value) => setAddressField("shipping", field, value)}
+                    />
+                </div>
+            )}
         </fieldset>
     );
 };

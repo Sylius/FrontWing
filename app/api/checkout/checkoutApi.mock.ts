@@ -3,6 +3,7 @@ import type {
     CheckoutPaymentMethod,
     CheckoutShippingMethod,
     CheckoutState,
+    Country,
     FreeShippingProgress,
     LoyaltyReward,
     OrderLineItem,
@@ -13,6 +14,7 @@ import type {
 import type { CheckoutApi } from "./checkoutApi";
 
 import addressesJson from "./mocks/addresses.json";
+import countriesJson from "./mocks/countries.json";
 import itemsJson from "./mocks/items.json";
 import catalogJson from "./mocks/orderSummary.json";
 
@@ -31,6 +33,7 @@ interface MockCatalog {
 
 const catalog: MockCatalog = catalogJson;
 const addresses: AddressInterface[] = addressesJson;
+const countries: Country[] = countriesJson;
 const items: OrderLineItem[] = itemsJson;
 
 const LATENCY_MS = 300;
@@ -159,6 +162,11 @@ export const checkoutApiMock: CheckoutApi = {
     async getCheckoutAddresses(): Promise<AddressInterface[]> {
         await delay();
         return clone(addresses);
+    },
+
+    async getCountries(): Promise<Country[]> {
+        await delay();
+        return clone(countries);
     },
 
     async getCheckoutItems(): Promise<OrderLineItem[]> {

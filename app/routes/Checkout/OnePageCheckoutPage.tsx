@@ -2,6 +2,8 @@ import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import CheckoutLayout from "~/layouts/Checkout";
 import { useOrder } from "~/context/OrderContext";
+import { useCustomer } from "~/context/CustomerContext";
+import { CheckoutProvider, createInitialCheckoutState } from "~/context/CheckoutContext";
 import { checkoutApi } from "~/api/checkout/checkoutApi";
 import ShippingMethodSection from "~/components/checkout/opc/ShippingMethodSection";
 import AddressSection from "~/components/checkout/opc/AddressSection";
@@ -11,11 +13,18 @@ import FreeShippingCard from "~/components/checkout/opc/FreeShippingCard";
 
 const OnePageCheckoutPage: React.FC = () => {
     const { orderToken } = useOrder();
+    const { customer, loading: customerLoading } = useCustomer();
     const token = orderToken ?? "";
 
     const addressesQuery = useQuery({
         queryKey: ["opc-addresses", token],
         queryFn: () => checkoutApi.getCheckoutAddresses(token),
+    });
+
+    const countriesQuery = useQuery({
+        queryKey: ["opc-countries"],
+        queryFn: () => checkoutApi.getCountries(),
+        staleTime: Infinity,
     });
 
     const itemsQuery = useQuery({
@@ -28,9 +37,23 @@ const OnePageCheckoutPage: React.FC = () => {
         queryFn: () => checkoutApi.getOrderSummary(token),
     });
 
-    const isPending = addressesQuery.isPending || itemsQuery.isPending || summaryQuery.isPending;
-    const isError = addressesQuery.isError || itemsQuery.isError || summaryQuery.isError;
+    const isPending =
+        customerLoading ||
+        addressesQuery.isPending ||
+        countriesQuery.isPending ||
+        itemsQuery.isPending ||
+        summaryQuery.isPending;
+    const isError =
+        addressesQuery.isError ||
+        countriesQuery.isError ||
+        itemsQuery.isError ||
+        summaryQuery.isError;
+
+    const addresses = addressesQuery.data;
+    const countries = countriesQuery.data;
+    const items = itemsQuery.data;
     const summary = summaryQuery.data;
+    const isReady = !isPending && !isError && !!addresses && !!countries && !!items && !!summary;
 
     return (
         <CheckoutLayout sidebarOn={false}>
@@ -43,36 +66,45 @@ const OnePageCheckoutPage: React.FC = () => {
                     <div className="text-danger py-5">Could not load the checkout. Please try again.</div>
                 )}
 
-                {!isPending && !isError && summary && (
-                    <div className="row gx-5">
-                        <div className="col-12 col-lg-8">
-                            <ShippingMethodSection
-                                methods={summary.shippingMethods}
-                                selectedCode={summary.selectedShippingMethod}
-                                currencyCode={summary.currencyCode}
-                            />
+                {isReady && (
+                    <CheckoutProvider
+                        initialState={createInitialCheckoutState({
+                            addresses,
+                            items,
+                            summary,
+                            email: customer?.email,
+                        })}
+                    >
+                        <div className="row gx-5">
+                            <div className="col-12 col-lg-8">
+                                <ShippingMethodSection
+                                    methods={summary.shippingMethods}
+                                    selectedCode={summary.selectedShippingMethod}
+                                    currencyCode={summary.currencyCode}
+                                />
 
-                            <AddressSection addresses={addressesQuery.data ?? []} />
+                                <AddressSection addresses={addresses} countries={countries} />
 
-                            <PaymentMethodSection
-                                methods={summary.paymentMethods}
-                                selectedCode={summary.selectedPaymentMethod}
-                            />
-                        </div>
+                                <PaymentMethodSection
+                                    methods={summary.paymentMethods}
+                                    selectedCode={summary.selectedPaymentMethod}
+                                />
+                            </div>
 
-                        <div className="col-12 col-lg-4">
-                            <div className="sticky-lg-top pt-2">
-                                <SummaryPanel items={itemsQuery.data ?? []} summary={summary} />
+                            <div className="col-12 col-lg-4">
+                                <div className="sticky-lg-top pt-2">
+                                    <SummaryPanel items={items} summary={summary} />
 
-                                {summary.freeShipping && (
-                                    <FreeShippingCard
-                                        freeShipping={summary.freeShipping}
-                                        currencyCode={summary.currencyCode}
-                                    />
-                                )}
+                                    {summary.freeShipping && (
+                                        <FreeShippingCard
+                                            freeShipping={summary.freeShipping}
+                                            currencyCode={summary.currencyCode}
+                                        />
+                                    )}
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </CheckoutProvider>
                 )}
             </div>
         </CheckoutLayout>
