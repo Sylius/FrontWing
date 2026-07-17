@@ -1,0 +1,23 @@
+[
+  {
+    "id": 101,
+    "firstName": "Anna",
+    "lastName": "Kowalska",
+    "phoneNumber": "+48 601 234 567",
+    "company": "Solenne Sp. z o.o.",
+    "countryCode": "PL",
+    "street": "Marszałkowska 12/4",
+    "city": "Warszawa",
+    "postcode": "00-590"
+  },
+  {
+    "id": 102,
+    "firstName": "Anna",
+    "lastName": "Kowalska",
+    "phoneNumber": "+48 601 234 567",
+    "countryCode": "DE",
+    "street": "Torstraße 88",
+    "city": "Berlin",
+    "postcode": "10119"
+  }
+]

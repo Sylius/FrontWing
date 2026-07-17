@@ -1,0 +1,52 @@
+{
+  "currencyCode": "EUR",
+  "defaultShippingMethodCode": "courier_inpostillo",
+  "shippingMethods": [
+    {
+      "code": "courier_inpostillo",
+      "name": "Courier Inpostillo",
+      "price": 2599,
+      "estimatedDelivery": { "from": "2025-07-28", "to": "2025-07-30" },
+      "enabled": true
+    },
+    {
+      "code": "courier_gsl",
+      "name": "Courier GSL",
+      "price": 2456,
+      "originalPrice": 3222,
+      "estimatedDelivery": { "from": "2025-07-28", "to": "2025-07-30" },
+      "enabled": true
+    },
+    {
+      "code": "parcel_locker_inpostillo",
+      "name": "Parcel Locker Inpostillo",
+      "price": 1499,
+      "estimatedDelivery": { "from": "2025-07-29", "to": "2025-07-31" },
+      "enabled": true,
+      "availableCountries": ["PL"]
+    },
+    {
+      "code": "parcel_locker_gsl",
+      "name": "Parcel Locker GSL",
+      "price": 1699,
+      "estimatedDelivery": { "from": "2025-07-29", "to": "2025-07-31" },
+      "enabled": true,
+      "availableCountries": ["PL"]
+    }
+  ],
+  "paymentMethods": [
+    { "code": "mollie", "name": "Mollie", "logoUrl": "/mollie-logo.svg", "enabled": true },
+    { "code": "adyen", "name": "Adyen", "logoUrl": "/adyen-logo.svg", "enabled": true },
+    { "code": "paypal", "name": "PayPal", "logoUrl": "/paypal-logo.svg", "enabled": true }
+  ],
+  "loyalty": {
+    "points": 12,
+    "value": 12,
+    "currency": "PLN",
+    "clubName": "SolenneClub"
+  },
+  "securePayments": {
+    "provider": "mollie",
+    "cardBrands": ["visa", "amex", "mastercard", "maestro"]
+  }
+}
