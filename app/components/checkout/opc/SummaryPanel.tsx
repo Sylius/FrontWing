@@ -9,13 +9,15 @@ import CouponRow from "./CouponRow";
 interface Props {
     items: OrderLineItem[];
     summary: OrderSummary;
+    recalculating: boolean;
+    canPay: boolean;
 }
 
-const SummaryPanel: React.FC<Props> = ({ items, summary }) => {
+const SummaryPanel: React.FC<Props> = ({ items, summary, recalculating, canPay }) => {
     const { currencyCode, totals, loyalty, estimatedDelivery, securePayments } = summary;
 
     return (
-        <div className="card bg-body-tertiary border-0 mb-3">
+        <div className="card bg-body-tertiary border-0 mb-3" aria-busy={recalculating}>
             <div className="card-body">
                 <OrderItemsSection items={items} currencyCode={currencyCode} />
 
@@ -77,8 +79,23 @@ const SummaryPanel: React.FC<Props> = ({ items, summary }) => {
                     </div>
                 )}
 
-                <button type="button" className="btn btn-primary w-100 mb-3" disabled>
-                    Pay now securely
+                <button
+                    type="button"
+                    className="btn btn-primary w-100 mb-3"
+                    disabled={!canPay}
+                >
+                    {recalculating ? (
+                        <>
+                            <span
+                                className="spinner-border spinner-border-sm me-2"
+                                role="status"
+                                aria-hidden="true"
+                            />
+                            Recalculating...
+                        </>
+                    ) : (
+                        "Pay now securely"
+                    )}
                 </button>
 
                 {securePayments && (

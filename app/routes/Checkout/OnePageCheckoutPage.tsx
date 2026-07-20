@@ -5,11 +5,7 @@ import { useOrder } from "~/context/OrderContext";
 import { useCustomer } from "~/context/CustomerContext";
 import { CheckoutProvider, createInitialCheckoutState } from "~/context/CheckoutContext";
 import { checkoutApi } from "~/api/checkout/checkoutApi";
-import ShippingMethodSection from "~/components/checkout/opc/ShippingMethodSection";
-import AddressSection from "~/components/checkout/opc/AddressSection";
-import PaymentMethodSection from "~/components/checkout/opc/PaymentMethodSection";
-import SummaryPanel from "~/components/checkout/opc/SummaryPanel";
-import FreeShippingCard from "~/components/checkout/opc/FreeShippingCard";
+import CheckoutContent from "~/components/checkout/opc/CheckoutContent";
 
 const OnePageCheckoutPage: React.FC = () => {
     const { orderToken } = useOrder();
@@ -75,31 +71,13 @@ const OnePageCheckoutPage: React.FC = () => {
                             email: customer?.email,
                         })}
                     >
-                        <div className="row gx-5">
-                            <div className="col-12 col-lg-8">
-                                <ShippingMethodSection
-                                    methods={summary.shippingMethods}
-                                    currencyCode={summary.currencyCode}
-                                />
-
-                                <AddressSection addresses={addresses} countries={countries} />
-
-                                <PaymentMethodSection methods={summary.paymentMethods} />
-                            </div>
-
-                            <div className="col-12 col-lg-4">
-                                <div className="sticky-lg-top pt-2">
-                                    <SummaryPanel items={items} summary={summary} />
-
-                                    {summary.freeShipping && (
-                                        <FreeShippingCard
-                                            freeShipping={summary.freeShipping}
-                                            currencyCode={summary.currencyCode}
-                                        />
-                                    )}
-                                </div>
-                            </div>
-                        </div>
+                        <CheckoutContent
+                            token={token}
+                            addresses={addresses}
+                            countries={countries}
+                            items={items}
+                            initialSummary={summary}
+                        />
                     </CheckoutProvider>
                 )}
             </div>

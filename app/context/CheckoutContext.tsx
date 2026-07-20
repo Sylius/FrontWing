@@ -14,8 +14,9 @@ export type CheckoutAction =
     | { type: "SET_ADDRESS_FIELD"; scope: AddressScope; field: AddressFieldName; value: string }
     | { type: "SELECT_ADDRESS"; scope: AddressScope; address: AddressInterface }
     | { type: "SET_USE_DIFFERENT_SHIPPING"; enabled: boolean }
-    | { type: "SET_SHIPPING_METHOD"; code: string }
-    | { type: "SET_PAYMENT_METHOD"; code: string }
+    | { type: "SET_SHIPPING_METHOD"; code: string | null }
+    | { type: "SET_PAYMENT_METHOD"; code: string | null }
+    | { type: "SET_COUPON"; code: string | null }
     | { type: "REMOVE_ITEM"; id: number };
 
 interface CheckoutContextType {
@@ -24,8 +25,9 @@ interface CheckoutContextType {
     setAddressField: (scope: AddressScope, field: AddressFieldName, value: string) => void;
     selectAddress: (scope: AddressScope, address: AddressInterface) => void;
     setUseDifferentShipping: (enabled: boolean) => void;
-    setShippingMethod: (code: string) => void;
-    setPaymentMethod: (code: string) => void;
+    setShippingMethod: (code: string | null) => void;
+    setPaymentMethod: (code: string | null) => void;
+    setCoupon: (code: string | null) => void;
     removeItem: (id: number) => void;
 }
 
@@ -107,6 +109,9 @@ export const checkoutReducer = (state: CheckoutState, action: CheckoutAction): C
         case "SET_PAYMENT_METHOD":
             return { ...state, paymentMethodCode: action.code };
 
+        case "SET_COUPON":
+            return { ...state, couponCode: action.code };
+
         case "REMOVE_ITEM":
             return { ...state, items: state.items.filter((item) => item.id !== action.id) };
 
@@ -142,12 +147,16 @@ export const CheckoutProvider: React.FC<{
         dispatch({ type: "SET_USE_DIFFERENT_SHIPPING", enabled });
     }, []);
 
-    const setShippingMethod = useCallback((code: string) => {
+    const setShippingMethod = useCallback((code: string | null) => {
         dispatch({ type: "SET_SHIPPING_METHOD", code });
     }, []);
 
-    const setPaymentMethod = useCallback((code: string) => {
+    const setPaymentMethod = useCallback((code: string | null) => {
         dispatch({ type: "SET_PAYMENT_METHOD", code });
+    }, []);
+
+    const setCoupon = useCallback((code: string | null) => {
+        dispatch({ type: "SET_COUPON", code });
     }, []);
 
     const removeItem = useCallback((id: number) => {
@@ -163,6 +172,7 @@ export const CheckoutProvider: React.FC<{
             setUseDifferentShipping,
             setShippingMethod,
             setPaymentMethod,
+            setCoupon,
             removeItem,
         }),
         [
@@ -173,6 +183,7 @@ export const CheckoutProvider: React.FC<{
             setUseDifferentShipping,
             setShippingMethod,
             setPaymentMethod,
+            setCoupon,
             removeItem,
         ],
     );
