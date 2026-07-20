@@ -13,7 +13,10 @@ export type CheckoutAction =
     | { type: "SET_EMAIL"; email: string }
     | { type: "SET_ADDRESS_FIELD"; scope: AddressScope; field: AddressFieldName; value: string }
     | { type: "SELECT_ADDRESS"; scope: AddressScope; address: AddressInterface }
-    | { type: "SET_USE_DIFFERENT_SHIPPING"; enabled: boolean };
+    | { type: "SET_USE_DIFFERENT_SHIPPING"; enabled: boolean }
+    | { type: "SET_SHIPPING_METHOD"; code: string }
+    | { type: "SET_PAYMENT_METHOD"; code: string }
+    | { type: "REMOVE_ITEM"; id: number };
 
 interface CheckoutContextType {
     state: CheckoutState;
@@ -21,6 +24,9 @@ interface CheckoutContextType {
     setAddressField: (scope: AddressScope, field: AddressFieldName, value: string) => void;
     selectAddress: (scope: AddressScope, address: AddressInterface) => void;
     setUseDifferentShipping: (enabled: boolean) => void;
+    setShippingMethod: (code: string) => void;
+    setPaymentMethod: (code: string) => void;
+    removeItem: (id: number) => void;
 }
 
 interface InitialStateInput {
@@ -95,6 +101,15 @@ export const checkoutReducer = (state: CheckoutState, action: CheckoutAction): C
             };
         }
 
+        case "SET_SHIPPING_METHOD":
+            return { ...state, shippingMethodCode: action.code };
+
+        case "SET_PAYMENT_METHOD":
+            return { ...state, paymentMethodCode: action.code };
+
+        case "REMOVE_ITEM":
+            return { ...state, items: state.items.filter((item) => item.id !== action.id) };
+
         default:
             return state;
     }
@@ -127,9 +142,39 @@ export const CheckoutProvider: React.FC<{
         dispatch({ type: "SET_USE_DIFFERENT_SHIPPING", enabled });
     }, []);
 
+    const setShippingMethod = useCallback((code: string) => {
+        dispatch({ type: "SET_SHIPPING_METHOD", code });
+    }, []);
+
+    const setPaymentMethod = useCallback((code: string) => {
+        dispatch({ type: "SET_PAYMENT_METHOD", code });
+    }, []);
+
+    const removeItem = useCallback((id: number) => {
+        dispatch({ type: "REMOVE_ITEM", id });
+    }, []);
+
     const value = useMemo(
-        () => ({ state, setEmail, setAddressField, selectAddress, setUseDifferentShipping }),
-        [state, setEmail, setAddressField, selectAddress, setUseDifferentShipping],
+        () => ({
+            state,
+            setEmail,
+            setAddressField,
+            selectAddress,
+            setUseDifferentShipping,
+            setShippingMethod,
+            setPaymentMethod,
+            removeItem,
+        }),
+        [
+            state,
+            setEmail,
+            setAddressField,
+            selectAddress,
+            setUseDifferentShipping,
+            setShippingMethod,
+            setPaymentMethod,
+            removeItem,
+        ],
     );
 
     return <CheckoutContext.Provider value={value}>{children}</CheckoutContext.Provider>;

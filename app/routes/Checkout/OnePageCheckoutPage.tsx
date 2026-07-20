@@ -79,16 +79,12 @@ const OnePageCheckoutPage: React.FC = () => {
                             <div className="col-12 col-lg-8">
                                 <ShippingMethodSection
                                     methods={summary.shippingMethods}
-                                    selectedCode={summary.selectedShippingMethod}
                                     currencyCode={summary.currencyCode}
                                 />
 
                                 <AddressSection addresses={addresses} countries={countries} />
 
-                                <PaymentMethodSection
-                                    methods={summary.paymentMethods}
-                                    selectedCode={summary.selectedPaymentMethod}
-                                />
+                                <PaymentMethodSection methods={summary.paymentMethods} />
                             </div>
 
                             <div className="col-12 col-lg-4">
