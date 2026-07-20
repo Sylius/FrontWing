@@ -39,14 +39,7 @@
     { "code": "adyen", "name": "Adyen", "logoUrl": "/adyen-logo.svg", "enabled": true },
     { "code": "paypal", "name": "PayPal", "logoUrl": "/paypal-logo.svg", "enabled": true }
   ],
-  "loyalty": {
-    "points": 12,
-    "value": 12,
-    "currency": "PLN",
-    "clubName": "SolenneClub"
-  },
   "securePayments": {
-    "provider": "mollie",
-    "cardBrands": ["visa", "amex", "mastercard", "maestro"]
+    "provider": "mollie"
   }
 }

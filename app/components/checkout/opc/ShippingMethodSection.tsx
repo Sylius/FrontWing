@@ -21,14 +21,14 @@ const ShippingMethodSection: React.FC<Props> = ({ methods, currencyCode }) => {
             {methods.length === 0 ? (
                 <div className="text-danger">No shipping methods available. Check your address.</div>
             ) : (
-                methods.map((method) => (
-                    <div key={method.code} className="card bg-body-tertiary border-0 mb-3">
-                        <label className="d-flex align-items-center gap-3 card-body">
+                methods.map((method, index) => (
+                    <div key={method.code} className={index > 0 ? "border-top" : undefined}>
+                        <label className="d-flex align-items-center gap-3 card-body py-2 checkout-method-tile">
                             <input
                                 type="radio"
                                 id={`opc-shipping-${method.code}`}
                                 name="opcShippingMethod"
-                                className="form-check-input flex-shrink-0 mt-0"
+                                className="form-check-input flex-shrink-0 mt-0 ms-2"
                                 value={method.code}
                                 checked={state.shippingMethodCode === method.code}
                                 disabled={!method.enabled}

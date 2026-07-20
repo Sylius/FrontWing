@@ -17,14 +17,14 @@ const PaymentMethodSection: React.FC<Props> = ({ methods }) => {
             {methods.length === 0 ? (
                 <div className="text-danger">No payment methods available for your order.</div>
             ) : (
-                methods.map((method) => (
-                    <div key={method.code} className="card bg-body-tertiary border-0 mb-3">
-                        <label className="d-flex align-items-center gap-3 card-body">
+                methods.map((method, index) => (
+                    <div key={method.code} className={index > 0 ? "border-top" : undefined}>
+                        <label className="d-flex align-items-center gap-3 card-body py-2 checkout-method-tile">
                             <input
                                 type="radio"
                                 id={`opc-payment-${method.code}`}
                                 name="opcPaymentMethod"
-                                className="form-check-input flex-shrink-0 mt-0"
+                                className="form-check-input flex-shrink-0 mt-0 ms-2"
                                 value={method.code}
                                 checked={state.paymentMethodCode === method.code}
                                 disabled={!method.enabled}

@@ -8,7 +8,6 @@ import ShippingMethodSection from "./ShippingMethodSection";
 import AddressSection from "./AddressSection";
 import PaymentMethodSection from "./PaymentMethodSection";
 import SummaryPanel from "./SummaryPanel";
-import FreeShippingCard from "./FreeShippingCard";
 
 interface Props {
     token: string;
@@ -60,20 +59,13 @@ const CheckoutContent: React.FC<Props> = ({ token, addresses, countries, items, 
             </div>
 
             <div className="col-12 col-lg-4">
-                <div className="sticky-lg-top pt-2">
+                <div className="sticky-lg-top pt-2 checkout-summary-sticky">
                     <SummaryPanel
                         items={items}
                         summary={summary}
                         recalculating={isRecalculating}
                         canPay={canPay}
                     />
-
-                    {summary.freeShipping && (
-                        <FreeShippingCard
-                            freeShipping={summary.freeShipping}
-                            currencyCode={summary.currencyCode}
-                        />
-                    )}
                 </div>
             </div>
         </div>

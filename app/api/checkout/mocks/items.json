@@ -4,11 +4,7 @@
     "productName": "Solenne Wool Blend Coat",
     "variantCode": "solenne_wool_blend_coat_beige_m",
     "imageUrl": "/logo192.png",
-    "options": [
-      { "name": "Brand", "value": "Solenne" },
-      { "name": "Color", "value": "Beige" },
-      { "name": "Size", "value": "M" }
-    ],
+    "variant": "Beige / M",
     "quantity": 12,
     "unitPrice": 15589,
     "originalUnitPrice": 17989,
@@ -18,11 +14,7 @@
     "id": 2,
     "productName": "Solenne Cashmere Scarf",
     "variantCode": "solenne_cashmere_scarf_navy_os",
-    "options": [
-      { "name": "Brand", "value": "Solenne" },
-      { "name": "Color", "value": "Navy" },
-      { "name": "Size", "value": "One size" }
-    ],
+    "variant": "Navy / One size",
     "quantity": 4,
     "unitPrice": 13908,
     "subtotal": 55632

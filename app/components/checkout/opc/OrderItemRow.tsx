@@ -25,11 +25,7 @@ const OrderItemRow: React.FC<Props> = ({ item, currencyCode, onRemove }) => (
         <div className="flex-grow-1">
             <div className="h6 mb-1 text-break">{item.productName}</div>
 
-            {item.options?.map((option) => (
-                <div key={option.name} className="text-body-tertiary small">
-                    {option.name}: {option.value}
-                </div>
-            ))}
+            {item.variant && <div className="text-body-tertiary small">{item.variant}</div>}
 
             <div className="small">
                 {item.quantity} × {formatMoney(item.unitPrice, currencyCode)}
@@ -43,11 +39,11 @@ const OrderItemRow: React.FC<Props> = ({ item, currencyCode, onRemove }) => (
 
         <button
             type="button"
-            className="btn btn-sm btn-transparent px-2 flex-shrink-0"
+            className="btn btn-sm btn-transparent p-0 flex-shrink-0 d-inline-flex align-items-center border-0"
             aria-label={`Remove ${item.productName}`}
             onClick={onRemove}
         >
-            <IconX className="icon icon-sm" stroke={2} />
+            <IconX className="icon icon-xs" stroke={2} />
         </button>
     </div>
 );

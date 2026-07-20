@@ -4,8 +4,6 @@ import type {
     CheckoutShippingMethod,
     CheckoutState,
     Country,
-    FreeShippingProgress,
-    LoyaltyReward,
     OrderLineItem,
     OrderSummary,
     OrderTotals,
@@ -27,7 +25,6 @@ interface MockCatalog {
     defaultShippingMethodCode: string | null;
     shippingMethods: MockShippingMethod[];
     paymentMethods: CheckoutPaymentMethod[];
-    loyalty?: LoyaltyReward;
     securePayments?: SecurePayments;
 }
 
@@ -39,8 +36,6 @@ const items: OrderLineItem[] = itemsJson;
 const LATENCY_MS = 300;
 
 const DEFAULT_COUNTRY_CODE = "PL";
-
-const FREE_SHIPPING_THRESHOLD = 250000;
 
 const ORDER_PROMOTION_TOTAL = -6259;
 
@@ -73,15 +68,6 @@ const resolveShippingMethods = (countryCode?: string): CheckoutShippingMethod[] 
         )
         .map(toContractShippingMethod);
 
-const resolveFreeShipping = (itemsSubtotal: number): FreeShippingProgress | undefined => {
-    if (itemsSubtotal >= FREE_SHIPPING_THRESHOLD) return undefined;
-
-    return {
-        remaining: FREE_SHIPPING_THRESHOLD - itemsSubtotal,
-        progressPercent: Math.round((itemsSubtotal / FREE_SHIPPING_THRESHOLD) * 100),
-    };
-};
-
 const calculateTotals = (
     state: CheckoutState,
     shippingMethod: CheckoutShippingMethod | null,
@@ -99,8 +85,7 @@ const calculateTotals = (
         itemsCount += line.quantity;
     }
 
-    const hasFreeShipping = itemsSubtotal >= FREE_SHIPPING_THRESHOLD;
-    const shippingTotal = !shippingMethod || hasFreeShipping ? 0 : shippingMethod.price;
+    const shippingTotal = shippingMethod ? shippingMethod.price : 0;
 
     const couponRate = state.couponCode ? (MOCK_COUPONS[state.couponCode.toUpperCase()] ?? 0) : 0;
     const couponDiscount = -Math.round(itemsSubtotal * couponRate);
@@ -152,8 +137,6 @@ const syncCheckout = async (token: string, state: CheckoutState): Promise<OrderS
         selectedPaymentMethod: selectedPaymentMethod?.code ?? null,
         totals,
         estimatedDelivery: selectedShippingMethod?.estimatedDelivery,
-        loyalty: catalog.loyalty ? clone(catalog.loyalty) : undefined,
-        freeShipping: resolveFreeShipping(totals.itemsSubtotal),
         securePayments: catalog.securePayments ? clone(catalog.securePayments) : undefined,
     };
 };

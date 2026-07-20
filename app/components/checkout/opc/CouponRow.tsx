@@ -1,17 +1,17 @@
 import React, { useState } from "react";
-import { IconPercentage, IconPlus, IconX } from "@tabler/icons-react";
+import { IconPercentage, IconChevronDown, IconX } from "@tabler/icons-react";
 import { useCheckout } from "~/context/CheckoutContext";
+
+const COUPON_COLLAPSE_ID = "opc-coupon-collapse";
 
 const CouponRow: React.FC = () => {
     const { state, setCoupon } = useCheckout();
-    const [expanded, setExpanded] = useState(false);
     const [value, setValue] = useState("");
 
     const apply = () => {
         const code = value.trim();
         if (code === "") return;
         setCoupon(code);
-        setExpanded(false);
     };
 
     const remove = () => {
@@ -41,24 +41,23 @@ const CouponRow: React.FC = () => {
 
     return (
         <>
-            <div className="d-flex align-items-center justify-content-between">
+            <button
+                type="button"
+                className="coupon-toggle btn btn-transparent border-0 shadow-none px-0 py-2 w-100 d-flex align-items-center justify-content-between collapsed"
+                data-bs-toggle="collapse"
+                data-bs-target={`#${COUPON_COLLAPSE_ID}`}
+                aria-expanded="false"
+                aria-controls={COUPON_COLLAPSE_ID}
+            >
                 <span className="d-flex align-items-center gap-2">
                     <IconPercentage className="icon icon-sm" stroke={2} />
                     Apply coupon code
                 </span>
 
-                <button
-                    type="button"
-                    className="btn btn-sm btn-transparent px-2"
-                    aria-label="Show coupon code form"
-                    aria-expanded={expanded}
-                    onClick={() => setExpanded((open) => !open)}
-                >
-                    <IconPlus className="icon icon-sm" stroke={2} />
-                </button>
-            </div>
+                <IconChevronDown className="icon icon-sm coupon-chevron" stroke={2} />
+            </button>
 
-            {expanded && (
+            <div className="collapse" id={COUPON_COLLAPSE_ID}>
                 <div className="input-group mt-2">
                     <input
                         type="text"
@@ -83,7 +82,7 @@ const CouponRow: React.FC = () => {
                         Apply
                     </button>
                 </div>
-            )}
+            </div>
         </>
     );
 };

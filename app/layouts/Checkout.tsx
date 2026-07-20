@@ -18,7 +18,7 @@ const CheckoutLayout: React.FC<CheckoutLayoutProps> = ({ children, sidebarOn = t
     }, [location.pathname]);
 
     return (
-        <div className="d-flex flex-column min-vh-100 overflow-hidden">
+        <div className={`d-flex flex-column min-vh-100${sidebarOn ? " overflow-hidden" : ""}`}>
             <Header />
             <div className="flex-grow-1 d-flex align-items-stretch">
                 <div className="container">

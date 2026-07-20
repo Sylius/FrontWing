@@ -437,3 +437,30 @@ input.form-check-input:checked {
 .product-main-image-wrapper img {
   transition: filter 0.3s ease, opacity 0.3s ease;
 }
+
+.shadow-soft {
+  box-shadow: 0 0 27.9px 0 rgba(213, 213, 213, 0.44);
+}
+
+.checkout-summary-sticky {
+  top: 1.5rem;
+}
+
+.checkout-method-tile {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background-color: var(--bs-gray-100);
+  }
+}
+
+.coupon-toggle {
+  .coupon-chevron {
+    transition: transform 0.2s ease;
+  }
+
+  &[aria-expanded="true"] .coupon-chevron {
+    transform: rotate(180deg);
+  }
+}

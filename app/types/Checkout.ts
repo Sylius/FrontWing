@@ -37,17 +37,12 @@ export interface CheckoutPaymentMethod {
     enabled: boolean;
 }
 
-export interface OrderLineItemOption {
-    name: string;
-    value: string;
-}
-
 export interface OrderLineItem {
     id: number;
     productName: string;
     variantCode: string;
     imageUrl?: string;
-    options?: OrderLineItemOption[];
+    variant?: string;
     quantity: number;
     unitPrice: number;
     originalUnitPrice?: number;
@@ -63,21 +58,8 @@ export interface OrderTotals {
     total: number;
 }
 
-export interface LoyaltyReward {
-    points: number;
-    value: number;
-    currency: string;
-    clubName: string;
-}
-
-export interface FreeShippingProgress {
-    remaining: number;
-    progressPercent: number;
-}
-
 export interface SecurePayments {
     provider: string;
-    cardBrands: string[];
 }
 
 export interface OrderSummary {
@@ -88,8 +70,6 @@ export interface OrderSummary {
     selectedPaymentMethod: string | null;
     totals: OrderTotals;
     estimatedDelivery?: DeliveryEstimate;
-    loyalty?: LoyaltyReward;
-    freeShipping?: FreeShippingProgress;
     securePayments?: SecurePayments;
 }
 

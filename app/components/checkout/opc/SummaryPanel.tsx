@@ -1,5 +1,5 @@
 import React from "react";
-import { IconCalendarMonth, IconGift, IconInfoCircle, IconLock } from "@tabler/icons-react";
+import { IconCalendarMonth, IconLock } from "@tabler/icons-react";
 import type { OrderLineItem, OrderSummary } from "~/types/Checkout";
 import { formatMoney } from "~/utils/price";
 import { formatDeliveryRange } from "~/utils/deliveryEstimate";
@@ -14,10 +14,10 @@ interface Props {
 }
 
 const SummaryPanel: React.FC<Props> = ({ items, summary, recalculating, canPay }) => {
-    const { currencyCode, totals, loyalty, estimatedDelivery, securePayments } = summary;
+    const { currencyCode, totals, estimatedDelivery, securePayments } = summary;
 
     return (
-        <div className="card bg-body-tertiary border-0 mb-3" aria-busy={recalculating}>
+        <div className="card border-0 shadow-soft mb-3" aria-busy={recalculating}>
             <div className="card-body">
                 <OrderItemsSection items={items} currencyCode={currencyCode} />
 
@@ -25,7 +25,7 @@ const SummaryPanel: React.FC<Props> = ({ items, summary, recalculating, canPay }
 
                 <div className="h2 mb-4">Summary</div>
 
-                <table className="table table-borderless mb-3">
+                <table className="table table-borderless table-sm mb-3">
                     <tbody>
                         <tr>
                             <td>Subtotal price ({totals.itemsCount} items)</td>
@@ -61,17 +61,6 @@ const SummaryPanel: React.FC<Props> = ({ items, summary, recalculating, canPay }
                     </tbody>
                 </table>
 
-                {loyalty && (
-                    <div className="d-flex align-items-start gap-2 mb-3 small">
-                        <IconGift className="icon icon-sm flex-shrink-0" stroke={2} />
-                        <span>
-                            You will receive {loyalty.points} points (i.e. {loyalty.value} {loyalty.currency}) in
-                            the <strong>{loyalty.clubName}</strong>
-                        </span>
-                        <IconInfoCircle className="icon icon-sm flex-shrink-0 text-body-tertiary" stroke={2} />
-                    </div>
-                )}
-
                 {estimatedDelivery && (
                     <div className="d-flex align-items-center gap-2 mb-4 small">
                         <IconCalendarMonth className="icon icon-sm flex-shrink-0" stroke={2} />
@@ -104,7 +93,6 @@ const SummaryPanel: React.FC<Props> = ({ items, summary, recalculating, canPay }
                         <span>
                             Secure payments by <strong>{securePayments.provider}</strong>
                         </span>
-                        <span className="text-uppercase">{securePayments.cardBrands.join(" · ")}</span>
                     </div>
                 )}
             </div>
