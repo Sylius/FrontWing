@@ -1,6 +1,6 @@
 import React from "react";
 import type { AddressInterface } from "~/types/Order";
-import type { AddressFieldName, Country } from "~/types/Checkout";
+import type { AddressFieldName, Country } from "~/modules/checkout-opc/types";
 
 interface Props {
     idPrefix: string;

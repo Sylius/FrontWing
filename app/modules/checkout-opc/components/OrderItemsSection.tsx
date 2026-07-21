@@ -1,6 +1,6 @@
 import React from "react";
-import type { OrderLineItem } from "~/types/Checkout";
-import { useCheckout } from "~/context/CheckoutContext";
+import type { OrderLineItem } from "~/modules/checkout-opc/types";
+import { useCheckout } from "~/modules/checkout-opc/context/CheckoutContext";
 import OrderItemRow from "./OrderItemRow";
 
 interface Props {

@@ -5,7 +5,7 @@ import type {
     CheckoutState,
     OrderLineItem,
     OrderSummary,
-} from "~/types/Checkout";
+} from "~/modules/checkout-opc/types";
 
 export type AddressScope = "billing" | "shipping";
 

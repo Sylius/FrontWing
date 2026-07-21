@@ -8,7 +8,7 @@ import type {
     OrderSummary,
     OrderTotals,
     SecurePayments,
-} from "~/types/Checkout";
+} from "~/modules/checkout-opc/types";
 import type { CheckoutApi } from "./checkoutApi";
 
 import addressesJson from "./mocks/addresses.json";

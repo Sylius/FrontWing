@@ -1,6 +1,6 @@
 import React from "react";
 import { IconPhoto, IconX } from "@tabler/icons-react";
-import type { OrderLineItem } from "~/types/Checkout";
+import type { OrderLineItem } from "~/modules/checkout-opc/types";
 import { formatMoney } from "~/utils/price";
 
 interface Props {

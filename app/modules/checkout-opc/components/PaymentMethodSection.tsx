@@ -1,6 +1,6 @@
 import React from "react";
-import type { CheckoutPaymentMethod } from "~/types/Checkout";
-import { useCheckout } from "~/context/CheckoutContext";
+import type { CheckoutPaymentMethod } from "~/modules/checkout-opc/types";
+import { useCheckout } from "~/modules/checkout-opc/context/CheckoutContext";
 import MethodLogo from "./MethodLogo";
 
 interface Props {

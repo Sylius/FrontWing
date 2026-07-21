@@ -3,9 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import CheckoutLayout from "~/layouts/Checkout";
 import { useOrder } from "~/context/OrderContext";
 import { useCustomer } from "~/context/CustomerContext";
-import { CheckoutProvider, createInitialCheckoutState } from "~/context/CheckoutContext";
-import { checkoutApi } from "~/api/checkout/checkoutApi";
-import CheckoutContent from "~/components/checkout/opc/CheckoutContent";
+import { CheckoutProvider, createInitialCheckoutState } from "~/modules/checkout-opc/context/CheckoutContext";
+import { checkoutApi } from "~/modules/checkout-opc/api/checkoutApi";
+import CheckoutContent from "~/modules/checkout-opc/components/CheckoutContent";
 
 const OnePageCheckoutPage: React.FC = () => {
     const { orderToken } = useOrder();

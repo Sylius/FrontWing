@@ -1,7 +1,7 @@
 import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { checkoutApi } from "~/api/checkout/checkoutApi";
-import type { CheckoutState, OrderSummary } from "~/types/Checkout";
+import { checkoutApi } from "~/modules/checkout-opc/api/checkoutApi";
+import type { CheckoutState, OrderSummary } from "~/modules/checkout-opc/types";
 import { useDebouncedValue } from "./useDebouncedValue";
 
 const DEBOUNCE_MS = 400;

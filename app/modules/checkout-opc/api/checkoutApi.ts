@@ -1,5 +1,5 @@
 import type { AddressInterface } from "~/types/Order";
-import type { CheckoutState, Country, OrderLineItem, OrderSummary } from "~/types/Checkout";
+import type { CheckoutState, Country, OrderLineItem, OrderSummary } from "~/modules/checkout-opc/types";
 
 export interface CheckoutApi {
     getCheckoutAddresses(token: string): Promise<AddressInterface[]>;

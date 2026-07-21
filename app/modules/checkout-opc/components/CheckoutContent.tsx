@@ -1,9 +1,9 @@
 import React, { useEffect } from "react";
 import type { AddressInterface } from "~/types/Order";
-import type { Country, OrderLineItem, OrderSummary } from "~/types/Checkout";
-import { useCheckout } from "~/context/CheckoutContext";
-import { useOrderSummary } from "~/hooks/useOrderSummary";
-import { canSubmitCheckout } from "~/utils/checkoutValidation";
+import type { Country, OrderLineItem, OrderSummary } from "~/modules/checkout-opc/types";
+import { useCheckout } from "~/modules/checkout-opc/context/CheckoutContext";
+import { useOrderSummary } from "~/modules/checkout-opc/hooks/useOrderSummary";
+import { canSubmitCheckout } from "~/modules/checkout-opc/utils/checkoutValidation";
 import ShippingMethodSection from "./ShippingMethodSection";
 import AddressSection from "./AddressSection";
 import PaymentMethodSection from "./PaymentMethodSection";

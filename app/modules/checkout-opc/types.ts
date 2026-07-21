@@ -1,4 +1,4 @@
-import type { AddressInterface } from "./Order";
+import type { AddressInterface } from "~/types/Order";
 
 export interface Country {
     code: string;

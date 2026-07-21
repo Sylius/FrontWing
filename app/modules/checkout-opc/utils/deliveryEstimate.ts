@@ -1,4 +1,4 @@
-import type { DeliveryEstimate } from "~/types/Checkout";
+import type { DeliveryEstimate } from "~/modules/checkout-opc/types";
 
 const dayFormat = new Intl.DateTimeFormat("en-GB", { day: "numeric", timeZone: "UTC" });
 const monthFormat = new Intl.DateTimeFormat("en-GB", { month: "long", timeZone: "UTC" });

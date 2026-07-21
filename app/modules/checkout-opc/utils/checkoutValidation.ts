@@ -1,5 +1,5 @@
 import type { AddressInterface } from "~/types/Order";
-import type { CheckoutState } from "~/types/Checkout";
+import type { CheckoutState } from "~/modules/checkout-opc/types";
 
 const REQUIRED_ADDRESS_FIELDS: (keyof AddressInterface)[] = [
     "firstName",

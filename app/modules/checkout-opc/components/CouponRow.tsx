@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { IconPercentage, IconChevronDown, IconX } from "@tabler/icons-react";
-import { useCheckout } from "~/context/CheckoutContext";
+import { useCheckout } from "~/modules/checkout-opc/context/CheckoutContext";
 
 const COUPON_COLLAPSE_ID = "opc-coupon-collapse";
 

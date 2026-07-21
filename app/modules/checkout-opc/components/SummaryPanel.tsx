@@ -1,8 +1,8 @@
 import React from "react";
 import { IconCalendarMonth, IconLock } from "@tabler/icons-react";
-import type { OrderLineItem, OrderSummary } from "~/types/Checkout";
+import type { OrderLineItem, OrderSummary } from "~/modules/checkout-opc/types";
 import { formatMoney } from "~/utils/price";
-import { formatDeliveryRange } from "~/utils/deliveryEstimate";
+import { formatDeliveryRange } from "~/modules/checkout-opc/utils/deliveryEstimate";
 import OrderItemsSection from "./OrderItemsSection";
 import CouponRow from "./CouponRow";
 

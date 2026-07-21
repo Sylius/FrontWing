@@ -1,7 +1,7 @@
 import React from "react";
 import type { AddressInterface } from "~/types/Order";
-import type { Country } from "~/types/Checkout";
-import { useCheckout } from "~/context/CheckoutContext";
+import type { Country } from "~/modules/checkout-opc/types";
+import { useCheckout } from "~/modules/checkout-opc/context/CheckoutContext";
 import AddressBookSelect from "./AddressBookSelect";
 import AddressFields from "./AddressFields";
 

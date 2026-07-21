@@ -1,9 +1,9 @@
 import React from "react";
 import { IconCalendarMonth } from "@tabler/icons-react";
-import type { CheckoutShippingMethod } from "~/types/Checkout";
-import { useCheckout } from "~/context/CheckoutContext";
+import type { CheckoutShippingMethod } from "~/modules/checkout-opc/types";
+import { useCheckout } from "~/modules/checkout-opc/context/CheckoutContext";
 import { formatMoney } from "~/utils/price";
-import { formatDeliveryRange } from "~/utils/deliveryEstimate";
+import { formatDeliveryRange } from "~/modules/checkout-opc/utils/deliveryEstimate";
 import MethodLogo from "./MethodLogo";
 
 interface Props {
