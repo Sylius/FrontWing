@@ -1,6 +1,6 @@
-import type { ActionFunction } from "@remix-run/node";
-import { json, redirect } from "@remix-run/node";
-import { Form, useActionData, useNavigation, useSearchParams } from "@remix-run/react";
+import type { ActionFunction } from "react-router";
+import { data as routerData, redirect } from "react-router";
+import { Form, useActionData, useNavigation, useSearchParams } from "react-router";
 import Default from "~/layouts/Default";
 
 interface ActionData {
@@ -36,7 +36,7 @@ export const action: ActionFunction = async ({ request }) => {
     }
 
     if (Object.keys(errors).length) {
-        return json<ActionData>(
+        return routerData(
             { errors, values: { newPassword: newPassword as string, confirmNewPassword: confirmNewPassword as string } },
             { status: 400 }
         );
@@ -61,13 +61,13 @@ export const action: ActionFunction = async ({ request }) => {
 
         if (!response.ok) {
             const message = data.message || data.detail || "Password reset failed.";
-            return json<ActionData>({ formError: message }, { status: 400 });
+            return routerData({ formError: message }, { status: 400 });
         }
 
         return redirect("/login?resetSuccessful=true");
     } catch (error) {
         console.error("Reset password error:", error);
-        return json<ActionData>({ formError: "Unexpected error occurred." }, { status: 500 });
+        return routerData({ formError: "Unexpected error occurred." }, { status: 500 });
     }
 };
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import Default from "../../layouts/Default";
 import AccountLayout from "../../layouts/Account";
 import { useFlashMessages } from "../../context/FlashMessagesContext";

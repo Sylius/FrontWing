@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Link } from "@remix-run/react";
+import { Link } from "react-router";
 import Default from "~/layouts/Default";
 
 export default function RegisterThankYouPage() {

@@ -4,16 +4,15 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
-    "build": "remix vite:build",
-    "dev": "remix vite:dev",
+    "build": "react-router build",
+    "dev": "react-router dev",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
-    "start": "remix-serve ./build/server/index.js",
-    "typecheck": "tsc"
+    "start": "react-router-serve ./build/server/index.js",
+    "typecheck": "react-router typegen && tsc"
   },
   "dependencies": {
-    "@remix-run/node": "^2.16.7",
-    "@remix-run/react": "^2.16.7",
-    "@remix-run/serve": "^2.16.7",
+    "@react-router/node": "^7.9.4",
+    "@react-router/serve": "^7.9.4",
     "@tabler/icons-react": "^3.33.0",
     "@tanstack/react-query": "^5.77.1",
     "@types/react-slick": "^0.23.13",
@@ -23,14 +22,15 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-loading-skeleton": "^3.5.0",
+    "react-router": "^7.9.4",
     "react-slick": "^0.30.3",
     "slick-carousel": "^1.8.1",
     "yet-another-react-lightbox": "^3.24.0"
   },
   "devDependencies": {
-    "@remix-run/css-bundle": "^2.16.8",
-    "@remix-run/dev": "^2.16.7",
+    "@react-router/dev": "^7.9.4",
     "@types/bootstrap": "^5.2.10",
+    "@types/node": "^22.20.1",
     "@types/react": "^18.2.20",
     "@types/react-dom": "^18.2.7",
     "@types/react-slick": "^0.23.13",

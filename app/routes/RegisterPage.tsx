@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "@remix-run/react";
+import { Link, useNavigate } from "react-router";
 import Default from "~/layouts/Default";
 import { IconUserPlus } from "@tabler/icons-react";
 import { useFlashMessages } from "~/context/FlashMessagesContext";

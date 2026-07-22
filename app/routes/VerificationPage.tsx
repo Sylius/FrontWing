@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useSearchParams } from "@remix-run/react";
+import { Link, useSearchParams } from "react-router";
 import Default from "~/layouts/Default";
 import { useFlashMessages } from "~/context/FlashMessagesContext";
 import { useCustomer } from "~/context/CustomerContext";

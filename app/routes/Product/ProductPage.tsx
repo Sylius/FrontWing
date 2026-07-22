@@ -1,5 +1,5 @@
-import { json, type LoaderFunctionArgs } from '@remix-run/node';
-import { useLoaderData } from '@remix-run/react';
+import { type LoaderFunctionArgs } from 'react-router';
+import { useLoaderData } from 'react-router';
 import ProductPage from '~/components/ProductPage';
 import type {
     Product as BaseProduct,
@@ -102,7 +102,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
         { label: product.name, url: `/product/${product.code}` },
     ];
 
-    return json({
+    return {
         product,
         variant,
         attributes: attributesData['hydra:member'] ?? [],
@@ -111,7 +111,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
         options: optionsData,
         variants: variantsData,
         breadcrumbs,
-    });
+    };
 }
 
 export default function ProductPageRoute() {

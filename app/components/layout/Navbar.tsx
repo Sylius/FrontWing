@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { IconChevronDown } from '@tabler/icons-react';
 import type { Taxon } from '~/types/Taxon';
 import { getChildren } from '~/utils/taxon';
@@ -8,7 +8,7 @@ interface NavbarProps {
     taxonTree: Taxon[];
 }
 
-const Navbar: React.FC<NavbarProps> = ({ taxonTree }) => {
+const Navbar: React.FC<NavbarProps> = ({ taxonTree = [] }) => {
     const parents = taxonTree.filter(t => t.level === 1);
 
     return (

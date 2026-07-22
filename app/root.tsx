@@ -5,12 +5,9 @@ import {
     Scripts,
     ScrollRestoration,
     useLoaderData,
-} from "@remix-run/react";
-import {
-    json,
     type LinksFunction,
     type LoaderFunction,
-} from "@remix-run/node";
+} from "react-router";
 
 import { BootstrapLoader } from "~/components/helpers/BootstrapLoader";
 import { OrderProvider } from "~/context/OrderContext";
@@ -22,7 +19,6 @@ import bootstrapStylesHref from "bootstrap/dist/css/bootstrap.css?url";
 import mainStylesHref from "./assets/scss/main.scss?url";
 
 import { orderTokenCookie } from "~/utils/cookies.server";
-import { cssBundleHref } from "@remix-run/css-bundle";
 import type { Taxon } from "~/types/Taxon";
 
 const queryClient = new QueryClient();
@@ -33,16 +29,16 @@ export const loader: LoaderFunction = async ({ request }) => {
     const token = typeof parsed === "string" ? parsed : parsed?.token ?? "";
 
     const API_URL = process.env.PUBLIC_API_URL!;
-    const res = await fetch(`${API_URL}/api/v2/shop/taxon-tree/MENU_CATEGORY/branch`);
-    const taxonTreeData = await res.json();
+    const res = await fetch(`${API_URL}/api/v2/shop/taxon-tree/category/branch`);
+    const taxonTreeData = res.ok ? await res.json() : null;
 
-    return json({
+    return {
         ENV: {
             API_URL,
         },
         orderToken: token || null,
-        taxonTree: taxonTreeData["hydra:member"],
-    });
+        taxonTree: taxonTreeData?.["hydra:member"] ?? [],
+    };
 };
 
 function EnvironmentScript({ env }: { env: Record<string, string | undefined> }) {
@@ -67,7 +63,6 @@ function RemixOrderTokenScript({ token }: { token: string | null }) {
 }
 
 export const links: LinksFunction = () => [
-    ...(cssBundleHref ? [{ rel: "stylesheet", href: cssBundleHref }] : []),
     { rel: "stylesheet", href: bootstrapStylesHref },
     { rel: "stylesheet", href: mainStylesHref },
     { rel: "preconnect", href: "https://fonts.googleapis.com" },

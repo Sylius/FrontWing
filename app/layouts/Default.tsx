@@ -2,7 +2,7 @@ import Header from './../components/layout/Header';
 import Footer from './../components/layout/Footer';
 import Navbar from "../components/layout/Navbar";
 import React from 'react';
-import { useOutletContext } from '@remix-run/react';
+import { useOutletContext } from 'react-router';
 import type { Taxon } from '~/types/Taxon';
 
 interface LayoutProps {
