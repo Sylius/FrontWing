@@ -11,8 +11,8 @@
     "typecheck": "react-router typegen && tsc"
   },
   "dependencies": {
-    "@react-router/node": "^7.9.4",
-    "@react-router/serve": "^7.9.4",
+    "@react-router/node": "^8.2.0",
+    "@react-router/serve": "^8.2.0",
     "@tabler/icons-react": "^3.33.0",
     "@tanstack/react-query": "^5.77.1",
     "@types/react-slick": "^0.23.13",
@@ -22,13 +22,13 @@
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-loading-skeleton": "^3.5.0",
-    "react-router": "^7.9.4",
+    "react-router": "^8.2.0",
     "react-slick": "^0.30.3",
     "slick-carousel": "^1.8.1",
     "yet-another-react-lightbox": "^3.24.0"
   },
   "devDependencies": {
-    "@react-router/dev": "^7.9.4",
+    "@react-router/dev": "^8.2.0",
     "@types/bootstrap": "^5.2.10",
     "@types/node": "^22.20.1",
     "@types/react": "^19.2.0",
