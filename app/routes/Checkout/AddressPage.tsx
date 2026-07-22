@@ -1,21 +1,20 @@
 import {
-    json,
     type LoaderFunctionArgs,
     type ActionFunctionArgs,
     redirect,
-} from "@remix-run/node";
+} from "react-router";
 import {
     useLoaderData,
     Form,
     useNavigation,
-} from "@remix-run/react";
+} from "react-router";
 import { useEffect, useRef, useState } from "react";
 import CheckoutLayout from "~/layouts/Checkout";
 import Steps from "~/components/checkout/Steps";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import { useCustomer } from "~/context/CustomerContext";
 import { useOrder } from "~/context/OrderContext";
-import { Link } from "@remix-run/react";
+import { Link } from "react-router";
 import { orderTokenCookie } from "~/utils/cookies.server";
 import { fetchOrderFromAPI } from "~/api/order.server";
 import type { AddressInterface, Order } from "~/types/Order";
@@ -43,7 +42,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     if (!token) return redirect("/cart");
 
     const order = await fetchOrderFromAPI(token, true);
-    return json({ order, token });
+    return { order, token };
 }
 
 export async function action({ request }: ActionFunctionArgs) {

@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router";
 import { useCustomer } from "../../context/CustomerContext";
 
 const RequireAuth: React.FC = () => {

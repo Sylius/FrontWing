@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Default from "../../layouts/Default";
 import AccountLayout from "../../layouts/Account";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { Address } from "../../types/Address";
 import { useCustomer } from "../../context/CustomerContext";
 import { useFlashMessages } from "../../context/FlashMessagesContext";

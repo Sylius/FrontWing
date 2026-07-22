@@ -1,6 +1,6 @@
-import type { LoaderFunction, ActionFunction } from "@remix-run/node";
-import { json, redirect } from "@remix-run/node";
-import { useLoaderData, Form, useNavigation } from "@remix-run/react";
+import type { LoaderFunction, ActionFunction } from "react-router";
+import { data as routerData, redirect } from "react-router";
+import { useLoaderData, Form, useNavigation } from "react-router";
 import Default from "~/layouts/Default";
 import { IconCreditCard } from "@tabler/icons-react";
 import Skeleton from "react-loading-skeleton";
@@ -57,7 +57,7 @@ export const loader: LoaderFunction = async ({ params }) => {
         }
     }
 
-    return json<LoaderData>({ order, paymentMethods: list, token });
+    return routerData({ order, paymentMethods: list, token });
 };
 
 export const action: ActionFunction = async ({ request, params }) => {
@@ -96,7 +96,7 @@ export const action: ActionFunction = async ({ request, params }) => {
             data = JSON.parse(text);
         } catch {}
         const msg = data.message || "Failed to set payment method";
-        return json({ formError: msg }, { status: 400 });
+        return routerData({ formError: msg }, { status: 400 });
     }
 
     return redirect(`/order/thank-you?token=${token}`);

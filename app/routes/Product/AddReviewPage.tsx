@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router';
 import ProductCard from '~/components/ProductCard';
 import { useFlashMessages } from '~/context/FlashMessagesContext';
 import Breadcrumbs from '~/components/Breadcrumbs';

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useLocation } from '@remix-run/react';
+import { useLocation } from 'react-router';
 import Header from './../components/layout/checkout/Header';
 import Sidebar from './../components/layout/checkout/Sidebar';
 import { useOrder } from '~/context/OrderContext';

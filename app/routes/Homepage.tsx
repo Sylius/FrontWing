@@ -1,5 +1,5 @@
-import { defer, type LoaderFunctionArgs } from "@remix-run/node";
-import { Await, useLoaderData } from "@remix-run/react";
+import { type LoaderFunctionArgs } from "react-router";
+import { Await, useLoaderData } from "react-router";
 import { Suspense } from "react";
 import Skeleton from "react-loading-skeleton";
 
@@ -17,10 +17,10 @@ export async function loader({}: LoaderFunctionArgs) {
         })
         .then((data) => data["hydra:member"] || data.items || data);
 
-    return defer({
+    return {
         products: productsPromise,
         apiUrl: API_URL,
-    });
+    };
 }
 
 export default function Homepage() {

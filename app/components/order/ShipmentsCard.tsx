@@ -15,9 +15,11 @@ interface ShipmentsCardProps {
 }
 
 const ShipmentsCard: React.FC<ShipmentsCardProps> = ({ shipment }) => {
+  const methodRef = typeof shipment?.method === 'string' ? shipment.method : undefined;
+
   const fetchShippingMethodFromAPI = async (): Promise<ShippingMethod> => {
     const response = await fetch(
-        `${window.ENV?.API_URL}${shipment.method}`
+        `${window.ENV?.API_URL}${methodRef}`
     );
     if (!response.ok) {
       throw new Error('Error downloading shipping method');
@@ -27,8 +29,9 @@ const ShipmentsCard: React.FC<ShipmentsCardProps> = ({ shipment }) => {
   };
 
   const { data: shippingMethod } = useQuery<ShippingMethod>({
-    queryKey: ['shipping-method', shipment.method],
+    queryKey: ['shipping-method', methodRef],
     queryFn: fetchShippingMethodFromAPI,
+    enabled: Boolean(methodRef),
   });
 
   return (

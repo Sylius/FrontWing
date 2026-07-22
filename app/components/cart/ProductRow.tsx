@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import type { OrderItem, ProductVariantDetails, ProductData } from "~/types/Order";
 import { formatPrice } from "~/utils/price";
-import { useFetcher, Link } from "@remix-run/react";
+import { useFetcher, Link } from "react-router";
 import { IconX } from "@tabler/icons-react";
 
 interface Props {

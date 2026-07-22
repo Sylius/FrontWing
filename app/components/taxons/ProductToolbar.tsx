@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router';
 import { IconSearch, IconX } from '@tabler/icons-react';
 
 const sortOptions = [

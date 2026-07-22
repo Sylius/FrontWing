@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useParams, useSearchParams, Link } from 'react-router-dom';
+import { useParams, useSearchParams, Link } from 'react-router';
 import Layout from '~/layouts/Default';
 import { Product } from '~/types/Product';
 import Breadcrumbs from '~/components/Breadcrumbs';

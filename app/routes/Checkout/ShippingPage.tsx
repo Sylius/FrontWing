@@ -1,14 +1,13 @@
 import {
-  json,
   redirect,
   type LoaderFunctionArgs,
   type ActionFunctionArgs,
-} from "@remix-run/node";
+} from "react-router";
 import {
   useLoaderData,
   useNavigation,
   Form,
-} from "@remix-run/react";
+} from "react-router";
 import CheckoutLayout from "~/layouts/Checkout";
 import { useOrder } from "~/context/OrderContext";
 import Steps from "~/components/checkout/Steps";
@@ -16,7 +15,7 @@ import { formatPrice } from "~/utils/price";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import { orderTokenCookie } from "~/utils/cookies.server";
 import { fetchOrderFromAPI } from "~/api/order.server";
-import { Link } from "@remix-run/react";
+import { Link } from "react-router";
 
 interface ShippingMethod {
   id: number;
@@ -36,11 +35,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   const shipmentId = order?.shipments?.[0]?.id;
   if (!shipmentId) {
-    return json({
+    return {
       shippingMethods: [],
       token,
       shipmentId: null,
-    });
+    };
   }
 
   const res = await fetch(
@@ -48,11 +47,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
   );
   const jsonData = await res.json();
 
-  return json({
+  return {
     shippingMethods: jsonData["hydra:member"] || [],
     token,
     shipmentId,
-  });
+  };
 }
 
 export async function action({ request }: ActionFunctionArgs) {

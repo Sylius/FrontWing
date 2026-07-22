@@ -1,6 +1,6 @@
-import type { ActionFunction } from "@remix-run/node";
-import { json, redirect } from "@remix-run/node";
-import { Form, useActionData, useNavigation } from "@remix-run/react";
+import type { ActionFunction } from "react-router";
+import { data as routerData, redirect } from "react-router";
+import { Form, useActionData, useNavigation } from "react-router";
 import Default from "~/layouts/Default";
 import AuthLeftPanel from "~/components/account/AuthLeftPanel";
 
@@ -18,7 +18,7 @@ export const action: ActionFunction = async ({ request }) => {
     const form = await request.formData();
     const email = form.get("email");
     if (typeof email !== "string" || !email) {
-        return json<ActionData>({ formError: "Email is required." }, { status: 400 });
+        return routerData({ formError: "Email is required." }, { status: 400 });
     }
 
     try {
@@ -39,13 +39,13 @@ export const action: ActionFunction = async ({ request }) => {
 
         if (!res.ok) {
             const msg = data.message || data.detail || "Failed to request password reset.";
-            return json<ActionData>({ formError: msg, values: { email } }, { status: 400 });
+            return routerData({ formError: msg, values: { email } }, { status: 400 });
         }
 
         return redirect("/login?resetRequested=true");
     } catch (e) {
         console.error("Reset password error:", e);
-        return json<ActionData>({ formError: "An unexpected error occurred." }, { status: 500 });
+        return routerData({ formError: "An unexpected error occurred." }, { status: 500 });
     }
 };
 

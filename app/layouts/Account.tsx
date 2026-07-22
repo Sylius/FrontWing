@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import Breadcrumbs from "../components/Breadcrumbs";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router";
 import {
     IconBook,
     IconHome,

@@ -1,6 +1,6 @@
-# Sylius FrontWing (React + Remix + Vite)
+# Sylius FrontWing (React + React Router + Vite)
 
-This is a headless frontend project for [Sylius](https://sylius.com), built with **React**, **Remix**, and **Vite**.  
+This is a headless frontend project for [Sylius](https://sylius.com), built with **React**, **React Router**, and **Vite**.  
 The goal is to provide a modern, fast, and flexible frontend for Sylius-based eCommerce platforms using a fully decoupled architecture.
 
 > ⚠️ **Note**: This project is currently under active development and is not production-ready yet. While many core features and Sylius pages are already implemented, some functionalities are still being finalized.
@@ -18,14 +18,14 @@ The goal is to provide a modern, fast, and flexible frontend for Sylius-based eC
     - Checkout flow
     - Customer account area (dashboard, orders, profile, address book)
 - 🎨 Styling based on **Bootstrap 5**
-- 🔄 Client-side routing powered by Remix
+- 🔄 Client-side routing powered by React Router
 
 ---
 
 ## 📦 Tech Stack
 
 - **React**
-- **Remix**
+- **React Router** (framework mode, v7)
 - **Vite**
 - **Bootstrap 5**
 - **TanStack Query (React Query)**

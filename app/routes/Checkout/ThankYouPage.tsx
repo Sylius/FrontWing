@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import Layout from "~/layouts/Default";
 import { useCustomer } from "~/context/CustomerContext";
-import { useSearchParams, useLocation, Link } from "@remix-run/react";
+import { useSearchParams, useLocation, Link } from "react-router";
 import { useOrder } from "~/context/OrderContext";
 
 export default function ThankYouPage() {

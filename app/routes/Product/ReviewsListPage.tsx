@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import Layout from '~/layouts/Default';
 import Breadcrumbs from '~/components/Breadcrumbs';
 import Reviews from '~/components/product/Reviews';

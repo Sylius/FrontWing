@@ -1,4 +1,4 @@
-import { createCookie } from "@remix-run/node";
+import { createCookie } from "react-router";
 
 export const orderTokenCookie = createCookie("orderToken", {
     path: "/",

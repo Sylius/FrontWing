@@ -1,4 +1,4 @@
-import { Link } from "@remix-run/react";
+import { Link } from "react-router";
 import { IconLockOpen } from "@tabler/icons-react";
 
 export default function AuthLeftPanel() {

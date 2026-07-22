@@ -1,15 +1,15 @@
 import {
-  json,
+  data,
   redirect,
   type LoaderFunctionArgs,
   type ActionFunctionArgs,
-} from "@remix-run/node";
+} from "react-router";
 import {
   useLoaderData,
   useFetcher,
   useLocation,
   Link,
-} from "@remix-run/react";
+} from "react-router";
 import Layout from "~/layouts/Default";
 import { orderTokenCookie } from "~/utils/cookies.server";
 import {
@@ -74,7 +74,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     headers["Set-Cookie"] = cookies.join("; ");
   }
 
-  return json({ order, token, products, messages }, { headers });
+  return data({ order, token, products, messages }, { headers });
 }
 
 export async function action({ request }: ActionFunctionArgs) {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { ProductVariantDetails, Product } from '~/types/Product';
 import { formatPrice } from '~/utils/price';
 import Skeleton from 'react-loading-skeleton';

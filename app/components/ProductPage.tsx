@@ -4,7 +4,7 @@ import React, {
     useEffect,
     useCallback,
 } from 'react';
-import { useParams, useNavigationType } from '@remix-run/react';
+import { useParams, useNavigationType } from 'react-router';
 import { useOrder } from '~/context/OrderContext';
 import { useFlashMessages } from '~/context/FlashMessagesContext';
 import Layout from '~/layouts/Default';

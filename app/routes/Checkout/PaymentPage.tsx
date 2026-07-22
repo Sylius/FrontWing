@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import CheckoutLayout from '../../layouts/Checkout';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router';
 import { useOrder } from '../../context/OrderContext';
 import { useQuery } from '@tanstack/react-query';
 import Steps from '../../components/checkout/Steps';

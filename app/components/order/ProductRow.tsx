@@ -1,7 +1,7 @@
 import { OrderItem } from '../../types/Order';
 import { formatPrice } from '../../utils/price';
 import { useQuery } from '@tanstack/react-query';
-import {Link} from "react-router-dom";
+import {Link} from "react-router";
 import React from "react";
 
 interface ProductRowProps {

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import CheckoutLayout from "~/layouts/Checkout";
 import { useOrder } from "~/context/OrderContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import Steps from "~/components/checkout/Steps";
 import Address from "~/components/Address";
 import PaymentsCard from "~/components/order/PaymentsCard";
@@ -87,14 +87,14 @@ const SummaryPage: React.FC = () => {
               </div>
 
               <div className="mb-5">
-                {order?.payments && (
+                {order?.payments?.[0] && (
                     <PaymentsCard
-                        payment={order?.payments[0]}
+                        payment={order.payments[0]}
                         total={order?.total ?? 0}
                         paymentState={order?.paymentState}
                     />
                 )}
-                {order?.shipments && <ShipmentsCard shipment={order?.shipments[0]} />}
+                {order?.shipments?.[0] && <ShipmentsCard shipment={order.shipments[0]} />}
               </div>
 
               <div className="table-responsive border-bottom mb-4">

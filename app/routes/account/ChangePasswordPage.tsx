@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Default from "../../layouts/Default";
 import AccountLayout from "../../layouts/Account";
 import { useCustomer } from "../../context/CustomerContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import Loader from "../../components/layout/Loader";
 import { useFlashMessages } from "../../context/FlashMessagesContext";
 
