@@ -123,7 +123,7 @@ export default function PayOrderPage() {
                             <>
                                 {" "}
                                 •{" "}
-                                {new Date(order.checkoutCompletedAt).toLocaleDateString(undefined, {
+                                {new Date(order.checkoutCompletedAt).toLocaleDateString('pl-PL', {
                                     year: "numeric",
                                     month: "short",
                                     day: "numeric",

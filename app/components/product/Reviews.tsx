@@ -31,7 +31,7 @@ const Reviews: React.FC<ReviewListProps> = ({ reviews }) => {
                         {review.author?.firstName
                             ? `${review.author.firstName}, `
                             : ''}
-                        {new Date(review.createdAt).toLocaleDateString()}
+                        {new Date(review.createdAt).toLocaleDateString('pl-PL')}
                     </small>
                 </div>
             ))}

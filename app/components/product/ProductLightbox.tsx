@@ -16,7 +16,7 @@ const ProductLightbox: React.FC<ProductLightboxProps> = ({ open, onClose, slides
 
     useEffect(() => {
         setIsClient(true);
-        setPortalTarget({ container: document.body } as any);
+        setPortalTarget({ root: document.body });
     }, []);
 
     if (!isClient || !portalTarget) return null;
