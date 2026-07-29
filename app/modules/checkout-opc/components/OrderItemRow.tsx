@@ -1,22 +1,26 @@
 import React from "react";
-import { IconPhoto, IconX } from "@tabler/icons-react";
+import { IconPhoto } from "@tabler/icons-react";
 import type { OrderLineItem } from "~/modules/checkout-opc/types";
 import { formatMoney } from "~/utils/price";
 
 interface Props {
     item: OrderLineItem;
     currencyCode: string;
-    onRemove: () => void;
 }
 
-const OrderItemRow: React.FC<Props> = ({ item, currencyCode, onRemove }) => (
-    <div className="d-flex align-items-start gap-3 py-3">
+const OrderItemRow: React.FC<Props> = ({ item, currencyCode }) => (
+    <div className="d-flex align-items-center gap-3 py-3">
         <div
-            className="d-flex align-items-center justify-content-center flex-shrink-0 bg-white rounded"
+            className="d-flex align-items-center justify-content-center flex-shrink-0 bg-white rounded overflow-hidden"
             style={{ width: "4rem", height: "4rem" }}
         >
             {item.imageUrl ? (
-                <img src={item.imageUrl} alt={item.productName} className="img-fluid rounded" />
+                <img
+                    src={item.imageUrl}
+                    alt={item.productName}
+                    className="rounded"
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                />
             ) : (
                 <IconPhoto className="icon icon-md text-body-tertiary" stroke={2} />
             )}
@@ -24,8 +28,6 @@ const OrderItemRow: React.FC<Props> = ({ item, currencyCode, onRemove }) => (
 
         <div className="flex-grow-1">
             <div className="h6 mb-1 text-break">{item.productName}</div>
-
-            {item.variant && <div className="text-body-tertiary small">{item.variant}</div>}
 
             <div className="small">
                 {item.quantity} × {formatMoney(item.unitPrice, currencyCode)}
@@ -36,15 +38,6 @@ const OrderItemRow: React.FC<Props> = ({ item, currencyCode, onRemove }) => (
                 )}
             </div>
         </div>
-
-        <button
-            type="button"
-            className="btn btn-sm btn-transparent p-0 flex-shrink-0 d-inline-flex align-items-center border-0"
-            aria-label={`Remove ${item.productName}`}
-            onClick={onRemove}
-        >
-            <IconX className="icon icon-xs" stroke={2} />
-        </button>
     </div>
 );
 

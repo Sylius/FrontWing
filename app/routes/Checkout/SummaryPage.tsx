@@ -12,6 +12,7 @@ import ProductRow from "~/components/order/ProductRow";
 import { OrderItem } from "~/types/Order";
 import { useCurrency } from "~/context/ChannelContext";
 import { useTranslation } from "react-i18next";
+import { serializeOrderToken } from "~/utils/orderTokenCookie";
 
 const SummaryPage: React.FC = () => {
   const { t } = useTranslation("checkout");
@@ -59,7 +60,7 @@ const SummaryPage: React.FC = () => {
       const newOrder = await res.json();
       const newToken = newOrder.tokenValue;
 
-      document.cookie = `orderToken=${newToken}; path=/; max-age=2592000; SameSite=Lax`;
+      document.cookie = serializeOrderToken(newToken);
       setOrderToken(newToken);
 
       navigate("/order/thank-you", { state: { tokenValue: order.tokenValue } });

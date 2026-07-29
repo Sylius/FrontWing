@@ -1,10 +1,16 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
     fetchOrderFromAPIClient,
     updateOrderItemAPIClient,
     removeOrderItemAPIClient,
+    OrderFetchError,
 } from "~/api/order.client";
+import {
+    readOrderToken,
+    serializeOrderToken,
+    clearOrderTokenCookie,
+} from "~/utils/orderTokenCookie";
 import type { Order } from "~/types/Order";
 
 interface OrderContextType {
@@ -22,18 +28,18 @@ interface OrderContextType {
 
 const OrderContext = createContext<OrderContextType | undefined>(undefined);
 
-const getCookieToken = (): string | null => {
-    if (typeof document === "undefined") return null;
-    const match = document.cookie.match(/(^| )orderToken=([^;]+)/);
-    return match ? decodeURIComponent(match[2]) : null;
-};
-
 export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const queryClient = useQueryClient();
     const [orderToken, setOrderToken] = useState<string | null>(null);
     const [activeCouponCode, setActiveCouponCode] = useState<string | null>(null);
+    const bootstrappedRef = useRef(false);
+    const creatingRef = useRef(false);
 
-    const createNewOrder = async () => {
+    const createNewOrder = async (reason?: string) => {
+        if (creatingRef.current) return;
+        creatingRef.current = true;
+        console.warn("[cart] creating a new order", { reason, previousToken: orderToken });
+
         try {
             const response = await fetch(`${window.ENV?.API_URL}/api/v2/shop/orders`, {
                 method: "POST",
@@ -47,7 +53,7 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             if (!order?.tokenValue) throw new Error("Missing tokenValue in order response");
 
             const newToken = order.tokenValue;
-            document.cookie = `orderToken=${newToken}; path=/; max-age=2592000; SameSite=Lax`;
+            document.cookie = serializeOrderToken(newToken);
             setOrderToken(newToken);
 
             await fetch("/api/sync-cart", {
@@ -56,32 +62,28 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             });
         } catch (e) {
             console.error("Could not create a new order:", e);
+        } finally {
+            creatingRef.current = false;
         }
     };
 
     useEffect(() => {
-        (async () => {
-            const remixToken = typeof window !== "undefined" && (window as any).__remixOrderToken;
-            const cookieToken = getCookieToken();
-            const initialToken = remixToken || cookieToken;
+        if (bootstrappedRef.current) return;
+        bootstrappedRef.current = true;
 
-            if (initialToken) {
-                try {
-                    const order = await fetchOrderFromAPIClient(initialToken, true);
-                    if (order?.checkoutState === "completed") {
-                        console.warn("⚠️ Existing token is for completed order, creating new cart...");
-                        await createNewOrder();
-                    } else {
-                        setOrderToken(initialToken);
-                    }
-                } catch {
-                    console.warn("⚠️ Existing token invalid, creating new cart...");
-                    await createNewOrder();
-                }
-            } else {
-                await createNewOrder();
-            }
-        })();
+        const remixToken =
+            typeof window !== "undefined"
+                ? (window as unknown as { __remixOrderToken?: string }).__remixOrderToken ?? null
+                : null;
+        const cookieToken = typeof document !== "undefined" ? readOrderToken(document.cookie) : null;
+        const initialToken = remixToken || cookieToken;
+
+        console.warn("[cart] bootstrap", { remixToken, cookieToken, initialToken });
+        if (initialToken) {
+            setOrderToken(initialToken);
+        } else {
+            createNewOrder("bootstrap: no initial token");
+        }
     }, []);
 
     const orderQuery = useQuery<Order, Error>({
@@ -119,6 +121,24 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }
     }, [orderQuery.data]);
 
+    useEffect(() => {
+        if (orderQuery.data?.checkoutState === "completed") {
+            console.warn("[cart] order is completed — recreating", { token: orderToken });
+            createNewOrder("order completed");
+        }
+    }, [orderQuery.data]);
+
+    useEffect(() => {
+        const error = orderQuery.error;
+        if (!error) return;
+        const status = error instanceof OrderFetchError ? error.status : null;
+        console.warn("[cart] order query error", { token: orderToken, status, error });
+        if (status === 404) {
+            console.warn("[cart] order token lost (404) — recreating", { token: orderToken });
+            createNewOrder("order fetch 404");
+        }
+    }, [orderQuery.error]);
+
     const updateOrderItem = (id: number, quantity: number) => {
         if (!orderToken) return;
         updateMutation.mutate({ id, quantity, token: orderToken });
@@ -138,8 +158,8 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         queryClient.removeQueries({ queryKey: ["order"] });
         setOrderToken(null);
         setActiveCouponCode(null);
-        document.cookie = "orderToken=; path=/; max-age=0; SameSite=Lax";
-        createNewOrder();
+        document.cookie = clearOrderTokenCookie();
+        createNewOrder("resetCart");
     };
 
     return (

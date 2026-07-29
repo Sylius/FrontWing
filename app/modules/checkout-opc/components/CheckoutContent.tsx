@@ -1,9 +1,13 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import type { AddressInterface } from "~/types/Order";
 import type { Country, OrderLineItem, OrderSummary } from "~/modules/checkout-opc/types";
 import { useCheckout } from "~/modules/checkout-opc/context/CheckoutContext";
+import { applyItemPricing } from "~/modules/checkout-opc/api/previewCheckout";
 import { useOrderSummary } from "~/modules/checkout-opc/hooks/useOrderSummary";
+import { useMethodReconciliation } from "~/modules/checkout-opc/hooks/useMethodReconciliation";
+import { useCheckoutSubmit } from "~/modules/checkout-opc/hooks/useCheckoutSubmit";
 import { canSubmitCheckout } from "~/modules/checkout-opc/utils/checkoutValidation";
+import { savePersistedCheckoutState } from "~/modules/checkout-opc/utils/checkoutStatePersistence";
 import ShippingMethodSection from "./ShippingMethodSection";
 import AddressSection from "./AddressSection";
 import PaymentMethodSection from "./PaymentMethodSection";
@@ -15,43 +19,60 @@ interface Props {
     countries: Country[];
     items: OrderLineItem[];
     initialSummary: OrderSummary;
+    currencyCode: string;
 }
 
-// Lives inside CheckoutProvider so it can read state and drive the reactive summary.
-// The parent page renders the provider, so it cannot call useCheckout() itself.
-const CheckoutContent: React.FC<Props> = ({ token, addresses, countries, items, initialSummary }) => {
-    const { state, setShippingMethod, setPaymentMethod } = useCheckout();
-    const { summary, isRecalculating } = useOrderSummary(token, state, initialSummary);
+const CheckoutContent: React.FC<Props> = ({
+    token,
+    addresses,
+    countries,
+    items,
+    initialSummary,
+    currencyCode,
+}) => {
+    const { state, setItems } = useCheckout();
+    const { summary, isRecalculating, hash } = useOrderSummary(
+        token,
+        state,
+        initialSummary,
+        currencyCode,
+    );
+    const { submit, isSubmitting, errorMessage } = useCheckoutSubmit(token);
+    const { shippingSectionRef, shippingMethodsChanged } = useMethodReconciliation(summary);
 
-    // §5.4 — methods are server-driven and may disappear (e.g. a courier that no longer
-    // serves the chosen country). If the selected method is gone, clear the stale choice.
+    // Prices shown per line come from the preview (reflects coupons/promotions),
+    // while the order supplies the display metadata (name, image, variant).
+    const displayItems = useMemo(
+        () => applyItemPricing(items, summary.items),
+        [items, summary.items],
+    );
+
     useEffect(() => {
-        if (
-            state.shippingMethodCode &&
-            !summary.shippingMethods.some((m) => m.code === state.shippingMethodCode && m.enabled)
-        ) {
-            setShippingMethod(null);
-        }
-    }, [summary, state.shippingMethodCode, setShippingMethod]);
+        savePersistedCheckoutState(token, state);
+    }, [state, token]);
 
+    // The live order owns items; mirror it so the recalculation reflects removals.
     useEffect(() => {
-        if (
-            state.paymentMethodCode &&
-            !summary.paymentMethods.some((m) => m.code === state.paymentMethodCode && m.enabled)
-        ) {
-            setPaymentMethod(null);
-        }
-    }, [summary, state.paymentMethodCode, setPaymentMethod]);
+        setItems(items.map(({ id, quantity }) => ({ id, quantity })));
+    }, [items, setItems]);
 
-    const canPay = canSubmitCheckout(state, isRecalculating);
+    const canPay = canSubmitCheckout(state, isRecalculating) && !!hash && !isSubmitting;
+
+    const handlePay = () => {
+        if (!canPay || !hash) return;
+        submit(state, hash);
+    };
 
     return (
         <div className="row gx-5">
             <div className="col-12 col-lg-8">
-                <ShippingMethodSection
-                    methods={summary.shippingMethods}
-                    currencyCode={summary.currencyCode}
-                />
+                <div ref={shippingSectionRef}>
+                    <ShippingMethodSection
+                        methods={summary.shippingMethods}
+                        currencyCode={summary.currencyCode}
+                        changedNotice={shippingMethodsChanged}
+                    />
+                </div>
 
                 <AddressSection addresses={addresses} countries={countries} />
 
@@ -61,10 +82,13 @@ const CheckoutContent: React.FC<Props> = ({ token, addresses, countries, items, 
             <div className="col-12 col-lg-4">
                 <div className="sticky-lg-top pt-2 checkout-summary-sticky">
                     <SummaryPanel
-                        items={items}
+                        items={displayItems}
                         summary={summary}
                         recalculating={isRecalculating}
                         canPay={canPay}
+                        submitting={isSubmitting}
+                        errorMessage={errorMessage}
+                        onPay={handlePay}
                     />
                 </div>
             </div>

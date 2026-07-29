@@ -1,9 +1,0 @@
-import { createCookie } from "react-router";
-
-export const orderTokenCookie = createCookie("orderToken", {
-    path: "/",
-    httpOnly: false,
-    sameSite: process.env.NODE_ENV === "development" ? "lax" : "none",
-    secure: process.env.NODE_ENV !== "development",
-    maxAge: 60 * 60 * 24 * 30,
-});

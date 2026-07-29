@@ -24,7 +24,7 @@ export interface CheckoutShippingMethod {
     code: string;
     name: string;
     logoUrl?: string;
-    price: number;
+    price?: number;
     originalPrice?: number;
     estimatedDelivery?: DeliveryEstimate;
     enabled: boolean;
@@ -40,19 +40,24 @@ export interface CheckoutPaymentMethod {
 export interface OrderLineItem {
     id: number;
     productName: string;
-    variantCode: string;
     imageUrl?: string;
-    variant?: string;
     quantity: number;
     unitPrice: number;
     originalUnitPrice?: number;
-    subtotal: number;
+}
+
+export interface OrderItemPricing {
+    id: number;
+    unitPrice: number;
+    originalUnitPrice: number | null;
+    discountedUnitPrice: number;
 }
 
 export interface OrderTotals {
     itemsSubtotal: number;
     itemsCount: number;
     shippingTotal: number;
+    shippingDiscountTotal: number;
     discountTotal: number;
     taxTotal: number;
     total: number;
@@ -69,8 +74,10 @@ export interface OrderSummary {
     selectedShippingMethod: string | null;
     selectedPaymentMethod: string | null;
     totals: OrderTotals;
+    items: OrderItemPricing[];
     estimatedDelivery?: DeliveryEstimate;
     securePayments?: SecurePayments;
+    hash?: string;
 }
 
 export interface CheckoutStateItem {

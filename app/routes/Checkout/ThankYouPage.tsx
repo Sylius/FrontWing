@@ -7,6 +7,7 @@ import { useCustomer } from "~/context/CustomerContext";
 import { useSearchParams, useLocation } from "react-router";
 import { LocalizedLink } from "~/components/LocalizedLink";
 import { useOrder } from "~/context/OrderContext";
+import { readOrderToken } from "~/utils/orderTokenCookie";
 
 export default function ThankYouPage() {
     const { t } = useTranslation("checkout");
@@ -21,12 +22,7 @@ export default function ThankYouPage() {
     const token =
         tokenFromState ||
         tokenFromQuery ||
-        (typeof document !== "undefined"
-            ? document.cookie
-                .split("; ")
-                .find((row) => row.startsWith("orderToken="))
-                ?.split("=")[1]
-            : null);
+        (typeof document !== "undefined" ? readOrderToken(document.cookie) : null);
 
     useEffect(() => {
         resetCart();

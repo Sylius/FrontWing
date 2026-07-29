@@ -1,5 +1,5 @@
 import React from "react";
-import { IconCalendarMonth } from "@tabler/icons-react";
+import { IconAlertTriangle, IconCalendarMonth } from "@tabler/icons-react";
 import type { CheckoutShippingMethod } from "~/modules/checkout-opc/types";
 import { useCheckout } from "~/modules/checkout-opc/context/CheckoutContext";
 import { formatMoney } from "~/utils/price";
@@ -9,14 +9,25 @@ import MethodLogo from "./MethodLogo";
 interface Props {
     methods: CheckoutShippingMethod[];
     currencyCode: string;
+    changedNotice?: boolean;
 }
 
-const ShippingMethodSection: React.FC<Props> = ({ methods, currencyCode }) => {
+const ShippingMethodSection: React.FC<Props> = ({ methods, currencyCode, changedNotice }) => {
     const { state, setShippingMethod } = useCheckout();
 
     return (
         <fieldset className="mb-5">
             <legend className="h5 mb-4">Shipping</legend>
+
+            {changedNotice && (
+                <div className="alert alert-warning d-flex align-items-center gap-2" role="alert">
+                    <IconAlertTriangle className="icon icon-sm flex-shrink-0" stroke={2} />
+                    <span>
+                        The available shipping methods changed because you updated your country.
+                        Please choose a shipping method again.
+                    </span>
+                </div>
+            )}
 
             {methods.length === 0 ? (
                 <div className="text-danger">No shipping methods available. Check your address.</div>
@@ -47,14 +58,16 @@ const ShippingMethodSection: React.FC<Props> = ({ methods, currencyCode }) => {
                                 )}
                             </div>
 
-                            <div className="text-end">
-                                <div>{formatMoney(method.price, currencyCode)}</div>
-                                {method.originalPrice !== undefined && (
-                                    <del className="text-body-tertiary small">
-                                        {formatMoney(method.originalPrice, currencyCode)}
-                                    </del>
-                                )}
-                            </div>
+                            {method.price !== undefined && (
+                                <div className="text-end">
+                                    <div>{formatMoney(method.price, currencyCode)}</div>
+                                    {method.originalPrice !== undefined && (
+                                        <del className="text-body-tertiary small">
+                                            {formatMoney(method.originalPrice, currencyCode)}
+                                        </del>
+                                    )}
+                                </div>
+                            )}
                         </label>
                     </div>
                 ))

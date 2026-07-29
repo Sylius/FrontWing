@@ -26,6 +26,8 @@ export interface ProductVariantDetails {
 export interface OrderItem {
     variant: string | ProductVariantDetails;
     productName?: string | null;
+    variantName?: string | null;
+    image?: string | null;
     id?: number;
     quantity?: number;
     unitPrice?: number;

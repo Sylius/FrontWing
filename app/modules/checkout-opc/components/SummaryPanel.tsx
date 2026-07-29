@@ -11,9 +11,20 @@ interface Props {
     summary: OrderSummary;
     recalculating: boolean;
     canPay: boolean;
+    submitting: boolean;
+    errorMessage: string | null;
+    onPay: () => void;
 }
 
-const SummaryPanel: React.FC<Props> = ({ items, summary, recalculating, canPay }) => {
+const SummaryPanel: React.FC<Props> = ({
+    items,
+    summary,
+    recalculating,
+    canPay,
+    submitting,
+    errorMessage,
+    onPay,
+}) => {
     const { currencyCode, totals, estimatedDelivery, securePayments } = summary;
 
     return (
@@ -35,6 +46,14 @@ const SummaryPanel: React.FC<Props> = ({ items, summary, recalculating, canPay }
                             <td>Estimated shipping cost</td>
                             <td className="text-end">{formatMoney(totals.shippingTotal, currencyCode)}</td>
                         </tr>
+                        {totals.shippingDiscountTotal !== 0 && (
+                            <tr>
+                                <td>Shipping discount</td>
+                                <td className="text-end">
+                                    {formatMoney(totals.shippingDiscountTotal, currencyCode)}
+                                </td>
+                            </tr>
+                        )}
                         {totals.discountTotal !== 0 && (
                             <tr>
                                 <td>Discount</td>
@@ -68,19 +87,26 @@ const SummaryPanel: React.FC<Props> = ({ items, summary, recalculating, canPay }
                     </div>
                 )}
 
+                {errorMessage && (
+                    <div className="alert alert-danger py-2 px-3 small mb-3" role="alert">
+                        {errorMessage}
+                    </div>
+                )}
+
                 <button
                     type="button"
                     className="btn btn-primary w-100 mb-3"
                     disabled={!canPay}
+                    onClick={onPay}
                 >
-                    {recalculating ? (
+                    {recalculating || submitting ? (
                         <>
                             <span
                                 className="spinner-border spinner-border-sm me-2"
                                 role="status"
                                 aria-hidden="true"
                             />
-                            Recalculating...
+                            {submitting ? "Placing order..." : "Recalculating..."}
                         </>
                     ) : (
                         "Pay now securely"

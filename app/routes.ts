@@ -1,4 +1,22 @@
 import { type RouteConfig, route, index, prefix } from "@react-router/dev/routes";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const onePageCheckoutEnabled = process.env.FEATURE_ONE_PAGE_CHECKOUT === "true";
+
+const checkoutRoutes: RouteConfig = onePageCheckoutEnabled
+  ? [
+      route("checkout", "modules/checkout-opc/route.tsx"),
+      route("checkout/*", "routes/Checkout/CheckoutStepRedirect.tsx"),
+    ]
+  : [
+      route("checkout", "routes/Checkout/CheckoutRedirect.tsx"),
+      route("checkout/address", "routes/Checkout/AddressPage.tsx"),
+      route("checkout/select-shipping", "routes/Checkout/ShippingPage.tsx"),
+      route("checkout/select-payment", "routes/Checkout/PaymentPage.tsx"),
+      route("checkout/complete", "routes/Checkout/SummaryPage.tsx"),
+    ];
 
 export default [
   // API (no language prefix)
@@ -32,13 +50,8 @@ export default [
       id: "routes/Product/ProductListRootLegacy",
     }),
 
-    route("checkout", "routes/Checkout/CheckoutRedirect.tsx"),
-
     // Checkout
-    route("checkout/address", "routes/Checkout/AddressPage.tsx"),
-    route("checkout/select-shipping", "routes/Checkout/ShippingPage.tsx"),
-    route("checkout/select-payment", "routes/Checkout/PaymentPage.tsx"),
-    route("checkout/complete", "routes/Checkout/SummaryPage.tsx"),
+    ...checkoutRoutes,
     route("order/thank-you", "routes/Checkout/ThankYouPage.tsx"),
 
     // Account

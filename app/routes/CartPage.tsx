@@ -14,7 +14,7 @@ import {
 import Layout from "~/layouts/Default";
 import { LocalizedLink } from "~/components/LocalizedLink";
 import { localizePath } from "~/utils/localizedPath";
-import { orderTokenCookie } from "~/utils/cookies.server";
+import { readOrderToken, serializeOrderToken } from "~/utils/orderTokenCookie";
 import {
   pickupCart,
   fetchOrderFromAPI,
@@ -46,8 +46,7 @@ type FlashMessage = {
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const cookieHeader = request.headers.get("Cookie");
-  let token = await orderTokenCookie.parse(cookieHeader);
-  if (typeof token !== "string") token = token?.token ?? token ?? "";
+  let token = readOrderToken(cookieHeader) ?? "";
 
   if (!token) {
     token = await pickupCart();
@@ -57,25 +56,25 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const rawMessages = flash.get("messages");
   const messages = rawMessages ? JSON.parse(rawMessages) : [];
 
-  const headers: Record<string, string> = {};
+  const headers = new Headers();
   const cookies: string[] = [];
 
-  cookies.push(await orderTokenCookie.serialize(token));
+  cookies.push(serializeOrderToken(token));
 
   let order = null;
   try {
     order = await fetchOrderFromAPI(token, true);
   } catch (err) {
     token = await pickupCart();
-    cookies.push(await orderTokenCookie.serialize(token));
+    cookies.push(serializeOrderToken(token));
     order = await fetchOrderFromAPI(token, true);
   }
 
   const products = await fetchCartSuggestions();
   cookies.push(await commitFlashSession(flash));
 
-  if (cookies.length > 0) {
-    headers["Set-Cookie"] = cookies.join("; ");
+  for (const cookie of cookies) {
+    headers.append("Set-Cookie", cookie);
   }
 
   return data({ order, token, products, messages }, { headers });
@@ -83,8 +82,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export async function action({ request, params }: ActionFunctionArgs) {
   const cookieHeader = request.headers.get("Cookie");
-  const parsed = await orderTokenCookie.parse(cookieHeader);
-  const token = typeof parsed === "string" ? parsed : parsed?.token ?? "";
+  const token = readOrderToken(cookieHeader) ?? "";
   const form = await request.formData();
 
   const intent = form.get("_intent");
@@ -327,7 +325,7 @@ export default function CartPage() {
                     </div>
                   </div>
                   <div className="d-flex">
-                    <LocalizedLink to="/checkout/address" className="btn btn-primary flex-grow-1">
+                    <LocalizedLink to="/checkout" className="btn btn-primary flex-grow-1">
                       {t("page.checkout")}
                     </LocalizedLink>
                   </div>
