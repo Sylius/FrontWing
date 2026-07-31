@@ -1,5 +1,5 @@
 import { OrderItem } from '../../types/Order';
-import { formatPrice } from '../../utils/price';
+import { formatPrice, getUnitPrices } from '../../utils/price';
 import { useQuery } from '@tanstack/react-query';
 import {Link} from "react-router";
 import React from "react";
@@ -45,6 +45,8 @@ const ProductRow: React.FC<ProductRowProps> = ({ orderItem }) => {
     queryFn: fetchProduct,
   });
 
+  const { originalUnitPrice, currentUnitPrice, hasDiscount } = getUnitPrices(orderItem);
+
   return (
     <tr>
       <td>
@@ -81,8 +83,17 @@ const ProductRow: React.FC<ProductRowProps> = ({ orderItem }) => {
           </div>
         </div>
       </td>
-      <td className="text-black-50 text-end">
-        <span>${formatPrice(orderItem.unitPrice)}</span>
+      <td className="text-end">
+        {hasDiscount ? (
+          <div className="d-flex flex-column align-items-end">
+            <span className="text-black-50 text-decoration-line-through">
+              ${formatPrice(originalUnitPrice)}
+            </span>
+            <span>${formatPrice(currentUnitPrice)}</span>
+          </div>
+        ) : (
+          <span className="text-black-50">${formatPrice(currentUnitPrice)}</span>
+        )}
       </td>
 
       <td className={'text-end'}>

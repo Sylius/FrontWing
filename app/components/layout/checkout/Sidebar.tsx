@@ -1,5 +1,5 @@
 import { useOrder } from "../../../context/OrderContext";
-import { formatPrice } from "../../../utils/price";
+import { formatPrice, getUnitPrices } from "../../../utils/price";
 import { OrderItem } from "../../../types/Order";
 import React from "react";
 
@@ -17,7 +17,11 @@ const Sidebar: React.FC = () => {
 
                 <table className="table mb-3">
                     <tbody>
-                    {order?.items?.map((orderItem: OrderItem) => (
+                    {order?.items?.map((orderItem: OrderItem) => {
+                        const { originalUnitPrice, currentUnitPrice, hasDiscount } =
+                            getUnitPrices(orderItem);
+
+                        return (
                         <tr key={orderItem.id}>
                             <td>
                                 <div className="py-3 h6 mb-0 text-break">
@@ -31,11 +35,21 @@ const Sidebar: React.FC = () => {
                             </td>
                             <td>
                                 <div className="py-3 text-end">
-                                    ${formatPrice(orderItem.subtotal)}
+                                    {hasDiscount ? (
+                                        <span className="d-inline-flex align-items-center gap-2">
+                                            <span className="text-black-50 text-decoration-line-through">
+                                                ${formatPrice(originalUnitPrice)}
+                                            </span>
+                                            <span>${formatPrice(currentUnitPrice)}</span>
+                                        </span>
+                                    ) : (
+                                        <span>${formatPrice(currentUnitPrice)}</span>
+                                    )}
                                 </div>
                             </td>
                         </tr>
-                    ))}
+                        );
+                    })}
                     </tbody>
                 </table>
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import type { OrderItem, ProductVariantDetails, ProductData } from "~/types/Order";
-import { formatPrice } from "~/utils/price";
+import { formatPrice, getUnitPrices } from "~/utils/price";
 import { useFetcher, Link } from "react-router";
 import { IconX } from "@tabler/icons-react";
 
@@ -16,6 +16,8 @@ export default function ProductRow({ item, fetcher, fetchOrder }: Props) {
     const [imageKey] = useState(() => Date.now());
 
     const variant = typeof item.variant === "object" ? item.variant as ProductVariantDetails : null;
+
+    const { originalUnitPrice, currentUnitPrice, hasDiscount } = getUnitPrices(item);
 
     const productUrl = product?.code ? `/product/${product.code}` : "#";
     const image = product?.images?.[0]?.path ?? "";
@@ -104,8 +106,19 @@ export default function ProductRow({ item, fetcher, fetchOrder }: Props) {
                 </div>
             </td>
 
-            <td className="text-black-50 text-end" style={{ width: "90px" }}>
-                ${formatPrice(item.unitPrice)}
+            <td className="text-end" style={{ width: "90px" }}>
+                {hasDiscount ? (
+                    <div className="d-flex flex-column">
+                        <span className="text-black-50 text-decoration-line-through">
+                            ${formatPrice(originalUnitPrice)}
+                        </span>
+                        <span>${formatPrice(currentUnitPrice)}</span>
+                    </div>
+                ) : (
+                    <span className="text-black-50">
+                        ${formatPrice(currentUnitPrice)}
+                    </span>
+                )}
             </td>
 
             <td className="text-end" style={{ width: "110px" }}>
