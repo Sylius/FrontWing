@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
     Links,
     Meta,
@@ -20,8 +21,6 @@ import mainStylesHref from "./assets/scss/main.scss?url";
 
 import { orderTokenCookie } from "~/utils/cookies.server";
 import type { Taxon } from "~/types/Taxon";
-
-const queryClient = new QueryClient();
 
 export const loader: LoaderFunction = async ({ request }) => {
     const cookieHeader = request.headers.get("Cookie");
@@ -83,6 +82,8 @@ export default function App() {
         orderToken: string | null;
         taxonTree: Taxon[];
     }>();
+
+    const [queryClient] = useState(() => new QueryClient());
 
     return (
         <html lang="en">
