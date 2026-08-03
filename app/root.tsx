@@ -5,6 +5,7 @@ import {
     Outlet,
     Scripts,
     ScrollRestoration,
+    redirect,
     useLoaderData,
     type LinksFunction,
     type LoaderFunction,
@@ -21,8 +22,23 @@ import mainStylesHref from "./assets/scss/main.scss?url";
 
 import { orderTokenCookie } from "~/utils/cookies.server";
 import type { Taxon } from "~/types/Taxon";
+import { fetchChannel } from "~/api/channel.server";
+import { resolveLocale } from "~/i18n.server";
+import { createLocaleMapper } from "~/utils/locale";
 
 export const loader: LoaderFunction = async ({ request }) => {
+    const url = new URL(request.url);
+
+    const channel = await fetchChannel();
+    const mapper = createLocaleMapper(channel.locales);
+    const firstSegment = url.pathname.split("/").filter(Boolean)[0];
+
+    if (!firstSegment || !mapper.urlSegments.includes(firstSegment)) {
+        const { urlLocale } = resolveLocale(request, channel);
+        const suffix = url.pathname === "/" ? "" : url.pathname;
+        throw redirect(`/${urlLocale}${suffix}${url.search}`);
+    }
+
     const cookieHeader = request.headers.get("Cookie");
     const parsed = await orderTokenCookie.parse(cookieHeader);
     const token = typeof parsed === "string" ? parsed : parsed?.token ?? "";
