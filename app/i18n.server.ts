@@ -8,15 +8,18 @@ import { createLocaleMapper, localeRegionCode, localeShortCode } from "~/utils/l
 
 const localesDir = path.resolve(process.cwd(), "public/locales");
 const resourceCache = new Map<string, Record<string, unknown>>();
+const cacheEnabled = process.env.NODE_ENV === "production";
 
 const loadNamespace = async (lng: string, ns: string): Promise<Record<string, unknown>> => {
     const cacheKey = `${lng}/${ns}`;
-    const cached = resourceCache.get(cacheKey);
-    if (cached) return cached;
+    if (cacheEnabled) {
+        const cached = resourceCache.get(cacheKey);
+        if (cached) return cached;
+    }
 
     const filePath = path.join(localesDir, lng, `${ns}.json`);
     const parsed = JSON.parse(await readFile(filePath, "utf-8"));
-    resourceCache.set(cacheKey, parsed);
+    if (cacheEnabled) resourceCache.set(cacheKey, parsed);
     return parsed;
 };
 

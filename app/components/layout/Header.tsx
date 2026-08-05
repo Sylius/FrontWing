@@ -3,6 +3,7 @@ import { LocalizedLink } from "~/components/LocalizedLink";
 import { useOrder } from "../../context/OrderContext";
 import { useCurrency } from "~/context/ChannelContext";
 import UserNavigation from "./header/UserNavigation";
+import { LocaleSwitcher } from "./header/LocaleSwitcher";
 import { IconMenu2, IconShoppingBag } from "@tabler/icons-react";
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
@@ -70,6 +71,10 @@ const Header: React.FC = () => {
                                 aria-expanded="false" aria-label="Toggle navigation">
                             <IconMenu2 stroke={1.25} size={28} />
                         </button>
+                    </div>
+
+                    <div className="col-auto">
+                        <LocaleSwitcher />
                     </div>
                 </div>
             </div>

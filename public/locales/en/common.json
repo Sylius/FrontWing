@@ -25,6 +25,10 @@
     "accountButton": "account button",
     "logo": "Sylius logo"
   },
+  "localeSwitcher": {
+    "ariaLabel": "Change language",
+    "language": "Language"
+  },
   "state": {
     "loading": "Loading…",
     "empty": "Nothing here yet"

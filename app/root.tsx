@@ -32,21 +32,22 @@ import { useChangeLanguage } from "~/hooks/useChangeLanguage";
 
 export const loader: LoaderFunction = async ({ request }) => {
     const url = new URL(request.url);
+    const pathname = url.pathname.replace(/\.data$/, "");
 
     const channel = await fetchChannel();
     const mapper = createLocaleMapper(channel.locales);
-    const firstSegment = url.pathname.split("/").filter(Boolean)[0];
+    const firstSegment = pathname.split("/").filter(Boolean)[0];
 
     if (!firstSegment || !mapper.urlSegments.includes(firstSegment)) {
         const { urlLocale } = resolveLocale(request, channel);
-        const suffix = url.pathname === "/" ? "" : url.pathname;
+        const suffix = pathname === "/" ? "" : pathname;
         throw redirect(`/${urlLocale}${suffix}${url.search}`);
     }
 
     const locale = firstSegment;
     const fallbackLng = mapper.toUrl(channel.defaultLocale);
 
-    const pathWithoutLang = url.pathname.slice(locale.length + 1) || "";
+    const pathWithoutLang = pathname.slice(locale.length + 1) || "";
     const canonical = `${url.origin}/${locale}${pathWithoutLang}`;
     const alternates = [
         ...mapper.urlSegments.map((segment) => ({

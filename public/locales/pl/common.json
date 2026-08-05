@@ -25,6 +25,10 @@
     "accountButton": "przycisk konta",
     "logo": "Logo Sylius"
   },
+  "localeSwitcher": {
+    "ariaLabel": "Zmień język",
+    "language": "Język"
+  },
   "state": {
     "loading": "Ładowanie…",
     "empty": "Tu jeszcze nic nie ma"
