@@ -1,7 +1,8 @@
 import { OrderItem } from '../../types/Order';
-import { formatPrice, getUnitPrices } from '../../utils/price';
+import { getUnitPrices } from '../../utils/price';
+import { useCurrency } from "~/context/ChannelContext";
 import { useQuery } from '@tanstack/react-query';
-import {Link} from "react-router";
+import { LocalizedLink } from "~/components/LocalizedLink";
 import React from "react";
 
 interface ProductRowProps {
@@ -9,6 +10,7 @@ interface ProductRowProps {
 }
 
 const ProductRow: React.FC<ProductRowProps> = ({ orderItem }) => {
+  const { formatPrice } = useCurrency();
   const fetchVariant = async (): Promise<any> => {
     const response = await fetch(
       `${window.ENV?.API_URL}${orderItem.variant}`
@@ -68,12 +70,12 @@ const ProductRow: React.FC<ProductRowProps> = ({ orderItem }) => {
           <div>
             <div className="h6">
               {product?.code ? (
-                  <Link
+                  <LocalizedLink
                       className="link-reset text-break"
                       to={`/product/${product.code}`}
                   >
                     {orderItem?.productName}
-                  </Link>
+                  </LocalizedLink>
               ) : (
                   orderItem?.productName
               )}
@@ -87,12 +89,12 @@ const ProductRow: React.FC<ProductRowProps> = ({ orderItem }) => {
         {hasDiscount ? (
           <div className="d-flex flex-column align-items-end">
             <span className="text-black-50 text-decoration-line-through">
-              ${formatPrice(originalUnitPrice)}
+              {formatPrice(originalUnitPrice)}
             </span>
-            <span>${formatPrice(currentUnitPrice)}</span>
+            <span>{formatPrice(currentUnitPrice)}</span>
           </div>
         ) : (
-          <span className="text-black-50">${formatPrice(currentUnitPrice)}</span>
+          <span className="text-black-50">{formatPrice(currentUnitPrice)}</span>
         )}
       </td>
 
@@ -101,7 +103,7 @@ const ProductRow: React.FC<ProductRowProps> = ({ orderItem }) => {
       </td>
 
       <td className="text-end">
-        <span>${formatPrice(orderItem.subtotal)}</span>
+        <span>{formatPrice(orderItem.subtotal)}</span>
       </td>
     </tr>
   );

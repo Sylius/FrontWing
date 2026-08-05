@@ -1,0 +1,57 @@
+{
+  "appName": "Sylius Demo",
+  "nav": {
+    "home": "Home",
+    "cart": "Cart",
+    "account": "My account",
+    "login": "Log in",
+    "register": "Register",
+    "logout": "Log out",
+    "search": "Search",
+    "categories": "Categories",
+    "greeting": "Hello {{name}}!"
+  },
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "back": "Back",
+    "continue": "Continue",
+    "confirm": "Confirm",
+    "signIn": "Sign in"
+  },
+  "aria": {
+    "close": "Close",
+    "breadcrumbs": "breadcrumbs",
+    "accountButton": "account button",
+    "logo": "Sylius logo"
+  },
+  "state": {
+    "loading": "Loading…",
+    "empty": "Nothing here yet"
+  },
+  "error": {
+    "generic": "Something went wrong. Please try again."
+  },
+  "footer": {
+    "about": "About",
+    "terms": "Terms and Conditions",
+    "privacy": "Privacy Policy",
+    "contact": "Contact us",
+    "faq": "FAQ",
+    "delivery": "Delivery & Shipping",
+    "returns": "Returns Policy",
+    "paymentMethods": "Payment methods:",
+    "copyright": "© Your Store, Powered by",
+    "social": {
+      "instagram": "instagram logo",
+      "facebook": "facebook logo",
+      "x": "x logo"
+    }
+  },
+  "flash": {
+    "success": "Success",
+    "error": "Error",
+    "info": "Info",
+    "warning": "Warning"
+  }
+}

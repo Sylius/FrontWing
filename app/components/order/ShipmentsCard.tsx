@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Shipment } from '../../types/Order';
 import { useQuery } from '@tanstack/react-query';
 
@@ -15,6 +16,7 @@ interface ShipmentsCardProps {
 }
 
 const ShipmentsCard: React.FC<ShipmentsCardProps> = ({ shipment }) => {
+  const { t } = useTranslation("account");
   const methodRef = typeof shipment?.method === 'string' ? shipment.method : undefined;
 
   const fetchShippingMethodFromAPI = async (): Promise<ShippingMethod> => {
@@ -37,7 +39,7 @@ const ShipmentsCard: React.FC<ShipmentsCardProps> = ({ shipment }) => {
   return (
       <div className="card border-0 bg-body-tertiary mb-3">
         <div className="card-header d-flex align-items-center">
-          <div className="me-auto">Shipments</div>
+          <div className="me-auto">{t("orders.details.shipments")}</div>
         </div>
         <div className="card-body d-flex flex-column gap-2">
           <div className="d-flex gap-4">

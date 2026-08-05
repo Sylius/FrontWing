@@ -1,18 +1,21 @@
 import React, { useState } from "react";
 import CheckoutLayout from "~/layouts/Checkout";
 import { useOrder } from "~/context/OrderContext";
-import { useNavigate } from "react-router";
+import { useLocalizedNavigate } from "~/hooks/useLocalizedNavigate";
 import Steps from "~/components/checkout/Steps";
 import Address from "~/components/Address";
 import PaymentsCard from "~/components/order/PaymentsCard";
 import ShipmentsCard from "~/components/order/ShipmentsCard";
 import ProductRow from "~/components/order/ProductRow";
 import { OrderItem } from "~/types/Order";
-import { formatPrice } from "~/utils/price";
+import { useCurrency } from "~/context/ChannelContext";
+import { useTranslation } from "react-i18next";
 
 const SummaryPage: React.FC = () => {
+  const { t } = useTranslation("checkout");
+  const { formatPrice } = useCurrency();
   const { order, resetCart, setOrderToken } = useOrder();
-  const navigate = useNavigate();
+  const navigate = useLocalizedNavigate();
   const [extraNotes, setExtraNotes] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -39,7 +42,7 @@ const SummaryPage: React.FC = () => {
       const responseText = await response.text();
 
       if (!response.ok) {
-        alert("Order checkout error:\n" + responseText);
+        alert(t("summary.checkoutError") + "\n" + responseText);
         throw new Error("Failed to complete order");
       }
 
@@ -70,18 +73,18 @@ const SummaryPage: React.FC = () => {
         <div className="col pt-4 pb-5">
           <div className="mx-auto">
             <Steps activeStep="complete" />
-            <h1 className="h5 mb-4">Order #{order?.number}</h1>
+            <h1 className="h5 mb-4">{t("summary.orderNumber", { number: order?.number })}</h1>
 
             <form onSubmit={handleSubmit} noValidate>
               <div className="row">
                 <div className="col-12 col-md-6 mb-3">
                   {order?.billingAddress && (
-                      <Address sectionName="Billing address" address={order.billingAddress} />
+                      <Address sectionName={t("summary.billingAddress")} address={order.billingAddress} />
                   )}
                 </div>
                 <div className="col-12 col-md-6 mb-3">
                   {order?.shippingAddress && (
-                      <Address sectionName="Shipping address" address={order.shippingAddress} />
+                      <Address sectionName={t("summary.shippingAddress")} address={order.shippingAddress} />
                   )}
                 </div>
               </div>
@@ -101,10 +104,10 @@ const SummaryPage: React.FC = () => {
                 <table className="table table-borderless table-space align-middle mb-0">
                   <thead>
                   <tr>
-                    <th>Item</th>
-                    <th className="text-end">Unit price</th>
-                    <th className="text-end">Qty</th>
-                    <th className="text-end">Subtotal</th>
+                    <th>{t("summary.item")}</th>
+                    <th className="text-end">{t("summary.unitPrice")}</th>
+                    <th className="text-end">{t("summary.qty")}</th>
+                    <th className="text-end">{t("summary.subtotal")}</th>
                   </tr>
                   </thead>
                   <tbody>
@@ -118,28 +121,28 @@ const SummaryPage: React.FC = () => {
               <table className="table table-borderless align-middle ms-auto mb-6">
                 <tbody>
                 <tr>
-                  <td className="text-end w-75">Items total:</td>
-                  <td className="text-end">${formatPrice(order?.itemsSubtotal ?? 0)}</td>
+                  <td className="text-end w-75">{t("summary.itemsTotal")}</td>
+                  <td className="text-end">{formatPrice(order?.itemsSubtotal ?? 0)}</td>
                 </tr>
                 <tr>
-                  <td className="text-end w-75">Taxes total:</td>
+                  <td className="text-end w-75">{t("summary.taxesTotal")}</td>
                   <td className="text-end">
-                    <div>${formatPrice(order?.taxTotal ?? 0)}</div>
-                    <small className="text-body-tertiary">Included in price</small>
+                    <div>{formatPrice(order?.taxTotal ?? 0)}</div>
+                    <small className="text-body-tertiary">{t("summary.includedInPrice")}</small>
                   </td>
                 </tr>
                 <tr>
-                  <td className="text-end w-75">Discount:</td>
-                  <td className="text-end">${formatPrice(order?.orderPromotionTotal ?? 0)}</td>
+                  <td className="text-end w-75">{t("summary.discount")}</td>
+                  <td className="text-end">{formatPrice(order?.orderPromotionTotal ?? 0)}</td>
                 </tr>
                 <tr>
-                  <td className="text-end w-75">Shipping total:</td>
-                  <td className="text-end">${formatPrice(order?.shippingTotal ?? 0)}</td>
+                  <td className="text-end w-75">{t("summary.shippingTotal")}</td>
+                  <td className="text-end">{formatPrice(order?.shippingTotal ?? 0)}</td>
                 </tr>
                 <tr>
-                  <td className="h5 text-end border-top pt-4 mt-3">Total:</td>
+                  <td className="h5 text-end border-top pt-4 mt-3">{t("summary.total")}</td>
                   <td className="h5 text-end border-top pt-4 mt-3">
-                    ${formatPrice(order?.total ?? 0)}
+                    {formatPrice(order?.total ?? 0)}
                   </td>
                 </tr>
                 </tbody>
@@ -147,7 +150,7 @@ const SummaryPage: React.FC = () => {
 
               <div className="field mb-3">
                 <label htmlFor="sylius_checkout_complete_notes" className="form-label">
-                  Extra notes
+                  {t("summary.extraNotes")}
                 </label>
                 <textarea
                     id="sylius_checkout_complete_notes"
@@ -159,7 +162,7 @@ const SummaryPage: React.FC = () => {
 
               <div className="text-center">
                 <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
-                  {isSubmitting ? "Placing order..." : "Place order"}
+                  {isSubmitting ? t("summary.placingOrder") : t("summary.placeOrder")}
                 </button>
               </div>
             </form>

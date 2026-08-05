@@ -1,0 +1,92 @@
+{
+  "home": {
+    "bannerAlt": "Strona główna",
+    "bannerLogoAlt": "Nowa kolekcja",
+    "latestDeals": "Najnowsze okazje",
+    "newCollection": "Nowa kolekcja",
+    "newCollectionAlt": "Nowa kolekcja",
+    "latestProducts": "Najnowsze produkty"
+  },
+  "list": {
+    "errorMissingCode": "Brak kodu kategorii",
+    "errorLoadFailed": "Nie udało się załadować kategorii",
+    "goLevelUp": "Poziom wyżej"
+  },
+  "card": {
+    "noPrice": "Brak ceny"
+  },
+  "gallery": {
+    "thumbnailAlt": "miniatura",
+    "mainAlt": "Główne zdjęcie produktu"
+  },
+  "breadcrumb": {
+    "category": "Kategoria",
+    "reviews": "Recenzje",
+    "add": "Dodaj"
+  },
+  "detail": {
+    "noPrice": "Cena niedostępna",
+    "quantity": "Ilość",
+    "adding": "Dodawanie...",
+    "addToCart": "Dodaj do koszyka",
+    "noShortDescription": "Brak krótkiego opisu",
+    "addYourReview": "Dodaj recenzję",
+    "viewMore": "Zobacz więcej",
+    "info": "Informacja",
+    "noReviews": "Brak recenzji",
+    "noAttributes": "Brak dostępnych atrybutów.",
+    "tabs": {
+      "details": "Szczegóły",
+      "attributes": "Atrybuty",
+      "reviews": "Recenzje ({{count}})"
+    },
+    "flash": {
+      "added": "Produkt dodany do koszyka",
+      "addFailed": "Nie udało się dodać produktu do koszyka"
+    }
+  },
+  "reviews": {
+    "title": "Recenzje",
+    "addYourReview": "Dodaj recenzję",
+    "count_one": "{{count}} recenzja",
+    "count_few": "{{count}} recenzje",
+    "count_many": "{{count}} recenzji",
+    "count_other": "{{count}} recenzji",
+    "voteCount_one": "{{count}} głos",
+    "voteCount_few": "{{count}} głosy",
+    "voteCount_many": "{{count}} głosów",
+    "voteCount_other": "{{count}} głosów"
+  },
+  "addReview": {
+    "title": "Dodaj recenzję",
+    "flash": {
+      "success": "Sukces — Twoja recenzja czeka na akceptację.",
+      "error": "Nie udało się dodać recenzji"
+    },
+    "form": {
+      "rating": "Ocena",
+      "ariaRating": "Ocena",
+      "star_one": "{{count}} gwiazdka",
+      "star_few": "{{count}} gwiazdki",
+      "star_many": "{{count}} gwiazdek",
+      "star_other": "{{count}} gwiazdek",
+      "title": "Tytuł",
+      "comment": "Komentarz",
+      "email": "E-mail",
+      "submit": "Dodaj"
+    }
+  },
+  "toolbar": {
+    "searchPlaceholder": "Wartość",
+    "sortLabel": "Sortuj:",
+    "sort": {
+      "position": "Według pozycji",
+      "nameAsc": "Od A do Z",
+      "nameDesc": "Od Z do A",
+      "newest": "Najnowsze",
+      "oldest": "Najstarsze",
+      "cheapest": "Od najtańszych",
+      "expensive": "Od najdroższych"
+    }
+  }
+}

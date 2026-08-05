@@ -1,0 +1,57 @@
+{
+  "appName": "Sylius Demo",
+  "nav": {
+    "home": "Strona główna",
+    "cart": "Koszyk",
+    "account": "Moje konto",
+    "login": "Zaloguj się",
+    "register": "Załóż konto",
+    "logout": "Wyloguj się",
+    "search": "Szukaj",
+    "categories": "Kategorie",
+    "greeting": "Cześć {{name}}!"
+  },
+  "actions": {
+    "save": "Zapisz",
+    "cancel": "Anuluj",
+    "back": "Wstecz",
+    "continue": "Dalej",
+    "confirm": "Potwierdź",
+    "signIn": "Zaloguj się"
+  },
+  "aria": {
+    "close": "Zamknij",
+    "breadcrumbs": "ścieżka nawigacji",
+    "accountButton": "przycisk konta",
+    "logo": "Logo Sylius"
+  },
+  "state": {
+    "loading": "Ładowanie…",
+    "empty": "Tu jeszcze nic nie ma"
+  },
+  "error": {
+    "generic": "Coś poszło nie tak. Spróbuj ponownie."
+  },
+  "footer": {
+    "about": "O nas",
+    "terms": "Regulamin",
+    "privacy": "Polityka prywatności",
+    "contact": "Kontakt",
+    "faq": "FAQ",
+    "delivery": "Dostawa i wysyłka",
+    "returns": "Zwroty",
+    "paymentMethods": "Metody płatności:",
+    "copyright": "© Twój Sklep, napędzany przez",
+    "social": {
+      "instagram": "logo Instagram",
+      "facebook": "logo Facebook",
+      "x": "logo X"
+    }
+  },
+  "flash": {
+    "success": "Sukces",
+    "error": "Błąd",
+    "info": "Informacja",
+    "warning": "Ostrzeżenie"
+  }
+}

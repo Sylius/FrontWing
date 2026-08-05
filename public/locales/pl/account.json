@@ -1,0 +1,237 @@
+{
+  "auth": {
+    "login": {
+      "title": "Logowanie",
+      "errorTitle": "Błąd",
+      "username": "Nazwa użytkownika",
+      "password": "Hasło",
+      "rememberMe": "Zapamiętaj mnie",
+      "submit": "Zaloguj się",
+      "submitting": "Logowanie...",
+      "forgot": "Nie pamiętasz hasła?",
+      "apiNotConfigured": "Adres URL API nie jest skonfigurowany",
+      "invalidCredentials": "Nieprawidłowe dane logowania",
+      "unexpectedError": "Wystąpił nieoczekiwany błąd"
+    },
+    "register": {
+      "title": "Załóż nowe konto klienta",
+      "haveAccount": "Masz już konto?",
+      "signIn": "Zaloguj się tutaj.",
+      "personalInfo": "Dane osobowe",
+      "firstName": "Imię",
+      "lastName": "Nazwisko",
+      "email": "E-mail",
+      "phone": "Numer telefonu",
+      "newsletter": "Zapisz się do newslettera",
+      "credentials": "Dane logowania",
+      "password": "Hasło",
+      "verifyPassword": "Powtórz hasło",
+      "submit": "Załóż konto",
+      "errors": {
+        "firstName": "Imię jest wymagane",
+        "lastName": "Nazwisko jest wymagane",
+        "email": "Nieprawidłowy adres e-mail",
+        "password": "Hasło ≥6 znaków",
+        "confirmPassword": "Hasła muszą być identyczne"
+      },
+      "correctErrors": "Popraw błędy w formularzu.",
+      "apiNotConfigured": "Adres URL API nie jest skonfigurowany.",
+      "registrationFailed": "Rejestracja nie powiodła się. Popraw zaznaczone błędy.",
+      "registrationError": "Błąd rejestracji.",
+      "success": "Dziękujemy za rejestrację! Sprawdź swoją skrzynkę e-mail, aby zweryfikować konto.",
+      "unexpectedError": "Wystąpił nieoczekiwany błąd podczas rejestracji."
+    },
+    "forgotten": {
+      "title": "Resetuj hasło",
+      "subtitle": "Ustaw nowe hasło dla swojego konta",
+      "email": "E-mail",
+      "submit": "Resetuj",
+      "submitting": "Wysyłanie..."
+    },
+    "reset": {
+      "title": "Zresetuj swoje hasło",
+      "newPassword": "Nowe hasło",
+      "confirmPassword": "Powtórz nowe hasło",
+      "submit": "Zresetuj hasło",
+      "submitting": "Resetowanie..."
+    },
+    "verification": {
+      "noToken": "Nie znaleziono tokenu weryfikacyjnego w adresie URL. Upewnij się, że kliknąłeś poprawny link.",
+      "verifying": "Weryfikowanie adresu e-mail...",
+      "configError": "Błąd konfiguracji: adres URL API nie jest ustawiony.",
+      "successMessage": "Twój adres e-mail został pomyślnie zweryfikowany!",
+      "flashSuccess": "E-mail zweryfikowany. Możesz się teraz zalogować lub dalej korzystać z konta.",
+      "failedFallback": "Weryfikacja adresu e-mail nie powiodła się. Link mógł wygasnąć lub być nieprawidłowy.",
+      "unexpectedError": "Wystąpił nieoczekiwany błąd podczas weryfikacji. Spróbuj ponownie.",
+      "pendingTitle": "Weryfikowanie adresu e-mail...",
+      "pendingText": "Poczekaj, aż potwierdzimy Twój adres e-mail.",
+      "loading": "Ładowanie...",
+      "successTitle": "E-mail zweryfikowany!",
+      "accountActive": "Twoje konto jest teraz aktywne.",
+      "goToLogin": "Przejdź do logowania",
+      "failedTitle": "Weryfikacja nie powiodła się",
+      "errorHelpBefore": "Upewnij się, że kliknąłeś poprawny link. Link mógł wygasnąć lub zostać już użyty. Jeśli masz konto, możesz spróbować",
+      "errorHelpLink": "się zalogować",
+      "errorHelpAfter": "i poprosić o nowy e-mail weryfikacyjny z poziomu panelu."
+    },
+    "thankYou": {
+      "title": "Dziękujemy za rejestrację!",
+      "subtitle": "Wysłaliśmy e-mail weryfikacyjny na Twoją skrzynkę odbiorczą.",
+      "instructions": "Sprawdź swoją skrzynkę e-mail i kliknij link weryfikacyjny, aby aktywować konto. Jeśli nie otrzymasz go w ciągu kilku minut, sprawdź folder spam.",
+      "goToLogin": "Przejdź do logowania"
+    },
+    "flash": {
+      "resetRequested": "Jeśli podany adres e-mail istnieje, instrukcje resetowania hasła zostały wysłane.",
+      "resetSuccessful": "Twoje hasło zostało pomyślnie zresetowane! Możesz się teraz zalogować."
+    },
+    "panel": {
+      "noAccount": "Nie masz konta?",
+      "registerHere": "Zarejestruj się tutaj"
+    }
+  },
+  "panel": {
+    "title": "Twoje konto",
+    "dashboard": "Panel",
+    "personalInfo": "Dane osobowe",
+    "changePassword": "Zmień hasło",
+    "addressBook": "Książka adresowa",
+    "orderHistory": "Historia zamówień"
+  },
+  "dashboard": {
+    "title": "Moje konto",
+    "subtitle": "Zarządzaj swoimi danymi osobowymi i preferencjami",
+    "verified": "Zweryfikowane",
+    "notVerified": "Niezweryfikowane",
+    "edit": "Edytuj",
+    "changePassword": "Zmień hasło",
+    "verify": "Zweryfikuj",
+    "sending": "Wysyłanie..."
+  },
+  "orders": {
+    "breadcrumb": "Historia zamówień",
+    "history": {
+      "title": "Historia zamówień",
+      "subtitle": "Przeglądaj swoje poprzednie zamówienia",
+      "empty": "Nie masz jeszcze żadnych zamówień.",
+      "errorTitle": "Błąd",
+      "loadError": "Nie udało się załadować zamówień. Spróbuj ponownie później.",
+      "infoTitle": "Informacja"
+    },
+    "table": {
+      "number": "Numer",
+      "date": "Data",
+      "shipTo": "Odbiorca",
+      "total": "Suma",
+      "state": "Status",
+      "actions": "Akcje",
+      "show": "Pokaż",
+      "pay": "Zapłać"
+    },
+    "details": {
+      "title": "Zamówienie #{{number}}",
+      "pay": "Zapłać",
+      "status": "Status",
+      "completedAt": "Zakończono",
+      "currency": "Waluta",
+      "billingAddress": "Adres rozliczeniowy",
+      "shippingAddress": "Adres dostawy",
+      "shipments": "Przesyłki",
+      "payments": "Płatności",
+      "missingCredentials": "Brak danych uwierzytelniających lub tokenu zamówienia.",
+      "loadFailed": "Nie udało się pobrać szczegółów zamówienia.",
+      "unexpectedError": "Wystąpił nieoczekiwany błąd podczas wczytywania zamówienia."
+    },
+    "items": {
+      "item": "Produkt",
+      "unitPrice": "Cena jednostkowa",
+      "qty": "Ilość",
+      "subtotal": "Wartość",
+      "itemsTotal": "Suma produktów:",
+      "taxTotal": "Suma podatku:",
+      "discount": "Rabat:",
+      "shippingTotal": "Suma dostawy:",
+      "total": "Razem:"
+    }
+  },
+  "addresses": {
+    "breadcrumb": "Książka adresowa",
+    "book": {
+      "title": "Książka adresowa",
+      "subtitle": "Zarządzaj zapisanymi adresami",
+      "add": "Dodaj adres",
+      "infoTitle": "Informacja",
+      "empty": "Nie masz zdefiniowanych adresów",
+      "loadError": "Nie udało się wczytać adresów",
+      "deleteSuccess": "Adres został usunięty",
+      "deleteError": "Nie udało się usunąć adresu"
+    },
+    "add": {
+      "breadcrumb": "Utwórz",
+      "title": "Książka adresowa",
+      "subtitle": "Dodaj adres",
+      "submit": "Dodaj",
+      "submitting": "Dodawanie...",
+      "cancel": "Anuluj",
+      "addSuccess": "Adres został dodany",
+      "addError": "Nie udało się dodać adresu"
+    },
+    "edit": {
+      "breadcrumb": "Edytuj",
+      "title": "Książka adresowa",
+      "subtitle": "Edytuj mój adres",
+      "submit": "Zapisz zmiany",
+      "submitting": "Zapisywanie...",
+      "cancel": "Anuluj",
+      "loadError": "Nie udało się wczytać adresu",
+      "updateSuccess": "Adres został zaktualizowany",
+      "updateError": "Nie udało się zaktualizować adresu"
+    },
+    "card": {
+      "default": "Twój domyślny adres",
+      "edit": "Edytuj",
+      "delete": "Usuń",
+      "setDefault": "Ustaw jako domyślny",
+      "setDefaultSuccess": "Domyślny adres został zaktualizowany",
+      "setDefaultError": "Nie udało się zaktualizować domyślnego adresu"
+    },
+    "form": {
+      "firstName": "Imię *",
+      "lastName": "Nazwisko *",
+      "company": "Firma",
+      "street": "Ulica *",
+      "country": "Kraj *",
+      "select": "Wybierz",
+      "province": "Województwo",
+      "city": "Miasto *",
+      "postcode": "Kod pocztowy *",
+      "phoneNumber": "Numer telefonu"
+    }
+  },
+  "changePassword": {
+    "title": "Zmień hasło",
+    "subtitle": "Ustaw nowe hasło dla swojego konta",
+    "current": "Obecne hasło",
+    "new": "Nowe hasło",
+    "confirmation": "Potwierdzenie",
+    "submit": "Zapisz zmiany",
+    "success": "Hasło zostało zmienione"
+  },
+  "profile": {
+    "breadcrumb": "Dane osobowe",
+    "title": "Twój profil",
+    "subtitle": "Edytuj swoje dane osobowe",
+    "firstName": "Imię *",
+    "lastName": "Nazwisko *",
+    "email": "E-mail *",
+    "birthday": "Data urodzenia *",
+    "gender": "Płeć *",
+    "genderMale": "Mężczyzna",
+    "genderFemale": "Kobieta",
+    "genderUnknown": "Nieznana",
+    "phoneNumber": "Numer telefonu",
+    "newsletter": "Zapisz się do newslettera",
+    "submit": "Zapisz zmiany",
+    "updateSuccess": "Profil został zaktualizowany",
+    "updateError": "Błąd podczas aktualizacji profilu"
+  }
+}

@@ -1,14 +1,16 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import Default from "../../layouts/Default";
 import AccountLayout from "../../layouts/Account";
 import { useCustomer } from "../../context/CustomerContext";
-import { useNavigate } from "react-router";
+import { useLocalizedNavigate } from "~/hooks/useLocalizedNavigate";
 import Loader from "../../components/layout/Loader";
 import { useFlashMessages } from "../../context/FlashMessagesContext";
 
 const ChangePasswordPage: React.FC = () => {
+  const { t } = useTranslation("account");
   const { customer } = useCustomer();
-  const navigate = useNavigate();
+  const navigate = useLocalizedNavigate();
   const { addMessage } = useFlashMessages();
 
   const [currentPassword, setCurrentPassword] = useState<string>();
@@ -56,7 +58,7 @@ const ChangePasswordPage: React.FC = () => {
       }
 
       navigate("/account/dashboard");
-      addMessage("success", "Password changed successfully");
+      addMessage("success", t("changePassword.success"));
     } catch (err) {
       console.error(err);
     } finally {
@@ -69,8 +71,8 @@ const ChangePasswordPage: React.FC = () => {
       <AccountLayout>
         <div className="col-12 col-md-9">
           <div className="mb-4">
-            <h1>Change password</h1>
-            Set a new password for your account
+            <h1>{t("changePassword.title")}</h1>
+            {t("changePassword.subtitle")}
           </div>
 
           <div className="mb-4 position-relative">
@@ -79,7 +81,7 @@ const ChangePasswordPage: React.FC = () => {
                 <div className="mb-4">
                   <div className="field mb-3 required">
                     <label className="form-label required">
-                      Current password
+                      {t("changePassword.current")}
                     </label>
                     <input
                       type="password"
@@ -95,7 +97,7 @@ const ChangePasswordPage: React.FC = () => {
                   </div>
 
                   <div className="field mb-3 required">
-                    <label className="form-label required">New password</label>
+                    <label className="form-label required">{t("changePassword.new")}</label>
                     <input
                       type="password"
                       required={true}
@@ -110,7 +112,7 @@ const ChangePasswordPage: React.FC = () => {
                   </div>
 
                   <div className="field mb-3 required">
-                    <label className="form-label required">Confirmation</label>
+                    <label className="form-label required">{t("changePassword.confirmation")}</label>
                     <input
                       type="password"
                       required={true}
@@ -130,7 +132,7 @@ const ChangePasswordPage: React.FC = () => {
                   className="btn btn-primary"
                   id="save-changes"
                 >
-                  Save changes
+                  {t("changePassword.submit")}
                 </button>
               </form>
             </Loader>

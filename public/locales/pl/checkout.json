@@ -1,0 +1,88 @@
+{
+  "header": {
+    "checkingOutAs": "Zamówienie składa"
+  },
+  "steps": {
+    "address": "Adres",
+    "shipping": "Dostawa",
+    "payment": "Płatność",
+    "complete": "Podsumowanie"
+  },
+  "address": {
+    "loading": "Ładowanie...",
+    "title": "Adres",
+    "email": "E-mail",
+    "billingAddress": "Adres rozliczeniowy",
+    "shippingAddress": "Adres dostawy",
+    "useDifferentShipping": "Użyć innego adresu do wysyłki?",
+    "selectFromBook": "Wybierz adres z książki adresowej",
+    "firstName": "Imię",
+    "lastName": "Nazwisko",
+    "company": "Firma",
+    "street": "Ulica",
+    "country": "Kraj",
+    "selectCountry": "Wybierz",
+    "province": "Województwo / Region",
+    "city": "Miasto",
+    "postcode": "Kod pocztowy",
+    "phone": "Telefon",
+    "backToCart": "Powrót do koszyka",
+    "next": "Dalej"
+  },
+  "shipping": {
+    "shipmentTitle": "Przesyłka #{{number}}",
+    "noMethods": "Brak dostępnych metod dostawy. Sprawdź swój adres.",
+    "changeAddress": "Zmień adres",
+    "next": "Dalej"
+  },
+  "payment": {
+    "paymentTitle": "Płatność #{{number}}",
+    "selectError": "Wybierz metodę płatności.",
+    "warning": "Uwaga",
+    "noMethods": "Brak dostępnych metod płatności dla Twojego zamówienia.",
+    "changeShipping": "Zmień metodę dostawy",
+    "next": "Dalej"
+  },
+  "summary": {
+    "orderNumber": "Zamówienie #{{number}}",
+    "billingAddress": "Adres rozliczeniowy",
+    "shippingAddress": "Adres dostawy",
+    "item": "Produkt",
+    "unitPrice": "Cena jednostkowa",
+    "qty": "Ilość",
+    "subtotal": "Suma częściowa",
+    "itemsTotal": "Suma produktów:",
+    "taxesTotal": "Suma podatków:",
+    "includedInPrice": "Wliczone w cenę",
+    "discount": "Rabat:",
+    "shippingTotal": "Suma dostawy:",
+    "total": "Razem:",
+    "extraNotes": "Dodatkowe uwagi",
+    "placingOrder": "Składanie zamówienia...",
+    "placeOrder": "Złóż zamówienie",
+    "checkoutError": "Błąd składania zamówienia:"
+  },
+  "thankYou": {
+    "title": "Dziękujemy!",
+    "message": "Zamówienie zostało złożone pomyślnie.",
+    "viewOrder": "Zobacz zamówienie",
+    "changePayment": "Zmień metodę płatności",
+    "createAccount": "Załóż konto"
+  },
+  "sidebar": {
+    "summary": "Podsumowanie",
+    "itemsTotal": "Suma produktów:",
+    "discount": "Rabat:",
+    "estimatedShipping": "Szacowany koszt dostawy:",
+    "taxesTotal": "Suma podatków:",
+    "orderTotal": "Suma zamówienia:"
+  },
+  "pay": {
+    "orderSummary": "Podsumowanie zamówienia #{{number}}",
+    "itemSingular": "produkt",
+    "itemPlural": "produkty",
+    "paymentTitle": "Płatność #{{number}}",
+    "noMethods": "Brak dostępnych metod płatności.",
+    "pay": "Zapłać"
+  }
+}

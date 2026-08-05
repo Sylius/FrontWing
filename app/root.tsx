@@ -16,15 +16,19 @@ import { OrderProvider } from "~/context/OrderContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CustomerProvider } from "~/context/CustomerContext";
 import { FlashMessagesProvider } from "~/context/FlashMessagesContext";
+import { ChannelProvider } from "~/context/ChannelContext";
 
 import bootstrapStylesHref from "bootstrap/dist/css/bootstrap.css?url";
 import mainStylesHref from "./assets/scss/main.scss?url";
 
 import { orderTokenCookie } from "~/utils/cookies.server";
 import type { Taxon } from "~/types/Taxon";
+import type { Channel } from "~/types/Channel";
 import { fetchChannel } from "~/api/channel.server";
-import { resolveLocale } from "~/i18n.server";
+import { resolveLocale, loadResources } from "~/i18n.server";
 import { createLocaleMapper } from "~/utils/locale";
+import type { I18nBootstrap } from "~/i18n";
+import { useChangeLanguage } from "~/hooks/useChangeLanguage";
 
 export const loader: LoaderFunction = async ({ request }) => {
     const url = new URL(request.url);
@@ -39,13 +43,30 @@ export const loader: LoaderFunction = async ({ request }) => {
         throw redirect(`/${urlLocale}${suffix}${url.search}`);
     }
 
+    const locale = firstSegment;
+    const fallbackLng = mapper.toUrl(channel.defaultLocale);
+
+    const pathWithoutLang = url.pathname.slice(locale.length + 1) || "";
+    const canonical = `${url.origin}/${locale}${pathWithoutLang}`;
+    const alternates = [
+        ...mapper.urlSegments.map((segment) => ({
+            hrefLang: segment,
+            href: `${url.origin}/${segment}${pathWithoutLang}`,
+        })),
+        { hrefLang: "x-default", href: `${url.origin}/${fallbackLng}${pathWithoutLang}` },
+    ];
+
     const cookieHeader = request.headers.get("Cookie");
     const parsed = await orderTokenCookie.parse(cookieHeader);
     const token = typeof parsed === "string" ? parsed : parsed?.token ?? "";
 
     const API_URL = process.env.PUBLIC_API_URL!;
-    const res = await fetch(`${API_URL}/api/v2/shop/taxon-tree/category/branch`);
-    const taxonTreeData = res.ok ? await res.json() : null;
+    const [i18nResources, taxonTreeData] = await Promise.all([
+        loadResources([locale, fallbackLng]),
+        fetch(`${API_URL}/api/v2/shop/taxon-tree/category/branch`).then((res) =>
+            res.ok ? res.json() : null,
+        ),
+    ]);
 
     return {
         ENV: {
@@ -53,6 +74,14 @@ export const loader: LoaderFunction = async ({ request }) => {
         },
         orderToken: token || null,
         taxonTree: taxonTreeData?.["hydra:member"] ?? [],
+        channel,
+        seo: { canonical, alternates },
+        i18n: {
+            locale,
+            supportedLngs: mapper.urlSegments,
+            fallbackLng,
+            resources: i18nResources,
+        } satisfies I18nBootstrap,
     };
 };
 
@@ -72,6 +101,17 @@ function RemixOrderTokenScript({ token }: { token: string | null }) {
         <script
             dangerouslySetInnerHTML={{
                 __html: `window.__remixOrderToken = "${token}";`,
+            }}
+        />
+    );
+}
+
+function I18nBootstrapScript({ bootstrap }: { bootstrap: I18nBootstrap }) {
+    const json = JSON.stringify(bootstrap).replace(/</g, "\\u003c");
+    return (
+        <script
+            dangerouslySetInnerHTML={{
+                __html: `window.__I18N__ = ${json};`,
             }}
         />
     );
@@ -97,12 +137,17 @@ export default function App() {
         ENV: Record<string, string>;
         orderToken: string | null;
         taxonTree: Taxon[];
+        channel: Channel;
+        seo: { canonical: string; alternates: { hrefLang: string; href: string }[] };
+        i18n: I18nBootstrap;
     }>();
 
     const [queryClient] = useState(() => new QueryClient());
 
+    useChangeLanguage(data.i18n.locale);
+
     return (
-        <html lang="en">
+        <html lang={data.i18n.locale}>
         <head>
             <meta charSet="utf-8"/>
             <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -111,21 +156,28 @@ export default function App() {
             <meta name="apple-mobile-web-app-title" content="Sylius Demo"/>
             <link rel="manifest" href="/manifest.webmanifest"/>
             <link rel="apple-touch-icon" href="/logo192.png"/>
+            <link rel="canonical" href={data.seo.canonical}/>
+            {data.seo.alternates.map((alt) => (
+                <link key={alt.hrefLang} rel="alternate" hrefLang={alt.hrefLang} href={alt.href}/>
+            ))}
             <Meta/>
             <Links/>
         </head>
 
         <body>
         <BootstrapLoader/>
-        <QueryClientProvider client={queryClient}>
-            <CustomerProvider>
-                <OrderProvider>
-                    <FlashMessagesProvider>
-                        <Outlet context={{taxonTree: data.taxonTree}}/>
-                    </FlashMessagesProvider>
-                </OrderProvider>
-            </CustomerProvider>
-        </QueryClientProvider>
+        <ChannelProvider channel={data.channel} currentLocale={data.i18n.locale}>
+            <QueryClientProvider client={queryClient}>
+                <CustomerProvider>
+                    <OrderProvider>
+                        <FlashMessagesProvider>
+                            <Outlet context={{taxonTree: data.taxonTree}}/>
+                        </FlashMessagesProvider>
+                    </OrderProvider>
+                </CustomerProvider>
+            </QueryClientProvider>
+        </ChannelProvider>
+        <I18nBootstrapScript bootstrap={data.i18n}/>
         <ScrollRestoration/>
         <Scripts/>
         <EnvironmentScript env={data.ENV}/>

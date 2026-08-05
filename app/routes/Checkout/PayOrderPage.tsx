@@ -1,10 +1,12 @@
 import type { LoaderFunction, ActionFunction } from "react-router";
 import { data as routerData, redirect } from "react-router";
 import { useLoaderData, Form, useNavigation } from "react-router";
+import { useTranslation } from "react-i18next";
 import Default from "~/layouts/Default";
 import { IconCreditCard } from "@tabler/icons-react";
 import Skeleton from "react-loading-skeleton";
 import type { Order } from "~/types/Order";
+import { localizePath } from "~/utils/localizedPath";
 
 interface PaymentMethod {
     id: number;
@@ -99,10 +101,11 @@ export const action: ActionFunction = async ({ request, params }) => {
         return routerData({ formError: msg }, { status: 400 });
     }
 
-    return redirect(`/order/thank-you?token=${token}`);
+    return redirect(localizePath(params.lang!, `/order/thank-you?token=${token}`));
 };
 
 export default function PayOrderPage() {
+    const { t } = useTranslation("checkout");
     const { order, paymentMethods } = useLoaderData<LoaderData>();
     const navigation = useNavigation();
     const busy = navigation.state !== "idle";
@@ -115,10 +118,10 @@ export default function PayOrderPage() {
             <div className="container my-5">
                 <div className="col-lg-8 mx-auto">
                     <h1 className="h4 mb-2">
-                        {order.number ? `Summary of your order #${order.number}` : <Skeleton width={300} />}
+                        {order.number ? t("pay.orderSummary", { number: order.number }) : <Skeleton width={300} />}
                     </h1>
                     <p className="text-muted mb-4">
-                        {total.toFixed(2)} {order.currencyCode} • {itemCount} {itemCount === 1 ? "item" : "items"}
+                        {total.toFixed(2)} {order.currencyCode} • {itemCount} {itemCount === 1 ? t("pay.itemSingular") : t("pay.itemPlural")}
                         {order.checkoutCompletedAt && (
                             <>
                                 {" "}
@@ -133,10 +136,10 @@ export default function PayOrderPage() {
                     </p>
 
                     <Form method="post">
-                        <h5 className="mb-4">Payment #1</h5>
+                        <h5 className="mb-4">{t("pay.paymentTitle", { number: 1 })}</h5>
 
                         {paymentMethods.length === 0 ? (
-                            <div className="alert alert-warning">No payment methods available.</div>
+                            <div className="alert alert-warning">{t("pay.noMethods")}</div>
                         ) : (
                             paymentMethods.map((m) => (
                                 <div key={m.id} className="card mb-3">
@@ -161,7 +164,7 @@ export default function PayOrderPage() {
 
                         <div className="text-center mt-4">
                             <button type="submit" className="btn btn-primary w-100" disabled={busy}>
-                                <IconCreditCard size={20} className="me-2" /> Pay
+                                <IconCreditCard size={20} className="me-2" /> {t("pay.pay")}
                             </button>
                         </div>
                     </Form>

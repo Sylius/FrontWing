@@ -1,7 +1,8 @@
 import React from 'react';
-import { Link } from 'react-router';
+import { useTranslation } from "react-i18next";
+import { LocalizedLink } from "~/components/LocalizedLink";
 import { ProductVariantDetails, Product } from '~/types/Product';
-import { formatPrice } from '~/utils/price';
+import { useCurrency } from "~/context/ChannelContext";
 import Skeleton from 'react-loading-skeleton';
 
 interface ProductCardProps {
@@ -9,6 +10,8 @@ interface ProductCardProps {
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+    const { t } = useTranslation("product");
+    const { formatPrice } = useCurrency();
     const variant: ProductVariantDetails | undefined = product.defaultVariantData ?? undefined;
 
     const getImageUrl = (path?: string, filter = 'sylius_shop_product_small_thumbnail') => {
@@ -21,7 +24,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
     return (
         <div>
-            <Link to={`/product/${product.code}`} className="link-reset">
+            <LocalizedLink to={`/product/${product.code}`} className="link-reset">
                 <div className="mb-4">
                     <div className="bg-light rounded-3" style={{ aspectRatio: '3 / 4', overflow: 'hidden' }}>
                         {image ? (
@@ -39,12 +42,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 <div className="h6 text-break">
                     {name || <Skeleton width={120} />}
                 </div>
-            </Link>
+            </LocalizedLink>
             <div>
                 {variant?.price != null ? (
-                    <span>${formatPrice(variant.price)}</span>
+                    <span>{formatPrice(variant.price)}</span>
                 ) : (
-                    <span>No price</span>
+                    <span>{t("card.noPrice")}</span>
                 )}
             </div>
         </div>

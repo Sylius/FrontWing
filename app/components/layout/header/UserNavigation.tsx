@@ -1,8 +1,10 @@
-import { Link } from "react-router";
+import { useTranslation } from "react-i18next";
+import { LocalizedLink } from "~/components/LocalizedLink";
 import { IconUser } from "@tabler/icons-react";
 import { useCustomer } from "~/context/CustomerContext";
 
 export default function UserNavigation() {
+    const { t } = useTranslation();
     const { customer, clearCustomer } = useCustomer();
 
     const handleLogout = () => {
@@ -23,38 +25,38 @@ export default function UserNavigation() {
                         </button>
                         <ul className="dropdown-menu dropdown-menu-end">
                             <li>
-                                <Link
+                                <LocalizedLink
                                     to="/account/dashboard"
                                     className="link-reset dropdown-item"
                                     id="mobile-my-account-button"
                                 >
-                                    My account
-                                </Link>
+                                    {t("nav.account")}
+                                </LocalizedLink>
                             </li>
                             <li>
-                                <Link
+                                <LocalizedLink
                                     to="/logout"
                                     className="link-reset dropdown-item"
                                     id="mobile-logout-button"
                                 >
-                                    Logout
-                                </Link>
+                                    {t("nav.logout")}
+                                </LocalizedLink>
                             </li>
                         </ul>
                     </div>
 
                     <div className="d-none d-lg-flex gap-2 align-items-center ps-2">
                         <IconUser stroke={1.25} size={28} />
-                        <span>Hello {customer.firstName}!</span>
+                        <span>{t("nav.greeting", { name: customer.firstName })}</span>
 
                         <small className="text-black-50 px-1">|</small>
-                        <Link
+                        <LocalizedLink
                             to="/account/dashboard"
                             className="link-reset"
                             id="my-account-button"
                         >
-                            My account
-                        </Link>
+                            {t("nav.account")}
+                        </LocalizedLink>
 
                         <small className="text-black-50 px-1">|</small>
                         <button
@@ -62,36 +64,36 @@ export default function UserNavigation() {
                             id="logout-button"
                             onClick={handleLogout}
                         >
-                            Logout
+                            {t("nav.logout")}
                         </button>
                     </div>
                 </div>
             ) : (
                 <div className="col-auto">
                     <div className="d-lg-none">
-                        <Link
+                        <LocalizedLink
                             to="/login"
                             className="btn btn-icon btn-transparent px-0"
-                            aria-label="account button"
+                            aria-label={t("aria.accountButton")}
                         >
                             <IconUser stroke={1.25} size={28} />
-                        </Link>
+                        </LocalizedLink>
                     </div>
 
                     <div className="d-none d-lg-flex align-items-center gap-2 ps-2">
                         <IconUser stroke={1.25} size={28} />
-                        <Link to="/login" className="link-reset" id="login-page-button">
-                            Login
-                        </Link>
+                        <LocalizedLink to="/login" className="link-reset" id="login-page-button">
+                            {t("nav.login")}
+                        </LocalizedLink>
 
                         <small className="text-black-50 px-1">|</small>
-                        <Link
+                        <LocalizedLink
                             to="/register"
                             className="link-reset"
                             id="register-page-button"
                         >
-                            Register
-                        </Link>
+                            {t("nav.register")}
+                        </LocalizedLink>
                     </div>
                 </div>
             )}

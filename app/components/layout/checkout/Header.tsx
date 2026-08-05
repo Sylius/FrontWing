@@ -1,8 +1,10 @@
-import { Link } from 'react-router';
+import { useTranslation } from "react-i18next";
+import { LocalizedLink } from "~/components/LocalizedLink";
 import { IconUser } from '@tabler/icons-react';
 import { useCustomer } from '../../../context/CustomerContext';
 
 const Header = () => {
+    const { t } = useTranslation(["common", "checkout"]);
     const { customer } = useCustomer();
 
     return (
@@ -10,7 +12,7 @@ const Header = () => {
             <div className="container">
                 <div className="row align-items-center">
                     <div className="col">
-                        <Link to="/" className="d-inline-block py-lg-2" style={{ width: '10rem' }} aria-label="sylius logo">
+                        <LocalizedLink to="/" className="d-inline-block py-lg-2" style={{ width: '10rem' }} aria-label={t("aria.logo")}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 3512 1033"
                                  fillRule="evenodd" strokeLinejoin="round" strokeMiterlimit="2">
                                 <path
@@ -25,20 +27,20 @@ const Header = () => {
                                     d="M731.417 1032.79L333.083 186.165l85.209-61.667 463.5 675.75-150.375 232.542zM510.667 57.625l259.458 209.583L588.042 0l-77.375 57.625z"
                                     fillRule="nonzero" fill="#30ba9d"></path>
                             </svg>
-                        </Link>
+                        </LocalizedLink>
                     </div>
                     <div className="col-12 col-md-auto d-flex align-items-center gap-2">
                         {customer ? (
                             customer.firstName && customer.lastName ? (
                                 <>
-                                    Checking out as <strong>{customer.firstName} {customer.lastName}</strong>
+                                    {t("checkout:header.checkingOutAs")} <strong>{customer.firstName} {customer.lastName}</strong>
                                 </>
                             ) : null
                         ) : (
-                            <Link to="/login" className="d-flex align-items-center text-decoration-none gap-2">
+                            <LocalizedLink to="/login" className="d-flex align-items-center text-decoration-none gap-2">
                                 <IconUser stroke={2} size={16} />
-                                Sign in
-                            </Link>
+                                {t("actions.signIn")}
+                            </LocalizedLink>
                         )}
                     </div>
                 </div>

@@ -1,18 +1,20 @@
 import React from "react";
-import { Link } from "react-router";
+import { useTranslation } from "react-i18next";
+import { LocalizedLink } from "~/components/LocalizedLink";
 
 interface StepsProps {
     activeStep?: "address" | "shipping" | "payment" | "complete";
 }
 
 const steps = [
-    { key: "address", label: "Address", path: "/checkout/address" },
-    { key: "shipping", label: "Shipping", path: "/checkout/select-shipping" },
-    { key: "payment", label: "Payment", path: "/checkout/select-payment" },
-    { key: "complete", label: "Complete", path: "/checkout/complete" },
-];
+    { key: "address", labelKey: "steps.address", path: "/checkout/address" },
+    { key: "shipping", labelKey: "steps.shipping", path: "/checkout/select-shipping" },
+    { key: "payment", labelKey: "steps.payment", path: "/checkout/select-payment" },
+    { key: "complete", labelKey: "steps.complete", path: "/checkout/complete" },
+] as const;
 
 const Steps: React.FC<StepsProps> = ({ activeStep = "address" }) => {
+    const { t } = useTranslation("checkout");
     const activeIndex = steps.findIndex((step) => step.key === activeStep);
 
     return (
@@ -29,9 +31,9 @@ const Steps: React.FC<StepsProps> = ({ activeStep = "address" }) => {
                     }`}
                 >
                     {index <= activeIndex ? (
-                        <Link to={step.path}>{step.label}</Link>
+                        <LocalizedLink to={step.path}>{t(step.labelKey)}</LocalizedLink>
                     ) : (
-                        <span>{step.label}</span>
+                        <span>{t(step.labelKey)}</span>
                     )}
                 </div>
             ))}

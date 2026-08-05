@@ -1,5 +1,6 @@
 import React from 'react';
-import { Link } from 'react-router';
+import { useTranslation } from "react-i18next";
+import { LocalizedLink } from "~/components/LocalizedLink";
 import { IconChevronDown } from '@tabler/icons-react';
 import type { Taxon } from '~/types/Taxon';
 import { getChildren } from '~/utils/taxon';
@@ -9,6 +10,7 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({ taxonTree = [] }) => {
+    const { t } = useTranslation();
     const parents = taxonTree.filter(t => t.level === 1);
 
     return (
@@ -18,13 +20,13 @@ const Navbar: React.FC<NavbarProps> = ({ taxonTree = [] }) => {
                 id="navbarNav"
             >
                 <div className="offcanvas-header w-100">
-                    <h5 className="offcanvas-title">Categories</h5>
+                    <h5 className="offcanvas-title">{t("nav.categories")}</h5>
                     <button
                         type="button"
                         className="btn-close"
                         data-bs-dismiss="offcanvas"
                         data-bs-target="#navbarNav"
-                        aria-label="Close"
+                        aria-label={t("aria.close")}
                     ></button>
                 </div>
 
@@ -51,24 +53,24 @@ const Navbar: React.FC<NavbarProps> = ({ taxonTree = [] }) => {
                                     </a>
                                     <div className="dropdown-menu position-absolute border dropdown-custom">
                                         {children.map((child) => (
-                                            <Link
+                                            <LocalizedLink
                                                 key={child.code}
                                                 className="nav-link nav-link-padding"
                                                 to={`/${taxon.code}/${child.code}`}
                                             >
                                                 {child.name}
-                                            </Link>
+                                            </LocalizedLink>
                                         ))}
                                     </div>
                                 </div>
                             ) : (
-                                <Link
+                                <LocalizedLink
                                     key={taxon.code}
                                     className="nav-link"
                                     to={`/${taxon.slug}`}
                                 >
                                     {taxon.name}
-                                </Link>
+                                </LocalizedLink>
                             );
                         })}
                     </div>

@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from "react";
 import type { OrderItem, ProductVariantDetails, ProductData } from "~/types/Order";
-import { formatPrice, getUnitPrices } from "~/utils/price";
-import { useFetcher, Link } from "react-router";
+import { getUnitPrices } from "~/utils/price";
+import { useCurrency } from "~/context/ChannelContext";
+import { useFetcher } from "react-router";
+import { LocalizedLink } from "~/components/LocalizedLink";
 import { IconX } from "@tabler/icons-react";
+import { useTranslation } from "react-i18next";
 
 interface Props {
     item: OrderItem;
@@ -11,6 +14,8 @@ interface Props {
 }
 
 export default function ProductRow({ item, fetcher, fetchOrder }: Props) {
+    const { t } = useTranslation("cart");
+    const { formatPrice } = useCurrency();
     const [qty, setQty] = useState(item.quantity ?? 1);
     const [product, setProduct] = useState<ProductData | null>(null);
     const [imageKey] = useState(() => Date.now());
@@ -90,9 +95,9 @@ export default function ProductRow({ item, fetcher, fetchOrder }: Props) {
                     )}
                     <div className="w-100">
                         <div className="link-reset text-break">
-                            <Link to={productUrl} className="text-decoration-none">
-                                {item.productName ?? "Unnamed Product"}
-                            </Link>
+                            <LocalizedLink to={productUrl} className="text-decoration-none">
+                                {item.productName ?? t("row.unnamedProduct")}
+                            </LocalizedLink>
                         </div>
                         {variant?.code && (
                             <div className="text-body-tertiary small">{variant.code}</div>
@@ -110,13 +115,13 @@ export default function ProductRow({ item, fetcher, fetchOrder }: Props) {
                 {hasDiscount ? (
                     <div className="d-flex flex-column">
                         <span className="text-black-50 text-decoration-line-through">
-                            ${formatPrice(originalUnitPrice)}
+                            {formatPrice(originalUnitPrice)}
                         </span>
-                        <span>${formatPrice(currentUnitPrice)}</span>
+                        <span>{formatPrice(currentUnitPrice)}</span>
                     </div>
                 ) : (
                     <span className="text-black-50">
-                        ${formatPrice(currentUnitPrice)}
+                        {formatPrice(currentUnitPrice)}
                     </span>
                 )}
             </td>
@@ -132,7 +137,7 @@ export default function ProductRow({ item, fetcher, fetchOrder }: Props) {
             </td>
 
             <td className="text-end" style={{ width: "90px" }}>
-                ${formatPrice(item.subtotal)}
+                {formatPrice(item.subtotal)}
             </td>
         </tr>
     );

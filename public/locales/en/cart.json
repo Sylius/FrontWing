@@ -1,0 +1,40 @@
+{
+  "page": {
+    "title": "Your shopping cart",
+    "subtitle": "Edit your items, apply coupon or proceed to the checkout",
+    "checkout": "Checkout",
+    "clearCart": "Clear cart",
+    "suggestions": "You may also like"
+  },
+  "table": {
+    "item": "Item",
+    "unitPrice": "Unit price",
+    "quantity": "Qty",
+    "total": "Total"
+  },
+  "row": {
+    "unnamedProduct": "Unnamed Product"
+  },
+  "coupon": {
+    "applied": "Applied coupon:",
+    "remove": "Remove coupon",
+    "placeholder": "Enter your code...",
+    "label": "Coupon code",
+    "apply": "Apply coupon"
+  },
+  "summary": {
+    "title": "Summary",
+    "itemsTotal": "Items total:",
+    "discount": "Discount:",
+    "shipping": "Estimated shipping cost:",
+    "taxes": "Taxes total:",
+    "orderTotal": "Order total:"
+  },
+  "empty": {
+    "info": "Info",
+    "message": "Your cart is empty"
+  },
+  "miniCart": {
+    "ariaLabel": "cart button"
+  }
+}

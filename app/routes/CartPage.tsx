@@ -8,9 +8,10 @@ import {
   useLoaderData,
   useFetcher,
   useLocation,
-  Link,
 } from "react-router";
 import Layout from "~/layouts/Default";
+import { LocalizedLink } from "~/components/LocalizedLink";
+import { localizePath } from "~/utils/localizedPath";
 import { orderTokenCookie } from "~/utils/cookies.server";
 import {
   pickupCart,
@@ -23,7 +24,7 @@ import {
 } from "~/api/order.server";
 import ProductRow from "~/components/cart/ProductRow";
 import ProductsList from "~/components/ProductsList";
-import { formatPrice } from "~/utils/price";
+import { useCurrency } from "~/context/ChannelContext";
 import { IconTrash } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { useOrder } from "~/context/OrderContext";
@@ -33,6 +34,7 @@ import {
   commitFlashSession,
 } from "~/utils/flashSession";
 import type { OrderItem } from "~/types/Order";
+import { useTranslation } from "react-i18next";
 
 type FlashMessage = {
   id: string;
@@ -77,7 +79,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   return data({ order, token, products, messages }, { headers });
 }
 
-export async function action({ request }: ActionFunctionArgs) {
+export async function action({ request, params }: ActionFunctionArgs) {
   const cookieHeader = request.headers.get("Cookie");
   const parsed = await orderTokenCookie.parse(cookieHeader);
   const token = typeof parsed === "string" ? parsed : parsed?.token ?? "";
@@ -105,7 +107,7 @@ export async function action({ request }: ActionFunctionArgs) {
         flash.flash("messages", JSON.stringify([
           { id: "coupon-success", type: "success", content: "Coupon applied successfully" },
         ]));
-        return redirect(`/cart?appliedCoupon=${encodeURIComponent(couponCode)}`, {
+        return redirect(localizePath(params.lang!, `/cart?appliedCoupon=${encodeURIComponent(couponCode)}`), {
           headers: {
             "Set-Cookie": await commitFlashSession(flash),
           },
@@ -114,7 +116,7 @@ export async function action({ request }: ActionFunctionArgs) {
         flash.flash("messages", JSON.stringify([
           { id: "coupon-error", type: "error", content: "Invalid coupon code" },
         ]));
-        return redirect("/cart", {
+        return redirect(localizePath(params.lang!, "/cart"), {
           headers: {
             "Set-Cookie": await commitFlashSession(flash),
           },
@@ -127,7 +129,7 @@ export async function action({ request }: ActionFunctionArgs) {
       flash.flash("messages", JSON.stringify([
         { id: "coupon-removed", type: "info", content: "Coupon has been removed." },
       ]));
-      return redirect("/cart", {
+      return redirect(localizePath(params.lang!, "/cart"), {
         headers: {
           "Set-Cookie": await commitFlashSession(flash),
         },
@@ -137,14 +139,14 @@ export async function action({ request }: ActionFunctionArgs) {
     flash.flash("messages", JSON.stringify([
       { id: "cart-error", type: "error", content: "An unexpected error occurred" },
     ]));
-    return redirect("/cart", {
+    return redirect(localizePath(params.lang!, "/cart"), {
       headers: {
         "Set-Cookie": await commitFlashSession(flash),
       },
     });
   }
 
-  return redirect("/cart", {
+  return redirect(localizePath(params.lang!, "/cart"), {
     headers: {
       "Set-Cookie": await commitFlashSession(flash),
     },
@@ -152,6 +154,8 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function CartPage() {
+  const { t } = useTranslation("cart");
+  const { formatPrice } = useCurrency();
   const { order: contextOrder, orderToken, fetchOrder } = useOrder();
   const { order: loaderOrder, token: loaderToken, products, messages } = useLoaderData<typeof loader>();
   const fetcher = useFetcher();
@@ -198,14 +202,14 @@ export default function CartPage() {
         />
         <div className="container mt-4 mb-5">
           <div className="mb-5">
-            <h1>Your shopping cart</h1>
-            <div>Edit your items, apply coupon or proceed to the checkout</div>
+            <h1>{t("page.title")}</h1>
+            <div>{t("page.subtitle")}</div>
           </div>
 
           {items.length === 0 ? (
               <div className="alert alert-info">
-                <div className="fw-bold">Info</div>
-                Your cart is empty
+                <div className="fw-bold">{t("empty.info")}</div>
+                {t("empty.message")}
               </div>
           ) : (
               <div className="row">
@@ -215,10 +219,10 @@ export default function CartPage() {
                       <thead>
                       <tr>
                         <th></th>
-                        <th>Item</th>
-                        <th className="text-end text-nowrap">Unit price</th>
-                        <th className="text-end">Qty</th>
-                        <th className="text-end">Total</th>
+                        <th>{t("table.item")}</th>
+                        <th className="text-end text-nowrap">{t("table.unitPrice")}</th>
+                        <th className="text-end">{t("table.quantity")}</th>
+                        <th className="text-end">{t("table.total")}</th>
                       </tr>
                       </thead>
                       <tbody>
@@ -239,7 +243,7 @@ export default function CartPage() {
                       {couponCode && isCouponActive ? (
                           <fetcher.Form method="post" className="card d-flex flex-row justify-content-between align-items-center w-100 py-1 px-3">
                             <div className="d-flex flex-wrap">
-                              <span className="me-2">Applied coupon:</span>
+                              <span className="me-2">{t("coupon.applied")}</span>
                               <span className="badge d-flex align-items-center text-bg-secondary">
                           {couponCode}
                         </span>
@@ -249,7 +253,7 @@ export default function CartPage() {
                                 name="_intent"
                                 value="coupon:remove"
                                 className="btn btn-sm btn-transparent d-flex align-items-center"
-                                aria-label="Remove coupon"
+                                aria-label={t("coupon.remove")}
                             >
                               <IconTrash stroke={1.5} />
                             </button>
@@ -259,8 +263,8 @@ export default function CartPage() {
                             <input
                                 name="couponCode"
                                 className="form-control"
-                                placeholder="Enter your code..."
-                                aria-label="Coupon code"
+                                placeholder={t("coupon.placeholder")}
+                                aria-label={t("coupon.label")}
                             />
                             <button
                                 type="submit"
@@ -268,7 +272,7 @@ export default function CartPage() {
                                 value="coupon:add"
                                 className="btn btn-outline-secondary"
                             >
-                              Apply coupon
+                              {t("coupon.apply")}
                             </button>
                           </fetcher.Form>
                       )}
@@ -289,41 +293,41 @@ export default function CartPage() {
                           });
                         }}
                     >
-                      Clear cart
+                      {t("page.clearCart")}
                     </button>
                   </div>
                 </div>
 
                 <div className="col-12 col-xl-4 ps-xl-5 mb-4">
                   <div className="p-4 bg-light mb-4 rounded-3">
-                    <h3 className="mb-4">Summary</h3>
+                    <h3 className="mb-4">{t("summary.title")}</h3>
                     <div className="hstack gap-2 mb-2">
-                      <div>Items total:</div>
-                      <div className="ms-auto text-end">${formatPrice(currentOrder?.itemsSubtotal ?? 0)}</div>
+                      <div>{t("summary.itemsTotal")}</div>
+                      <div className="ms-auto text-end">{formatPrice(currentOrder?.itemsSubtotal ?? 0)}</div>
                     </div>
                     {!!currentOrder?.orderPromotionTotal && (
                         <div className="hstack gap-2 mb-2">
-                          <div>Discount:</div>
-                          <div className="ms-auto text-end">${formatPrice(currentOrder.orderPromotionTotal)}</div>
+                          <div>{t("summary.discount")}</div>
+                          <div className="ms-auto text-end">{formatPrice(currentOrder.orderPromotionTotal)}</div>
                         </div>
                     )}
                     <div className="hstack gap-2 mb-2">
-                      <div>Estimated shipping cost:</div>
-                      <div className="ms-auto text-end">${formatPrice(currentOrder?.shippingTotal ?? 0)}</div>
+                      <div>{t("summary.shipping")}</div>
+                      <div className="ms-auto text-end">{formatPrice(currentOrder?.shippingTotal ?? 0)}</div>
                     </div>
                     <div className="hstack gap-2 mb-2">
-                      <div>Taxes total:</div>
-                      <div className="ms-auto text-end">${formatPrice(currentOrder?.taxTotal ?? 0)}</div>
+                      <div>{t("summary.taxes")}</div>
+                      <div className="ms-auto text-end">{formatPrice(currentOrder?.taxTotal ?? 0)}</div>
                     </div>
                     <div className="hstack gap-2 border-top pt-4 mt-4">
-                      <div className="h5">Order total:</div>
-                      <div className="ms-auto h5 text-end">${formatPrice(currentOrder?.total ?? 0)}</div>
+                      <div className="h5">{t("summary.orderTotal")}</div>
+                      <div className="ms-auto h5 text-end">{formatPrice(currentOrder?.total ?? 0)}</div>
                     </div>
                   </div>
                   <div className="d-flex">
-                    <Link to="/checkout/address" className="btn btn-primary flex-grow-1">
-                      Checkout
-                    </Link>
+                    <LocalizedLink to="/checkout/address" className="btn btn-primary flex-grow-1">
+                      {t("page.checkout")}
+                    </LocalizedLink>
                   </div>
                 </div>
               </div>
@@ -331,7 +335,7 @@ export default function CartPage() {
 
           {products?.length > 0 && (
               <div className="mt-5">
-                <ProductsList products={products} limit={4} name="You may also like" />
+                <ProductsList products={products} limit={4} name={t("page.suggestions")} />
               </div>
           )}
         </div>

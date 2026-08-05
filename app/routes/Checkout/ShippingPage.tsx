@@ -8,14 +8,16 @@ import {
   useNavigation,
   Form,
 } from "react-router";
+import { useTranslation } from "react-i18next";
 import CheckoutLayout from "~/layouts/Checkout";
 import { useOrder } from "~/context/OrderContext";
 import Steps from "~/components/checkout/Steps";
-import { formatPrice } from "~/utils/price";
+import { useCurrency } from "~/context/ChannelContext";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import { orderTokenCookie } from "~/utils/cookies.server";
 import { fetchOrderFromAPI } from "~/api/order.server";
-import { Link } from "react-router";
+import { LocalizedLink } from "~/components/LocalizedLink";
+import { localizePath } from "~/utils/localizedPath";
 
 interface ShippingMethod {
   id: number;
@@ -25,11 +27,11 @@ interface ShippingMethod {
   price: number;
 }
 
-export async function loader({ request }: LoaderFunctionArgs) {
+export async function loader({ request, params }: LoaderFunctionArgs) {
   const cookieHeader = request.headers.get("Cookie");
   const token = await orderTokenCookie.parse(cookieHeader);
 
-  if (!token) return redirect("/cart");
+  if (!token) return redirect(localizePath(params.lang!, "/cart"));
 
   const order = await fetchOrderFromAPI(token, true);
 
@@ -54,13 +56,13 @@ export async function loader({ request }: LoaderFunctionArgs) {
   };
 }
 
-export async function action({ request }: ActionFunctionArgs) {
+export async function action({ request, params }: ActionFunctionArgs) {
   const form = await request.formData();
   const shippingMethod = form.get("shippingMethod")?.toString();
   const token = form.get("token")?.toString();
   const shipmentId = form.get("shipmentId")?.toString();
 
-  if (!token || !shipmentId || !shippingMethod) return redirect("/checkout/address");
+  if (!token || !shipmentId || !shippingMethod) return redirect(localizePath(params.lang!, "/checkout/address"));
 
   await fetch(
       `${process.env.PUBLIC_API_URL}/api/v2/shop/orders/${token}/shipments/${shipmentId}`,
@@ -71,7 +73,7 @@ export async function action({ request }: ActionFunctionArgs) {
       }
   );
 
-  return redirect("/checkout/select-payment");
+  return redirect(localizePath(params.lang!, "/checkout/select-payment"));
 }
 
 export default function ShippingPage() {
@@ -80,6 +82,8 @@ export default function ShippingPage() {
     token: string;
     shipmentId: number | null;
   }>();
+  const { t } = useTranslation("checkout");
+  const { formatPrice } = useCurrency();
   const navigation = useNavigation();
   const isSubmitting = navigation.state === "submitting";
 
@@ -91,12 +95,12 @@ export default function ShippingPage() {
             <input type="hidden" name="token" value={token} />
             <input type="hidden" name="shipmentId" value={shipmentId ?? ""} />
 
-            <h5 className="mb-4">Shipment #1</h5>
+            <h5 className="mb-4">{t("shipping.shipmentTitle", { number: 1 })}</h5>
 
             <div className="mb-5">
               {shippingMethods.length === 0 ? (
                   <div className="text-danger">
-                    No shipping methods available. Check your address.
+                    {t("shipping.noMethods")}
                   </div>
               ) : (
                   shippingMethods.map((method) => (
@@ -133,17 +137,17 @@ export default function ShippingPage() {
             </div>
 
             <div className="d-flex justify-content-between flex-column flex-sm-row gap-2">
-              <Link className="btn btn-light btn-icon" to="/checkout/address">
+              <LocalizedLink className="btn btn-light btn-icon" to="/checkout/address">
                 <IconChevronLeft stroke={2} />
-                Change address
-              </Link>
+                {t("shipping.changeAddress")}
+              </LocalizedLink>
 
               <button
                   type="submit"
                   disabled={isSubmitting}
                   className="btn btn-primary btn-icon"
               >
-                Next
+                {t("shipping.next")}
                 <IconChevronRight stroke={2} />
               </button>
             </div>

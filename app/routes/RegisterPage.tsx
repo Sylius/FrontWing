@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
+import { LocalizedLink } from "~/components/LocalizedLink";
+import { useLocalizedNavigate } from "~/hooks/useLocalizedNavigate";
 import Default from "~/layouts/Default";
 import { IconUserPlus } from "@tabler/icons-react";
 import { useFlashMessages } from "~/context/FlashMessagesContext";
@@ -15,6 +17,7 @@ interface FieldErrors {
 }
 
 export default function RegisterPage() {
+    const { t } = useTranslation("account");
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [email, setEmail] = useState("");
@@ -25,16 +28,16 @@ export default function RegisterPage() {
     const [errors, setErrors] = useState<FieldErrors>({});
     const [loading, setLoading] = useState(false);
 
-    const navigate = useNavigate();
+    const navigate = useLocalizedNavigate();
     const { addMessage } = useFlashMessages();
 
     function validate(): boolean {
         const errs: FieldErrors = {};
-        if (!firstName.trim()) errs.firstName = "First name required";
-        if (!lastName.trim()) errs.lastName = "Last name required";
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.email = "Invalid email";
-        if (password.length < 6) errs.password = "Password ≥6 chars";
-        if (password !== confirmPassword) errs.confirmPassword = "Passwords must match";
+        if (!firstName.trim()) errs.firstName = t("auth.register.errors.firstName");
+        if (!lastName.trim()) errs.lastName = t("auth.register.errors.lastName");
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.email = t("auth.register.errors.email");
+        if (password.length < 6) errs.password = t("auth.register.errors.password");
+        if (password !== confirmPassword) errs.confirmPassword = t("auth.register.errors.confirmPassword");
         setErrors(errs);
         return Object.keys(errs).length === 0;
     }
@@ -43,14 +46,14 @@ export default function RegisterPage() {
         e.preventDefault();
         setErrors({});
         if (!validate()) {
-            addMessage("error", "Please correct the errors in the form.");
+            addMessage("error", t("auth.register.correctErrors"));
             return;
         }
         setLoading(true);
 
         try {
             const API_URL = window.ENV?.API_URL;
-            if (!API_URL) throw new Error("API URL not configured.");
+            if (!API_URL) throw new Error(t("auth.register.apiNotConfigured"));
 
             const payload = {
                 firstName,
@@ -83,17 +86,17 @@ export default function RegisterPage() {
                         apiErrors[v.propertyPath] = v.message;
                     });
                     setErrors(apiErrors);
-                    addMessage("error", "Registration failed. Please fix the highlighted errors.");
+                    addMessage("error", t("auth.register.registrationFailed"));
                 } else {
-                    addMessage("error", data["hydra:description"] || data.message || "Registration error.");
+                    addMessage("error", data["hydra:description"] || data.message || t("auth.register.registrationError"));
                 }
                 return;
             }
 
-            addMessage("success", "Thank you for registering! Check your email to verify your account.");
+            addMessage("success", t("auth.register.success"));
             navigate("/register/thank-you", { replace: true });
         } catch (err: unknown) {
-            addMessage("error", err instanceof Error ? err.message : "Unexpected error during registration.");
+            addMessage("error", err instanceof Error ? err.message : t("auth.register.unexpectedError"));
         } finally {
             setLoading(false);
         }
@@ -104,20 +107,20 @@ export default function RegisterPage() {
             <div className="container my-auto">
                 <div className="row justify-content-center my-5">
                     <div className="col-12 col-md-8 col-lg-6">
-                        <h1 className="h2 mb-1">Create a new customer account</h1>
+                        <h1 className="h2 mb-1">{t("auth.register.title")}</h1>
                         <p className="mb-4">
-                            Have an account already?{" "}
-                            <Link to="/login" className="link-reset">
-                                Sign in here.
-                            </Link>
+                            {t("auth.register.haveAccount")}{" "}
+                            <LocalizedLink to="/login" className="link-reset">
+                                {t("auth.register.signIn")}
+                            </LocalizedLink>
                         </p>
 
                         <form onSubmit={handleRegister} noValidate>
-                            <h2 className="h5 mb-3">Personal information</h2>
+                            <h2 className="h5 mb-3">{t("auth.register.personalInfo")}</h2>
 
                             <div className="mb-3">
                                 <label htmlFor="firstName" className="form-label required">
-                                    First name <span className="text-danger">*</span>
+                                    {t("auth.register.firstName")} <span className="text-danger">*</span>
                                 </label>
                                 <input
                                     id="firstName"
@@ -132,7 +135,7 @@ export default function RegisterPage() {
 
                             <div className="mb-3">
                                 <label htmlFor="lastName" className="form-label required">
-                                    Last name <span className="text-danger">*</span>
+                                    {t("auth.register.lastName")} <span className="text-danger">*</span>
                                 </label>
                                 <input
                                     id="lastName"
@@ -147,7 +150,7 @@ export default function RegisterPage() {
 
                             <div className="mb-3">
                                 <label htmlFor="email" className="form-label required">
-                                    Email <span className="text-danger">*</span>
+                                    {t("auth.register.email")} <span className="text-danger">*</span>
                                 </label>
                                 <input
                                     id="email"
@@ -162,7 +165,7 @@ export default function RegisterPage() {
 
                             <div className="mb-3">
                                 <label htmlFor="phoneNumber" className="form-label">
-                                    Phone number
+                                    {t("auth.register.phone")}
                                 </label>
                                 <input
                                     id="phoneNumber"
@@ -184,15 +187,15 @@ export default function RegisterPage() {
                                     onChange={(e) => setSubscribeNewsletter(e.target.checked)}
                                 />
                                 <label htmlFor="newsletter" className="form-check-label">
-                                    Subscribe to the newsletter
+                                    {t("auth.register.newsletter")}
                                 </label>
                             </div>
 
-                            <h2 className="h5 mb-3">Account credentials</h2>
+                            <h2 className="h5 mb-3">{t("auth.register.credentials")}</h2>
 
                             <div className="mb-3">
                                 <label htmlFor="password" className="form-label required">
-                                    Password <span className="text-danger">*</span>
+                                    {t("auth.register.password")} <span className="text-danger">*</span>
                                 </label>
                                 <input
                                     id="password"
@@ -208,7 +211,7 @@ export default function RegisterPage() {
 
                             <div className="mb-4">
                                 <label htmlFor="confirmPassword" className="form-label required">
-                                    Verify password <span className="text-danger">*</span>
+                                    {t("auth.register.verifyPassword")} <span className="text-danger">*</span>
                                 </label>
                                 <input
                                     id="confirmPassword"
@@ -226,7 +229,7 @@ export default function RegisterPage() {
 
                             <div className="d-grid mb-5">
                                 <button type="submit" className="btn btn-primary btn-icon" disabled={loading}>
-                                    <IconUserPlus size={20} /> Create an account
+                                    <IconUserPlus size={20} /> {t("auth.register.submit")}
                                 </button>
                             </div>
                         </form>

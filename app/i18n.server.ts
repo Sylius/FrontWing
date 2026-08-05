@@ -3,47 +3,60 @@ import path from "node:path";
 import { createInstance, type i18n, type Resource, type TFunction } from "i18next";
 import { initReactI18next } from "react-i18next";
 import type { Channel } from "~/types/Channel";
-import { buildInitOptions, DEFAULT_NS } from "~/i18n";
+import { buildInitOptions, NAMESPACES } from "~/i18n";
 import { createLocaleMapper, localeRegionCode, localeShortCode } from "~/utils/locale";
 
 const localesDir = path.resolve(process.cwd(), "public/locales");
 const resourceCache = new Map<string, Record<string, unknown>>();
 
-const loadResource = async (lng: string): Promise<Record<string, unknown>> => {
-    const cached = resourceCache.get(lng);
+const loadNamespace = async (lng: string, ns: string): Promise<Record<string, unknown>> => {
+    const cacheKey = `${lng}/${ns}`;
+    const cached = resourceCache.get(cacheKey);
     if (cached) return cached;
 
-    const filePath = path.join(localesDir, lng, "translation.json");
+    const filePath = path.join(localesDir, lng, `${ns}.json`);
     const parsed = JSON.parse(await readFile(filePath, "utf-8"));
-    resourceCache.set(lng, parsed);
+    resourceCache.set(cacheKey, parsed);
     return parsed;
+};
+
+export const loadResources = async (
+    lngs: string[],
+    namespaces: readonly string[] = NAMESPACES
+): Promise<Resource> => {
+    const resources: Resource = {};
+    for (const l of Array.from(new Set(lngs))) {
+        resources[l] = {};
+        for (const ns of namespaces) {
+            resources[l][ns] = await loadNamespace(l, ns);
+        }
+    }
+    return resources;
 };
 
 interface CreateInstanceArgs {
     lng: string;
     supportedLngs: string[];
     fallbackLng: string;
+    namespaces?: readonly string[];
 }
 
 export const createI18nInstance = async ({
     lng,
     supportedLngs,
     fallbackLng,
-}: CreateInstanceArgs): Promise<{ instance: i18n; t: TFunction }> => {
+    namespaces = NAMESPACES,
+}: CreateInstanceArgs): Promise<{ instance: i18n; t: TFunction; resources: Resource }> => {
     const instance = createInstance();
 
-    const lngsToLoad = Array.from(new Set([lng, fallbackLng]));
-    const resources: Resource = {};
-    for (const l of lngsToLoad) {
-        resources[l] = { [DEFAULT_NS]: await loadResource(l) };
-    }
+    const resources = await loadResources([lng, fallbackLng], namespaces);
 
     await instance.use(initReactI18next).init({
-        ...buildInitOptions({ lng, supportedLngs, fallbackLng }),
+        ...buildInitOptions({ lng, supportedLngs, fallbackLng, ns: namespaces }),
         resources,
     });
 
-    return { instance, t: instance.getFixedT(lng) };
+    return { instance, t: instance.getFixedT(lng), resources };
 };
 
 const parseAcceptLanguage = (header: string | null): string[] => {

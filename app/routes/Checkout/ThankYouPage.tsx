@@ -1,10 +1,13 @@
 import React, { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import Layout from "~/layouts/Default";
 import { useCustomer } from "~/context/CustomerContext";
-import { useSearchParams, useLocation, Link } from "react-router";
+import { useSearchParams, useLocation } from "react-router";
+import { LocalizedLink } from "~/components/LocalizedLink";
 import { useOrder } from "~/context/OrderContext";
 
 export default function ThankYouPage() {
+    const { t } = useTranslation("checkout");
     const { customer } = useCustomer();
     const { resetCart } = useOrder();
     const [searchParams] = useSearchParams();
@@ -31,27 +34,27 @@ export default function ThankYouPage() {
         <Layout>
             <div className="container text-center my-auto">
                 <div className="row flex-column my-4">
-                    <h1 className="h2">Thank you!</h1>
-                    <p>You have successfully placed an order.</p>
+                    <h1 className="h2">{t("thankYou.title")}</h1>
+                    <p>{t("thankYou.message")}</p>
 
                     <div className="d-flex flex-column flex-lg-row justify-content-center gap-2 mt-4">
                         {customer && token ? (
-                            <Link to={`/account/orders/${token}`} className="btn btn-primary">
-                                View order
-                            </Link>
+                            <LocalizedLink to={`/account/orders/${token}`} className="btn btn-primary">
+                                {t("thankYou.viewOrder")}
+                            </LocalizedLink>
                         ) : (
                             <>
                                 {token && (
-                                    <Link
+                                    <LocalizedLink
                                         to={`/account/orders/${token}/pay`}
                                         className="btn btn-primary"
                                     >
-                                        Change payment method
-                                    </Link>
+                                        {t("thankYou.changePayment")}
+                                    </LocalizedLink>
                                 )}
-                                <Link to="/register" className="btn btn-secondary">
-                                    Create an account
-                                </Link>
+                                <LocalizedLink to="/register" className="btn btn-secondary">
+                                    {t("thankYou.createAccount")}
+                                </LocalizedLink>
                             </>
                         )}
                     </div>

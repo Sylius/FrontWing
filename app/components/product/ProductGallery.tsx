@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import Skeleton from 'react-loading-skeleton';
 import { Image } from '~/types/Product';
 
@@ -11,6 +12,7 @@ interface Props {
 }
 
 const ProductGallery: React.FC<Props> = ({ images, activeImage, onChange, onOpenLightbox, getImageUrl }) => {
+    const { t } = useTranslation('product');
     const mainImage = images.find((img) => img.path === activeImage) ?? images[0];
 
     if (!mainImage) {
@@ -32,7 +34,7 @@ const ProductGallery: React.FC<Props> = ({ images, activeImage, onChange, onOpen
                             >
                                 <img
                                     src={getImageUrl(img.path, 'sylius_shop_product_small_thumbnail')}
-                                    alt="thumbnail"
+                                    alt={t('gallery.thumbnailAlt')}
                                     className="w-100 h-100 object-fit-cover"
                                 />
                             </button>
@@ -47,7 +49,7 @@ const ProductGallery: React.FC<Props> = ({ images, activeImage, onChange, onOpen
                 >
                     <img
                         src={getImageUrl(mainImage.path, 'sylius_shop_product_original')}
-                        alt="Main product"
+                        alt={t('gallery.mainAlt')}
                         loading="lazy"
                         className="img-fluid w-100 h-100 object-fit-cover"
                     />

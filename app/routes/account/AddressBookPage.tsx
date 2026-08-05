@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import Default from "../../layouts/Default";
 import AccountLayout from "../../layouts/Account";
-import { Link } from "react-router";
+import { LocalizedLink } from "~/components/LocalizedLink";
 import { Address } from "../../types/Address";
 import { useCustomer } from "../../context/CustomerContext";
 import { useFlashMessages } from "../../context/FlashMessagesContext";
@@ -18,6 +19,7 @@ const getDefaultAddressId = (
 
 
 const AddressBookPage: React.FC = () => {
+    const { t } = useTranslation(["account", "common"]);
     const { customer } = useCustomer();
     const { addMessage } = useFlashMessages();
 
@@ -43,7 +45,7 @@ const AddressBookPage: React.FC = () => {
             setAddresses(data["hydra:member"] || []);
         } catch (err) {
             console.error("Error loading addresses", err);
-            addMessage("error", "Failed to load addresses");
+            addMessage("error", t("addresses.book.loadError"));
         } finally {
             setLoading(false);
         }
@@ -64,11 +66,11 @@ const AddressBookPage: React.FC = () => {
 
             if (!res.ok) throw new Error("Failed to delete address");
 
-            addMessage("success", "Address deleted");
+            addMessage("success", t("addresses.book.deleteSuccess"));
             fetchAddresses();
         } catch (err) {
             console.error("Error deleting address", err);
-            addMessage("error", "Failed to delete address");
+            addMessage("error", t("addresses.book.deleteError"));
         }
     };
 
@@ -88,28 +90,28 @@ const AddressBookPage: React.FC = () => {
         <Default>
             <AccountLayout
                 breadcrumbs={[
-                    { label: "Home", url: "/" },
-                    { label: "My account", url: "/account/dashboard" },
-                    { label: "Address book", url: "/account/address-book" },
+                    { label: t("common:nav.home"), url: "/" },
+                    { label: t("common:nav.account"), url: "/account/dashboard" },
+                    { label: t("addresses.breadcrumb"), url: "/account/address-book" },
                 ]}
             >
                 <div className="col-12 col-md-9">
                     <div className="d-flex justify-content-between align-items-start mb-4">
                         <div>
-                            <h1 className="mb-1">Address book</h1>
-                            <div className="text-muted">Manage your saved addresses</div>
+                            <h1 className="mb-1">{t("addresses.book.title")}</h1>
+                            <div className="text-muted">{t("addresses.book.subtitle")}</div>
                         </div>
-                        <Link to="/account/address-book/add" className="btn btn-primary">
-                            Add address
-                        </Link>
+                        <LocalizedLink to="/account/address-book/add" className="btn btn-primary">
+                            {t("addresses.book.add")}
+                        </LocalizedLink>
                     </div>
 
                     {loading ? (
                         <Skeleton count={3} height={120} className="mb-3" />
                     ) : addresses.length === 0 ? (
                         <div className="alert alert-info">
-                            <div className="fw-bold">Info</div>
-                            You have no addresses defined
+                            <div className="fw-bold">{t("addresses.book.infoTitle")}</div>
+                            {t("addresses.book.empty")}
                         </div>
                     ) : (
                         <AddressCards

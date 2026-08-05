@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useSearchParams } from "react-router";
+import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router";
+import { LocalizedLink } from "~/components/LocalizedLink";
 import Default from "~/layouts/Default";
 import { useFlashMessages } from "~/context/FlashMessagesContext";
 import { useCustomer } from "~/context/CustomerContext";
 
 export default function VerificationPage() {
+    const { t } = useTranslation("account");
     const [searchParams] = useSearchParams();
     const { addMessage } = useFlashMessages();
     const { refetchCustomer } = useCustomer();
@@ -17,7 +20,7 @@ export default function VerificationPage() {
         const token = searchParams.get("token");
         if (!token) {
             setStatus("error");
-            setMessage("No verification token found in the URL. Please ensure you clicked the correct link.");
+            setMessage(t("auth.verification.noToken"));
             return;
         }
         if (attempted.current) return;
@@ -25,12 +28,12 @@ export default function VerificationPage() {
 
         async function verify() {
             setStatus("pending");
-            setMessage("Verifying your email address...");
+            setMessage(t("auth.verification.verifying"));
 
             const API_URL = window.ENV?.API_URL;
             if (!API_URL) {
                 setStatus("error");
-                setMessage("Configuration error: API URL not set.");
+                setMessage(t("auth.verification.configError"));
                 return;
             }
 
@@ -56,11 +59,11 @@ export default function VerificationPage() {
 
                 if (response.ok) {
                     setStatus("success");
-                    setMessage(data.message || "Your email has been successfully verified!");
-                    addMessage("success", "Email verified. You can now log in or continue using your account.");
+                    setMessage(data.message || t("auth.verification.successMessage"));
+                    addMessage("success", t("auth.verification.flashSuccess"));
                     await refetchCustomer();
                 } else {
-                    const msg = data.message || data.detail || "Email verification failed. The link might be expired or invalid.";
+                    const msg = data.message || data.detail || t("auth.verification.failedFallback");
                     setStatus("error");
                     setMessage(msg);
                     addMessage("error", msg);
@@ -68,8 +71,8 @@ export default function VerificationPage() {
             } catch (err: unknown) {
                 console.error("Verification error:", err);
                 setStatus("error");
-                setMessage("An unexpected error occurred during verification. Please try again.");
-                addMessage("error", "An unexpected error occurred during verification. Please try again.");
+                setMessage(t("auth.verification.unexpectedError"));
+                addMessage("error", t("auth.verification.unexpectedError"));
             }
         }
 
@@ -89,38 +92,37 @@ export default function VerificationPage() {
                     <div className="col-12 col-md-8 col-lg-6 text-center">
                         {status === "pending" && (
                             <>
-                                <h1 className="h2 mb-3">Verifying your email...</h1>
-                                <p className="lead mb-4">Please wait while we confirm your email address.</p>
+                                <h1 className="h2 mb-3">{t("auth.verification.pendingTitle")}</h1>
+                                <p className="lead mb-4">{t("auth.verification.pendingText")}</p>
                                 <div className="spinner-border text-primary" role="status">
-                                    <span className="visually-hidden">Loading...</span>
+                                    <span className="visually-hidden">{t("auth.verification.loading")}</span>
                                 </div>
                             </>
                         )}
                         {status === "success" && (
                             <>
-                                <h1 className="h2 mb-3">Email Verified!</h1>
+                                <h1 className="h2 mb-3">{t("auth.verification.successTitle")}</h1>
                                 <p className="lead mb-4">{message}</p>
-                                <p className="mb-5">Your account is now active.</p>
-                                <Link to="/login" className="btn btn-primary">
-                                    Go to Login
-                                </Link>
+                                <p className="mb-5">{t("auth.verification.accountActive")}</p>
+                                <LocalizedLink to="/login" className="btn btn-primary">
+                                    {t("auth.verification.goToLogin")}
+                                </LocalizedLink>
                             </>
                         )}
                         {status === "error" && (
                             <>
-                                <h1 className="h2 mb-3">Verification Failed</h1>
+                                <h1 className="h2 mb-3">{t("auth.verification.failedTitle")}</h1>
                                 <p className="lead mb-4">{message}</p>
                                 <p className="mb-5">
-                                    Please ensure you clicked the correct link. The link may have expired or been used.
-                                    If you have an account, you can try
-                                    <Link to="/login" className="link-reset ms-1">
-                                        logging in
-                                    </Link>
-                                    and requesting a new verification email from your dashboard.
+                                    {t("auth.verification.errorHelpBefore")}
+                                    <LocalizedLink to="/login" className="link-reset ms-1">
+                                        {t("auth.verification.errorHelpLink")}
+                                    </LocalizedLink>
+                                    {t("auth.verification.errorHelpAfter")}
                                 </p>
-                                <Link to="/login" className="btn btn-primary">
-                                    Go to Login
-                                </Link>
+                                <LocalizedLink to="/login" className="btn btn-primary">
+                                    {t("auth.verification.goToLogin")}
+                                </LocalizedLink>
                             </>
                         )}
                     </div>

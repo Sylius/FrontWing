@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { IconX } from "@tabler/icons-react";
 
 type FlashMessage = {
@@ -12,7 +13,16 @@ type Props = {
   removeMessage: (id: string) => void;
 };
 
+const typeLabelKeys = {
+  success: "flash.success",
+  error: "flash.error",
+  info: "flash.info",
+  warning: "flash.warning",
+} as const;
+
 const FlashMessages: React.FC<Props> = ({ messages, removeMessage }) => {
+  const { t } = useTranslation();
+
   useEffect(() => {
     const timers = messages.map((msg) =>
         setTimeout(() => removeMessage(msg.id), 5000)
@@ -30,11 +40,11 @@ const FlashMessages: React.FC<Props> = ({ messages, removeMessage }) => {
                 key={msg.id}
             >
               <div className="d-flex justify-content-between">
-                <div className="fw-bold">{msg.type.toUpperCase()}</div>
+                <div className="fw-bold">{t(typeLabelKeys[msg.type])}</div>
                 <span
                     className="close flash-message-close"
                     onClick={() => removeMessage(msg.id)}
-                    aria-label="Close"
+                    aria-label={t("aria.close")}
                 >
               <IconX stroke={2} />
             </span>

@@ -1,5 +1,6 @@
 import React from 'react';
-import { Link } from 'react-router';
+import { useTranslation } from "react-i18next";
+import { LocalizedLink } from "~/components/LocalizedLink";
 import Default from '~/layouts/Default';
 import AccountLayout from '~/layouts/Account';
 import { useCustomer } from '~/context/CustomerContext';
@@ -42,6 +43,7 @@ const fetchCustomerOrders = async (): Promise<Order[]> => {
 };
 
 export default function OrderHistoryPage() {
+    const { t } = useTranslation(["account", "common"]);
     const { customer } = useCustomer();
     const { data: orders = [], isLoading, isError } = useQuery<Order[]>({
         queryKey: ['customerOrders', customer?.email],
@@ -53,15 +55,15 @@ export default function OrderHistoryPage() {
         <Default>
             <AccountLayout
                 breadcrumbs={[
-                    { label: 'Home', url: '/' },
-                    { label: 'My account', url: '/account/dashboard' },
-                    { label: 'Order History', url: '/account/order-history' },
+                    { label: t('common:nav.home'), url: '/' },
+                    { label: t('common:nav.account'), url: '/account/dashboard' },
+                    { label: t('orders.breadcrumb'), url: '/account/order-history' },
                 ]}
             >
                 <div className="col-12 col-md-9">
                     <div className="mb-4">
-                        <h1>Order history</h1>
-                        Browse your past orders
+                        <h1>{t('orders.history.title')}</h1>
+                        {t('orders.history.subtitle')}
                     </div>
 
                     {isLoading || orders.length > 0 ? (
@@ -85,12 +87,12 @@ export default function OrderHistoryPage() {
                                         <table className="table card-table table-vcenter text-nowrap datatable">
                                             <thead>
                                             <tr>
-                                                <th>Number</th>
-                                                <th>Date</th>
-                                                <th>Ship to</th>
-                                                <th>Total</th>
-                                                <th>State</th>
-                                                <th className="text-center">Actions</th>
+                                                <th>{t('orders.table.number')}</th>
+                                                <th>{t('orders.table.date')}</th>
+                                                <th>{t('orders.table.shipTo')}</th>
+                                                <th>{t('orders.table.total')}</th>
+                                                <th>{t('orders.table.state')}</th>
+                                                <th className="text-center">{t('orders.table.actions')}</th>
                                             </tr>
                                             </thead>
                                             <tbody>
@@ -110,20 +112,20 @@ export default function OrderHistoryPage() {
                                                     <td>${(order.itemsSubtotal / 100).toFixed(2)}</td>
                                                     <td>{order.state}</td>
                                                     <td className="d-flex gap-2 flex-wrap justify-content-center">
-                                                        <Link
+                                                        <LocalizedLink
                                                             to={`/account/orders/${order.tokenValue}`}
                                                             className="btn btn-sm btn-outline-gray"
                                                         >
-                                                            Show
-                                                        </Link>
+                                                            {t('orders.table.show')}
+                                                        </LocalizedLink>
                                                         {order.state !== 'completed' && order.paymentState === 'awaiting_payment' && (
-                                                            <Link
+                                                            <LocalizedLink
                                                                 to={`/account/orders/${order.tokenValue}/pay`}
                                                                 className="btn btn-sm btn-outline-gray d-flex align-items-center gap-1"
                                                             >
                                                                 <IconCreditCard size={18} />
-                                                                Pay
-                                                            </Link>
+                                                                {t('orders.table.pay')}
+                                                            </LocalizedLink>
                                                         )}
                                                     </td>
                                                 </tr>
@@ -136,13 +138,13 @@ export default function OrderHistoryPage() {
                         </div>
                     ) : isError ? (
                         <div className="alert alert-danger">
-                            <div className="fw-bold">Error</div>
-                            Failed to load orders. Please try again later.
+                            <div className="fw-bold">{t('orders.history.errorTitle')}</div>
+                            {t('orders.history.loadError')}
                         </div>
                     ) : (
                         <div className="alert alert-info">
-                            <div className="fw-bold">Info</div>
-                            You have no orders yet.
+                            <div className="fw-bold">{t('orders.history.infoTitle')}</div>
+                            {t('orders.history.empty')}
                         </div>
                     )}
                 </div>

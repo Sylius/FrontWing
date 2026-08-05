@@ -1,13 +1,16 @@
 import React, { useEffect } from 'react';
-import { Link } from 'react-router';
+import { LocalizedLink } from "~/components/LocalizedLink";
 import { useOrder } from "../../context/OrderContext";
-import { formatPrice } from "../../utils/price";
+import { useCurrency } from "~/context/ChannelContext";
 import UserNavigation from "./header/UserNavigation";
 import { IconMenu2, IconShoppingBag } from "@tabler/icons-react";
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
+import { useTranslation } from "react-i18next";
 
 const Header: React.FC = () => {
+    const { t } = useTranslation("cart");
+    const { formatPrice } = useCurrency();
     const { order, isFetching } = useOrder();
 
     useEffect(() => {
@@ -23,7 +26,7 @@ const Header: React.FC = () => {
             <div className="container">
                 <div className="row align-items-center">
                     <div className="col">
-                        <Link to="/" className="d-inline-block py-lg-2" style={{ width: '10rem' }}
+                        <LocalizedLink to="/" className="d-inline-block py-lg-2" style={{ width: '10rem' }}
                               aria-label="sylius logo">
                             <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 3512 1033"
                                  fillRule="evenodd" strokeLinejoin="round" strokeMiterlimit="2">
@@ -39,26 +42,26 @@ const Header: React.FC = () => {
                                     d="M731.417 1032.79L333.083 186.165l85.209-61.667 463.5 675.75-150.375 232.542zM510.667 57.625l259.458 209.583L588.042 0l-77.375 57.625z"
                                     fillRule="nonzero" fill="#30ba9d" />
                             </svg>
-                        </Link>
+                        </LocalizedLink>
                     </div>
 
                     <UserNavigation />
 
                     <div className="col-auto position-relative">
-                        <Link to="/cart">
+                        <LocalizedLink to="/cart">
                             <div>
                                 <button className="btn btn-icon btn-transparent px-0 position-relative"
                                         data-bs-toggle="offcanvas" data-bs-target="#offcanvasCart"
-                                        aria-label="cart button">
+                                        aria-label={t("miniCart.ariaLabel")}>
                                     <IconShoppingBag stroke={1.25} size={28} />
                                     <div className="d-none d-md-block">
                                         {isFetching
                                             ? <Skeleton width={40} height={24} />
-                                            : `$${formatPrice(displayTotal)}`}
+                                            : formatPrice(displayTotal)}
                                     </div>
                                 </button>
                             </div>
-                        </Link>
+                        </LocalizedLink>
                     </div>
 
                     <div className="col-auto d-lg-none">

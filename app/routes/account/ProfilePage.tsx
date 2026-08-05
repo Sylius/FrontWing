@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import Default from "../../layouts/Default";
 import AccountLayout from "../../layouts/Account";
 import { useCustomer } from "../../context/CustomerContext";
@@ -6,6 +7,7 @@ import { useFlashMessages } from "../../context/FlashMessagesContext";
 import Skeleton from "react-loading-skeleton";
 
 const ProfilePage: React.FC = () => {
+    const { t } = useTranslation(["account", "common"]);
     const { customer, refetchCustomer } = useCustomer();
     const { addMessage } = useFlashMessages();
 
@@ -70,9 +72,9 @@ const ProfilePage: React.FC = () => {
             if (!res.ok) throw new Error("Failed to update profile");
 
             await refetchCustomer();
-            addMessage("success", "Profile updated successfully");
+            addMessage("success", t("profile.updateSuccess"));
         } catch (err) {
-            addMessage("error", "Error updating profile");
+            addMessage("error", t("profile.updateError"));
             console.error(err);
         }
     };
@@ -81,15 +83,15 @@ const ProfilePage: React.FC = () => {
         <Default>
             <AccountLayout
                 breadcrumbs={[
-                    { label: "Home", url: "/" },
-                    { label: "My account", url: "/account/dashboard" },
-                    { label: "Personal information", url: "/account/profile/edit" },
+                    { label: t("common:nav.home"), url: "/" },
+                    { label: t("common:nav.account"), url: "/account/dashboard" },
+                    { label: t("profile.breadcrumb"), url: "/account/profile/edit" },
                 ]}
             >
                 <div className="col-12 col-md-9">
                     <div className="mb-4">
-                        <h1>Your profile</h1>
-                        Edit your personal information
+                        <h1>{t("profile.title")}</h1>
+                        {t("profile.subtitle")}
                     </div>
 
                     {loading ? (
@@ -98,7 +100,7 @@ const ProfilePage: React.FC = () => {
                         <form onSubmit={handleSubmit}>
                             <div className="row">
                                 <div className="col-md-6 mb-3">
-                                    <label className="form-label">First name *</label>
+                                    <label className="form-label">{t("profile.firstName")}</label>
                                     <input
                                         className="form-control"
                                         name="firstName"
@@ -108,7 +110,7 @@ const ProfilePage: React.FC = () => {
                                     />
                                 </div>
                                 <div className="col-md-6 mb-3">
-                                    <label className="form-label">Last name *</label>
+                                    <label className="form-label">{t("profile.lastName")}</label>
                                     <input
                                         className="form-control"
                                         name="lastName"
@@ -118,7 +120,7 @@ const ProfilePage: React.FC = () => {
                                     />
                                 </div>
                                 <div className="col-12 mb-3">
-                                    <label className="form-label">Email *</label>
+                                    <label className="form-label">{t("profile.email")}</label>
                                     <input
                                         className="form-control"
                                         name="email"
@@ -129,7 +131,7 @@ const ProfilePage: React.FC = () => {
                                     />
                                 </div>
                                 <div className="col-md-6 mb-3">
-                                    <label className="form-label">Birthday *</label>
+                                    <label className="form-label">{t("profile.birthday")}</label>
                                     <input
                                         className="form-control"
                                         name="birthday"
@@ -139,7 +141,7 @@ const ProfilePage: React.FC = () => {
                                     />
                                 </div>
                                 <div className="col-md-6 mb-3">
-                                    <label className="form-label">Gender *</label>
+                                    <label className="form-label">{t("profile.gender")}</label>
                                     <select
                                         className="form-select"
                                         name="gender"
@@ -147,13 +149,13 @@ const ProfilePage: React.FC = () => {
                                         onChange={handleChange}
                                         required
                                     >
-                                        <option value="m">Male</option>
-                                        <option value="f">Female</option>
-                                        <option value="u">Unknown</option>
+                                        <option value="m">{t("profile.genderMale")}</option>
+                                        <option value="f">{t("profile.genderFemale")}</option>
+                                        <option value="u">{t("profile.genderUnknown")}</option>
                                     </select>
                                 </div>
                                 <div className="col-12 mb-3">
-                                    <label className="form-label">Phone number</label>
+                                    <label className="form-label">{t("profile.phoneNumber")}</label>
                                     <input
                                         className="form-control"
                                         name="phoneNumber"
@@ -171,12 +173,12 @@ const ProfilePage: React.FC = () => {
                                         onChange={handleChange}
                                     />
                                     <label htmlFor="newsletter" className="form-check-label">
-                                        Subscribe to the newsletter
+                                        {t("profile.newsletter")}
                                     </label>
                                 </div>
                             </div>
 
-                            <button className="btn btn-primary">Save changes</button>
+                            <button className="btn btn-primary">{t("profile.submit")}</button>
                         </form>
                     )}
                 </div>

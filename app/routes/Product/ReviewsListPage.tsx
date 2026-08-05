@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 import Layout from '~/layouts/Default';
 import Breadcrumbs from '~/components/Breadcrumbs';
@@ -7,6 +8,7 @@ import Skeleton from 'react-loading-skeleton';
 import { Product, ProductReview } from '~/types/Product';
 
 const ReviewsListPage: React.FC = () => {
+    const { t } = useTranslation(['product', 'common']);
     const API_URL = typeof window !== 'undefined' ? window.ENV?.API_URL : '';
     const { code } = useParams<{ code: string }>();
 
@@ -44,8 +46,8 @@ const ReviewsListPage: React.FC = () => {
                 }
 
                 const breadcrumbPaths: { label: string; url: string }[] = [
-                    { label: 'Home', url: '/' },
-                    { label: 'Category', url: '#' },
+                    { label: t('common:nav.home'), url: '/' },
+                    { label: t('breadcrumb.category'), url: '#' },
                 ];
 
                 if (data.productTaxons?.length) {
@@ -76,7 +78,7 @@ const ReviewsListPage: React.FC = () => {
                 }
 
                 breadcrumbPaths.push({ label: data.name, url: `/product/${data.code}` });
-                breadcrumbPaths.push({ label: 'Reviews', url: '#' });
+                breadcrumbPaths.push({ label: t('breadcrumb.reviews'), url: '#' });
                 setBreadcrumbs(breadcrumbPaths);
             } catch (err) {
                 console.error('Failed to load product or reviews', err);
@@ -133,12 +135,12 @@ const ReviewsListPage: React.FC = () => {
                             <>
                                 <div className="d-sm-flex gap-3">
                                     <div className="flex-grow-1 mb-3">
-                                        <h1>Reviews</h1>
-                                        <div>{reviews.length} vote{reviews.length !== 1 && 's'}</div>
+                                        <h1>{t('reviews.title')}</h1>
+                                        <div>{t('reviews.voteCount', { count: reviews.length })}</div>
                                     </div>
                                     <div className="mb-3">
                                         <a href={`/product/${code}/review/new`} className="btn btn-primary">
-                                            Add your review
+                                            {t('reviews.addYourReview')}
                                         </a>
                                     </div>
                                 </div>
