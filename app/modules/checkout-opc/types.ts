@@ -11,6 +11,7 @@ export type AddressFieldName =
     | "company"
     | "street"
     | "countryCode"
+    | "provinceName"
     | "city"
     | "postcode"
     | "phoneNumber";

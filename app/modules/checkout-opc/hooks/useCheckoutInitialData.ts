@@ -1,5 +1,4 @@
 import { useEffect, useMemo } from "react";
-import { useNavigate } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useOrder } from "~/context/OrderContext";
 import { useCustomer } from "~/context/CustomerContext";
@@ -8,6 +7,7 @@ import { checkoutApi } from "~/modules/checkout-opc/api/checkoutApi";
 import { mapOrderItemsToLineItems } from "~/modules/checkout-opc/api/previewCheckout";
 import { summaryKey } from "~/modules/checkout-opc/hooks/useOrderSummary";
 import { loadPersistedCheckoutState } from "~/modules/checkout-opc/utils/checkoutStatePersistence";
+import { useLocalizedNavigate } from "~/hooks/useLocalizedNavigate";
 import type { AddressInterface } from "~/types/Order";
 import type {
     CheckoutState,
@@ -33,21 +33,16 @@ export interface CheckoutInitialData {
 export const useCheckoutInitialData = (): CheckoutInitialData => {
     const { order, isFetching: orderFetching } = useOrder();
     const { customer, loading: customerLoading } = useCustomer();
-    const navigate = useNavigate();
+    const navigate = useLocalizedNavigate();
     const token = order?.tokenValue ?? "";
 
     const isEmptyOrder = !!order && (order.items?.length ?? 0) === 0;
 
     useEffect(() => {
         if (!orderFetching && isEmptyOrder) {
-            console.warn("[opc] empty order — redirecting to /cart", {
-                token,
-                items: order?.items?.length ?? null,
-                checkoutState: order?.checkoutState ?? null,
-            });
             navigate("/cart", { replace: true });
         }
-    }, [orderFetching, isEmptyOrder, navigate, token, order]);
+    }, [orderFetching, isEmptyOrder, navigate]);
 
     const countriesQuery = useQuery({
         queryKey: ["opc-countries"],

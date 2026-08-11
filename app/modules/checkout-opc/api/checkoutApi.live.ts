@@ -20,8 +20,8 @@ const previewCheckout = async (
     body: Record<string, unknown>,
 ): Promise<CheckoutPreview> => {
     const res = await fetch(`${apiUrl()}/api/v2/shop/orders/${token}/one-page/preview`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: "PATCH",
+        headers: { "Content-Type": "application/merge-patch+json" },
         body: JSON.stringify(body),
     });
 
@@ -62,8 +62,8 @@ export const checkoutApiLive: CheckoutApi = {
 
     async completeCheckout(token: string, state: CheckoutState, hash: string): Promise<Order> {
         const res = await fetch(`${apiUrl()}/api/v2/shop/orders/${token}/one-page/complete`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
+            method: "PATCH",
+            headers: { "Content-Type": "application/merge-patch+json" },
             body: JSON.stringify(buildCompleteBody(state, hash)),
         });
 

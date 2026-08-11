@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { useNavigate } from "react-router";
+import { useLocalizedNavigate } from "~/hooks/useLocalizedNavigate";
 import { checkoutApi } from "~/modules/checkout-opc/api/checkoutApi";
 import { CheckoutCompleteError, type CheckoutViolation } from "~/modules/checkout-opc/api/checkoutApi";
 import { clearPersistedCheckoutState } from "~/modules/checkout-opc/utils/checkoutStatePersistence";
@@ -13,7 +13,7 @@ export interface UseCheckoutSubmitResult {
 }
 
 export const useCheckoutSubmit = (token: string): UseCheckoutSubmitResult => {
-    const navigate = useNavigate();
+    const navigate = useLocalizedNavigate();
 
     const mutation = useMutation({
         mutationFn: ({ state, hash }: { state: CheckoutState; hash: string }) =>

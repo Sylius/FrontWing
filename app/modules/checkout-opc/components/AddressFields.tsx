@@ -93,6 +93,18 @@ const AddressFields: React.FC<Props> = ({ idPrefix, address, countries, onChange
         </div>
 
         <div className="mb-3">
+            <label className="form-label" htmlFor={`${idPrefix}-provinceName`}>
+                Province / State
+            </label>
+            <input
+                id={`${idPrefix}-provinceName`}
+                className="form-control"
+                value={address.provinceName ?? ""}
+                onChange={(event) => onChange("provinceName", event.target.value)}
+            />
+        </div>
+
+        <div className="mb-3">
             <label className="form-label" htmlFor={`${idPrefix}-city`}>
                 City
             </label>
