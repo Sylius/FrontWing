@@ -28,8 +28,9 @@ import type { Channel } from "~/types/Channel";
 import { fetchChannel } from "~/api/channel.server";
 import { resolveLocale } from "~/i18n.server";
 import { createLocaleMapper } from "~/utils/locale";
-import { collectNamespaces, type I18nBootstrap, type I18nMeta } from "~/i18n";
+import { collectNamespaces, extractResources, type I18nBootstrap, type I18nMeta } from "~/i18n";
 import { useChangeLanguage } from "~/hooks/useChangeLanguage";
+import { useTranslation } from "react-i18next";
 
 export const handle = { i18n: ["common"] };
 
@@ -143,13 +144,20 @@ export default function App() {
     }>();
 
     const matches = useMatches();
+    const { i18n } = useTranslation();
     const [queryClient] = useState(() => new QueryClient());
 
     useChangeLanguage(data.i18n.locale);
 
+    const namespaces = collectNamespaces(matches);
     const i18nBootstrap: I18nBootstrap = {
         ...data.i18n,
-        ns: collectNamespaces(matches),
+        ns: namespaces,
+        resources: extractResources(
+            i18n.store.data,
+            [data.i18n.locale, data.i18n.fallbackLng],
+            namespaces,
+        ),
     };
 
     return (

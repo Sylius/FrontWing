@@ -20,6 +20,7 @@ export const createClientI18n = async (bootstrap: I18nBootstrap): Promise<i18n> 
                 fallbackLng: bootstrap.fallbackLng,
                 ns: bootstrap.ns,
             }),
+            resources: bootstrap.resources,
             partialBundledLanguages: true,
         });
 

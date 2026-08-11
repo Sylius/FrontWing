@@ -1,4 +1,4 @@
-import type { InitOptions } from "i18next";
+import type { InitOptions, Resource } from "i18next";
 
 export const NAMESPACES = ["common", "product", "cart", "checkout", "account"] as const;
 export type Namespace = (typeof NAMESPACES)[number];
@@ -13,6 +13,7 @@ export interface I18nMeta {
 
 export interface I18nBootstrap extends I18nMeta {
     ns: string[];
+    resources?: Resource;
 }
 
 const readHandleNamespaces = (handle: unknown): string[] => {
@@ -28,6 +29,28 @@ export const collectNamespaces = (
         readHandleNamespaces(match.route ? match.route.handle : match.handle),
     );
     return [...new Set([DEFAULT_NS, ...namespaces])];
+};
+
+export const extractResources = (
+    store: Record<string, Record<string, unknown>> | undefined,
+    langs: string[],
+    namespaces: string[],
+): Resource => {
+    const resources: Resource = {};
+    if (!store) return resources;
+
+    for (const lng of [...new Set(langs)]) {
+        const bundle = store[lng];
+        if (!bundle) continue;
+
+        const picked: Record<string, unknown> = {};
+        for (const ns of namespaces) {
+            if (bundle[ns] !== undefined) picked[ns] = bundle[ns];
+        }
+        resources[lng] = picked as Resource[string];
+    }
+
+    return resources;
 };
 
 export interface I18nRuntimeOptions {
