@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { AddressInterface } from "~/types/Order";
 import type { AddressFieldName, Country } from "~/modules/checkout-opc/types";
 import AddressFields from "./AddressFields";
@@ -20,6 +21,8 @@ const AddressBook: React.FC<Props> = ({
     onSelect,
     onChange,
 }) => {
+    const { t } = useTranslation("checkout");
+
     const matchesBook = (candidate: AddressInterface): boolean =>
         addresses.some((entry) => entry.id === candidate.id);
 
@@ -80,7 +83,7 @@ const AddressBook: React.FC<Props> = ({
                     }}
                 />
                 <label className="form-check-label" htmlFor={`${idPrefix}-manual`}>
-                    Enter address manually
+                    {t("opc.address.enterManually")}
                 </label>
             </div>
 

@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import type { AddressInterface } from "~/types/Order";
 import type { Country } from "~/modules/checkout-opc/types";
 import { useCheckout } from "~/modules/checkout-opc/context/CheckoutContext";
@@ -14,29 +15,32 @@ const AddressSection: React.FC<Props> = ({ addresses, countries }) => {
     const { state, setEmail, setAddressField, selectAddress, setUseDifferentShipping } =
         useCheckout();
     const { customer, loading: customerLoading } = useCustomer();
+    const { t } = useTranslation("checkout");
     const showEmailField = !customerLoading && !customer;
 
     return (
         <fieldset className="mb-5">
-            <legend className="h5 mb-4">Address</legend>
+            <legend className="h5 mb-4">{t("opc.address.legend")}</legend>
 
             {showEmailField && (
                 <div className="mb-3">
                     <label className="form-label" htmlFor="opc-email">
-                        Email
+                        {t("opc.address.email")}
                     </label>
                     <input
                         id="opc-email"
                         type="email"
                         className="form-control"
-                        placeholder="your@email.com"
+                        placeholder={t("opc.address.emailPlaceholder")}
                         value={state.email}
                         onChange={(event) => setEmail(event.target.value)}
                     />
                 </div>
             )}
 
-            {state.useDifferentShipping && <div className="h6 mb-3">Billing address</div>}
+            {state.useDifferentShipping && (
+                <div className="h6 mb-3">{t("opc.address.billingAddress")}</div>
+            )}
 
             <AddressBook
                 idPrefix="opc-billing"
@@ -56,13 +60,13 @@ const AddressSection: React.FC<Props> = ({ addresses, countries }) => {
                     onChange={(event) => setUseDifferentShipping(event.target.checked)}
                 />
                 <label className="form-check-label" htmlFor="opc-different-shipping">
-                    Use a different address for shipping
+                    {t("opc.address.useDifferentShipping")}
                 </label>
             </div>
 
             {state.useDifferentShipping && (
                 <div className="mt-4">
-                    <div className="h6 mb-3">Shipping address</div>
+                    <div className="h6 mb-3">{t("opc.address.shippingAddress")}</div>
 
                     <AddressBook
                         idPrefix="opc-shipping"

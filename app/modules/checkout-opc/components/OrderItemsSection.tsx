@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import type { OrderLineItem } from "~/modules/checkout-opc/types";
 import OrderItemRow from "./OrderItemRow";
 
@@ -8,10 +9,12 @@ interface Props {
 }
 
 const OrderItemsSection: React.FC<Props> = ({ items, currencyCode }) => {
+    const { t } = useTranslation("checkout");
+
     return (
-        <section aria-label="Your order">
+        <section aria-label={t("opc.items.ariaLabel")}>
             {items.length === 0 ? (
-                <p className="text-body-tertiary mb-0">Your cart is empty.</p>
+                <p className="text-body-tertiary mb-0">{t("opc.items.empty")}</p>
             ) : (
                 <div className="overflow-y-auto" style={{ maxHeight: "24rem" }}>
                     {items.map((item, index) => (

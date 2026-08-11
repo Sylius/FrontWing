@@ -1,4 +1,5 @@
 import React from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { IconCalendarMonth, IconLock } from "@tabler/icons-react";
 import type { OrderLineItem, OrderSummary } from "~/modules/checkout-opc/types";
 import { formatMoney } from "~/utils/price";
@@ -25,6 +26,7 @@ const SummaryPanel: React.FC<Props> = ({
     errorMessage,
     onPay,
 }) => {
+    const { t } = useTranslation("checkout");
     const { currencyCode, totals, estimatedDelivery, securePayments } = summary;
 
     return (
@@ -34,21 +36,21 @@ const SummaryPanel: React.FC<Props> = ({
 
                 <hr />
 
-                <div className="h2 mb-4">Summary</div>
+                <div className="h2 mb-4">{t("opc.summary.title")}</div>
 
                 <table className="table table-borderless table-sm mb-3">
                     <tbody>
                         <tr>
-                            <td>Subtotal price ({totals.itemsCount} items)</td>
+                            <td>{t("opc.summary.subtotal", { itemsCount: totals.itemsCount })}</td>
                             <td className="text-end">{formatMoney(totals.itemsSubtotal, currencyCode)}</td>
                         </tr>
                         <tr>
-                            <td>Estimated shipping cost</td>
+                            <td>{t("opc.summary.estimatedShipping")}</td>
                             <td className="text-end">{formatMoney(totals.shippingTotal, currencyCode)}</td>
                         </tr>
                         {totals.shippingDiscountTotal !== 0 && (
                             <tr>
-                                <td>Shipping discount</td>
+                                <td>{t("opc.summary.shippingDiscount")}</td>
                                 <td className="text-end">
                                     {formatMoney(totals.shippingDiscountTotal, currencyCode)}
                                 </td>
@@ -56,13 +58,13 @@ const SummaryPanel: React.FC<Props> = ({
                         )}
                         {totals.discountTotal !== 0 && (
                             <tr>
-                                <td>Discount</td>
+                                <td>{t("opc.summary.discount")}</td>
                                 <td className="text-end">{formatMoney(totals.discountTotal, currencyCode)}</td>
                             </tr>
                         )}
                         {totals.taxTotal !== 0 && (
                             <tr>
-                                <td>Taxes total</td>
+                                <td>{t("opc.summary.taxesTotal")}</td>
                                 <td className="text-end">{formatMoney(totals.taxTotal, currencyCode)}</td>
                             </tr>
                         )}
@@ -72,7 +74,7 @@ const SummaryPanel: React.FC<Props> = ({
                             </td>
                         </tr>
                         <tr>
-                            <td className="border-top pt-3 h5">Total</td>
+                            <td className="border-top pt-3 h5">{t("opc.summary.total")}</td>
                             <td className="border-top pt-3 text-end h5">
                                 {formatMoney(totals.total, currencyCode)}
                             </td>
@@ -83,7 +85,9 @@ const SummaryPanel: React.FC<Props> = ({
                 {estimatedDelivery && (
                     <div className="d-flex align-items-center gap-2 mb-4 small">
                         <IconCalendarMonth className="icon icon-sm flex-shrink-0" stroke={2} />
-                        Estimated delivery: {formatDeliveryRange(estimatedDelivery)}
+                        {t("opc.summary.estimatedDelivery", {
+                            range: formatDeliveryRange(estimatedDelivery),
+                        })}
                     </div>
                 )}
 
@@ -106,10 +110,12 @@ const SummaryPanel: React.FC<Props> = ({
                                 role="status"
                                 aria-hidden="true"
                             />
-                            {submitting ? "Placing order..." : "Recalculating..."}
+                            {submitting
+                                ? t("opc.summary.placingOrder")
+                                : t("opc.summary.recalculating")}
                         </>
                     ) : (
-                        "Pay now securely"
+                        t("opc.summary.payNow")
                     )}
                 </button>
 
@@ -117,7 +123,12 @@ const SummaryPanel: React.FC<Props> = ({
                     <div className="d-flex align-items-center justify-content-center flex-wrap gap-2 text-body-tertiary small">
                         <IconLock className="icon icon-xs" stroke={2} />
                         <span>
-                            Secure payments by <strong>{securePayments.provider}</strong>
+                            <Trans
+                                i18nKey="opc.summary.securePayments"
+                                t={t}
+                                values={{ provider: securePayments.provider }}
+                                components={{ strong: <strong /> }}
+                            />
                         </span>
                     </div>
                 )}

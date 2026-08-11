@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { IconAlertTriangle, IconCalendarMonth } from "@tabler/icons-react";
 import type { CheckoutShippingMethod } from "~/modules/checkout-opc/types";
 import { useCheckout } from "~/modules/checkout-opc/context/CheckoutContext";
@@ -14,23 +15,21 @@ interface Props {
 
 const ShippingMethodSection: React.FC<Props> = ({ methods, currencyCode, changedNotice }) => {
     const { state, setShippingMethod } = useCheckout();
+    const { t } = useTranslation("checkout");
 
     return (
         <fieldset className="mb-5">
-            <legend className="h5 mb-4">Shipping</legend>
+            <legend className="h5 mb-4">{t("opc.shipping.legend")}</legend>
 
             {changedNotice && (
                 <div className="alert alert-warning d-flex align-items-center gap-2" role="alert">
                     <IconAlertTriangle className="icon icon-sm flex-shrink-0" stroke={2} />
-                    <span>
-                        The available shipping methods changed because you updated your country.
-                        Please choose a shipping method again.
-                    </span>
+                    <span>{t("opc.shipping.methodsChanged")}</span>
                 </div>
             )}
 
             {methods.length === 0 ? (
-                <div className="text-danger">No shipping methods available. Check your address.</div>
+                <div className="text-danger">{t("opc.shipping.noMethods")}</div>
             ) : (
                 methods.map((method, index) => (
                     <div key={method.code} className={index > 0 ? "border-top" : undefined}>
@@ -53,7 +52,9 @@ const ShippingMethodSection: React.FC<Props> = ({ methods, currencyCode, changed
                                 {method.estimatedDelivery && (
                                     <div className="d-flex align-items-center gap-1 text-body-tertiary small">
                                         <IconCalendarMonth className="icon icon-xs" stroke={2} />
-                                        Estimated delivery: {formatDeliveryRange(method.estimatedDelivery)}
+                                        {t("opc.shipping.estimatedDelivery", {
+                                            range: formatDeliveryRange(method.estimatedDelivery),
+                                        })}
                                     </div>
                                 )}
                             </div>
