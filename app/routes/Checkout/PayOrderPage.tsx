@@ -1,3 +1,5 @@
+export const handle = { i18n: ["common","cart","checkout"] };
+
 import type { LoaderFunction, ActionFunction } from "react-router";
 import { data as routerData, redirect } from "react-router";
 import { useLoaderData, Form, useNavigation } from "react-router";

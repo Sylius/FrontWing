@@ -1,3 +1,5 @@
+export const handle = { i18n: ["common","cart","product"] };
+
 import { type LoaderFunctionArgs } from "react-router";
 import { Await, useLoaderData } from "react-router";
 import { Suspense } from "react";

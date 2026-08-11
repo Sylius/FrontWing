@@ -1,3 +1,5 @@
+export const handle = { i18n: ["common","cart","checkout"] };
+
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import Layout from "~/layouts/Default";

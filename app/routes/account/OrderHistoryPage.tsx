@@ -1,3 +1,5 @@
+export const handle = { i18n: ["common","cart","account"] };
+
 import React from 'react';
 import { useTranslation } from "react-i18next";
 import { LocalizedLink } from "~/components/LocalizedLink";

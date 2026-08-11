@@ -1,3 +1,5 @@
+export const handle = { i18n: ["common","cart","product"] };
+
 import { type LoaderFunctionArgs } from 'react-router';
 import { useLoaderData } from 'react-router';
 import ProductPage from '~/components/ProductPage';

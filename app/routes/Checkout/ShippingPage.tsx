@@ -1,3 +1,5 @@
+export const handle = { i18n: ["common","checkout"] };
+
 import {
   redirect,
   type LoaderFunctionArgs,

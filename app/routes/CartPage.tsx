@@ -1,3 +1,5 @@
+export const handle = { i18n: ["common","cart"] };
+
 import {
   data,
   redirect,

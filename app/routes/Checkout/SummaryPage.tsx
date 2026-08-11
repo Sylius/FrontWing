@@ -1,3 +1,5 @@
+export const handle = { i18n: ["common","checkout"] };
+
 import React, { useState } from "react";
 import CheckoutLayout from "~/layouts/Checkout";
 import { useOrder } from "~/context/OrderContext";

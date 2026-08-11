@@ -1,3 +1,5 @@
+export const handle = { i18n: ["common","cart","account"] };
+
 import type { ActionFunction } from "react-router";
 import { data as routerData, redirect } from "react-router";
 import { Form, useActionData, useNavigation, useSearchParams } from "react-router";

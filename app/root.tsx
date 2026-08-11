@@ -7,6 +7,7 @@ import {
     ScrollRestoration,
     redirect,
     useLoaderData,
+    useMatches,
     type LinksFunction,
     type LoaderFunction,
 } from "react-router";
@@ -25,10 +26,12 @@ import { orderTokenCookie } from "~/utils/cookies.server";
 import type { Taxon } from "~/types/Taxon";
 import type { Channel } from "~/types/Channel";
 import { fetchChannel } from "~/api/channel.server";
-import { resolveLocale, loadResources } from "~/i18n.server";
+import { resolveLocale } from "~/i18n.server";
 import { createLocaleMapper } from "~/utils/locale";
-import type { I18nBootstrap } from "~/i18n";
+import { collectNamespaces, type I18nBootstrap, type I18nMeta } from "~/i18n";
 import { useChangeLanguage } from "~/hooks/useChangeLanguage";
+
+export const handle = { i18n: ["common"] };
 
 export const loader: LoaderFunction = async ({ request }) => {
     const url = new URL(request.url);
@@ -62,12 +65,9 @@ export const loader: LoaderFunction = async ({ request }) => {
     const token = typeof parsed === "string" ? parsed : parsed?.token ?? "";
 
     const API_URL = process.env.PUBLIC_API_URL!;
-    const [i18nResources, taxonTreeData] = await Promise.all([
-        loadResources([locale, fallbackLng]),
-        fetch(`${API_URL}/api/v2/shop/taxon-tree/category/branch`).then((res) =>
-            res.ok ? res.json() : null,
-        ),
-    ]);
+    const taxonTreeData = await fetch(
+        `${API_URL}/api/v2/shop/taxon-tree/category/branch`,
+    ).then((res) => (res.ok ? res.json() : null));
 
     return {
         ENV: {
@@ -81,8 +81,7 @@ export const loader: LoaderFunction = async ({ request }) => {
             locale,
             supportedLngs: mapper.urlSegments,
             fallbackLng,
-            resources: i18nResources,
-        } satisfies I18nBootstrap,
+        } satisfies I18nMeta,
     };
 };
 
@@ -140,12 +139,18 @@ export default function App() {
         taxonTree: Taxon[];
         channel: Channel;
         seo: { canonical: string; alternates: { hrefLang: string; href: string }[] };
-        i18n: I18nBootstrap;
+        i18n: I18nMeta;
     }>();
 
+    const matches = useMatches();
     const [queryClient] = useState(() => new QueryClient());
 
     useChangeLanguage(data.i18n.locale);
+
+    const i18nBootstrap: I18nBootstrap = {
+        ...data.i18n,
+        ns: collectNamespaces(matches),
+    };
 
     return (
         <html lang={data.i18n.locale}>
@@ -178,7 +183,7 @@ export default function App() {
                 </CustomerProvider>
             </QueryClientProvider>
         </ChannelProvider>
-        <I18nBootstrapScript bootstrap={data.i18n}/>
+        <I18nBootstrapScript bootstrap={i18nBootstrap}/>
         <ScrollRestoration/>
         <Scripts/>
         <EnvironmentScript env={data.ENV}/>

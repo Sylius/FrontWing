@@ -1,3 +1,5 @@
+export const handle = { i18n: ["common","cart","product"] };
+
 import React, { useEffect, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useSearchParams } from 'react-router';

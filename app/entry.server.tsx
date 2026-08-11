@@ -19,6 +19,7 @@ import type { i18n } from "i18next";
 import { fetchChannel } from "~/api/channel.server";
 import { createI18nInstance, resolveLocale } from "~/i18n.server";
 import { createLocaleMapper } from "~/utils/locale";
+import { collectNamespaces } from "~/i18n";
 
 const ABORT_DELAY = 5_000;
 
@@ -33,10 +34,13 @@ export default async function handleRequest(
   const mapper = createLocaleMapper(channel.locales);
   const { urlLocale } = resolveLocale(request, channel);
 
+  const namespaces = collectNamespaces(routerContext.staticHandlerContext.matches);
+
   const { instance } = await createI18nInstance({
     lng: urlLocale,
     supportedLngs: mapper.urlSegments,
     fallbackLng: mapper.toUrl(channel.defaultLocale),
+    namespaces,
   });
 
   const readyEvent = isbot(request.headers.get("user-agent") || "")
