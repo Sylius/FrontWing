@@ -78,7 +78,6 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const cookieToken = typeof document !== "undefined" ? readOrderToken(document.cookie) : null;
         const initialToken = remixToken || cookieToken;
 
-        console.warn("[cart] bootstrap", { remixToken, cookieToken, initialToken });
         if (initialToken) {
             setOrderToken(initialToken);
         } else {
