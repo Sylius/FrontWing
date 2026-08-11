@@ -13,6 +13,11 @@ const apiUrl = (): string => (typeof window !== "undefined" ? window.ENV?.API_UR
 const jwt = (): string | null =>
     typeof window !== "undefined" ? localStorage.getItem("jwtToken") : null;
 
+const authHeaders = (): Record<string, string> => {
+    const token = jwt();
+    return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
 const NO_CURRENCY = "";
 
 const previewCheckout = async (
@@ -21,7 +26,7 @@ const previewCheckout = async (
 ): Promise<CheckoutPreview> => {
     const res = await fetch(`${apiUrl()}/api/v2/shop/orders/${token}/one-page/preview`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/merge-patch+json" },
+        headers: { "Content-Type": "application/merge-patch+json", ...authHeaders() },
         body: JSON.stringify(body),
     });
 
@@ -63,7 +68,7 @@ export const checkoutApiLive: CheckoutApi = {
     async completeCheckout(token: string, state: CheckoutState, hash: string): Promise<Order> {
         const res = await fetch(`${apiUrl()}/api/v2/shop/orders/${token}/one-page/complete`, {
             method: "PATCH",
-            headers: { "Content-Type": "application/merge-patch+json" },
+            headers: { "Content-Type": "application/merge-patch+json", ...authHeaders() },
             body: JSON.stringify(buildCompleteBody(state, hash)),
         });
 
