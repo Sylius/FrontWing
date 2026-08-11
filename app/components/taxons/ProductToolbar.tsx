@@ -1,18 +1,20 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router';
 import { IconSearch, IconX } from '@tabler/icons-react';
 
 const sortOptions = [
-    { label: 'By position', value: '' },
-    { label: 'From A to Z', value: 'order[translation.name]=asc' },
-    { label: 'From Z to A', value: 'order[translation.name]=desc' },
-    { label: 'Newest first', value: 'order[createdAt]=desc' },
-    { label: 'Oldest first', value: 'order[createdAt]=asc' },
-    { label: 'Cheapest first', value: 'order[price]=asc' },
-    { label: 'Most expensive first', value: 'order[price]=desc' },
-];
+    { label: 'toolbar.sort.position', value: '' },
+    { label: 'toolbar.sort.nameAsc', value: 'order[translation.name]=asc' },
+    { label: 'toolbar.sort.nameDesc', value: 'order[translation.name]=desc' },
+    { label: 'toolbar.sort.newest', value: 'order[createdAt]=desc' },
+    { label: 'toolbar.sort.oldest', value: 'order[createdAt]=asc' },
+    { label: 'toolbar.sort.cheapest', value: 'order[price]=asc' },
+    { label: 'toolbar.sort.expensive', value: 'order[price]=desc' },
+] as const;
 
 const ProductToolbar: React.FC = () => {
+    const { t } = useTranslation('product');
     const [searchParams, setSearchParams] = useSearchParams();
 
     const [searchValue, setSearchValue] = useState(() => searchParams.get('translations.name') || '');
@@ -65,7 +67,7 @@ const ProductToolbar: React.FC = () => {
                 <input
                     type="text"
                     className="form-control border-0"
-                    placeholder="Value"
+                    placeholder={t('toolbar.searchPlaceholder')}
                     value={searchValue}
                     onChange={e => setSearchValue(e.target.value)}
                 />
@@ -79,11 +81,11 @@ const ProductToolbar: React.FC = () => {
             </div>
 
             <div className="ms-auto d-flex align-items-center gap-2 ps-4">
-                <label className="form-label m-0">Sort:</label>
+                <label className="form-label m-0">{t('toolbar.sortLabel')}</label>
                 <select className="form-select" value={sortValue} onChange={handleSortChange}>
                     {sortOptions.map(opt => (
                         <option key={opt.label} value={opt.value}>
-                            {opt.label}
+                            {t(opt.label)}
                         </option>
                     ))}
                 </select>

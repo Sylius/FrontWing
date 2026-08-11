@@ -1,6 +1,7 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Payment } from '../../types/Order';
-import { formatPrice } from '../../utils/price';
+import { useCurrency } from "~/context/ChannelContext";
 
 interface PaymentsCardProps {
     payment: Payment;
@@ -9,10 +10,12 @@ interface PaymentsCardProps {
 }
 
 const PaymentsCard: React.FC<PaymentsCardProps> = ({ payment, total, paymentState }) => {
+    const { t } = useTranslation("account");
+    const { formatPrice } = useCurrency();
     return (
         <div className="card border-0 bg-body-tertiary mb-3">
             <div className="card-header d-flex align-items-center">
-                <div className="me-auto">Payments</div>
+                <div className="me-auto">{t("orders.details.payments")}</div>
                 <div>{paymentState ?? ''}</div>
             </div>
 
@@ -23,7 +26,7 @@ const PaymentsCard: React.FC<PaymentsCardProps> = ({ payment, total, paymentStat
                             ? payment.method.name
                             : ''}
                     </div>
-                    <div className="fw-medium">${formatPrice(total)}</div>
+                    <div className="fw-medium">{formatPrice(total)}</div>
                     <div>{payment.state ?? ''}</div>
                 </div>
             </div>

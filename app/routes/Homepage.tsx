@@ -1,6 +1,9 @@
+export const handle = { i18n: ["common","cart","product"] };
+
 import { type LoaderFunctionArgs } from "react-router";
 import { Await, useLoaderData } from "react-router";
 import { Suspense } from "react";
+import { useTranslation } from "react-i18next";
 import Skeleton from "react-loading-skeleton";
 
 import ProductsList from "~/components/ProductsList";
@@ -24,6 +27,7 @@ export async function loader({}: LoaderFunctionArgs) {
 }
 
 export default function Homepage() {
+    const { t } = useTranslation("product");
     const { products, apiUrl } = useLoaderData<typeof loader>();
 
     return (
@@ -36,13 +40,13 @@ export default function Homepage() {
                             width="1920"
                             height="793"
                             className="img-fluid"
-                            alt="Home"
+                            alt={t("home.bannerAlt")}
                         />
                         <img
                             src={`${apiUrl}/build/shop/images/homepage-banner-logo.6759d0fb.webp`}
                             className="position-absolute"
                             style={{ maxWidth: "40vw" }}
-                            alt="New collection"
+                            alt={t("home.bannerLogoAlt")}
                         />
                     </div>
                 </div>
@@ -52,7 +56,7 @@ export default function Homepage() {
                 <Suspense fallback={<Skeleton count={1} height={300} className="mb-3" />}>
                     <Await resolve={products}>
                         {(resolved: Product[]) => (
-                            <ProductsList products={resolved} limit={4} name="Latest deals" />
+                            <ProductsList products={resolved} limit={4} name={t("home.latestDeals")} />
                         )}
                     </Await>
                 </Suspense>
@@ -60,7 +64,7 @@ export default function Homepage() {
 
             <div className="container mb-5">
                 <div className="mb-5">
-                    <h2>New collection</h2>
+                    <h2>{t("home.newCollection")}</h2>
                 </div>
                 <div className="photo-grid">
                     <div className="photo-grid-item-1">
@@ -68,7 +72,7 @@ export default function Homepage() {
                             src={`${apiUrl}/build/shop/images/homepage-new-collection-photo-1.2b163989.webp`}
                             className="object-fit-cover w-100 h-100 rounded-3"
                             loading="lazy"
-                            alt="New collection"
+                            alt={t("home.newCollectionAlt")}
                         />
                     </div>
                     <div className="photo-grid-item-2">
@@ -76,7 +80,7 @@ export default function Homepage() {
                             src={`${apiUrl}/build/shop/images/homepage-new-collection-photo-2.2c91a0c3.webp`}
                             className="object-fit-cover w-100 h-100 rounded-3"
                             loading="lazy"
-                            alt="New collection"
+                            alt={t("home.newCollectionAlt")}
                         />
                     </div>
                     <div className="photo-grid-item-3">
@@ -84,7 +88,7 @@ export default function Homepage() {
                             src={`${apiUrl}/build/shop/images/homepage-new-collection-photo-3.466a0c4c.webp`}
                             className="object-fit-cover w-100 h-100 rounded-3"
                             loading="lazy"
-                            alt="New collection"
+                            alt={t("home.newCollectionAlt")}
                         />
                     </div>
                 </div>
@@ -94,7 +98,7 @@ export default function Homepage() {
                 <Suspense fallback={<Skeleton count={1} height={300} className="mb-3" />}>
                     <Await resolve={products}>
                         {(resolved: Product[]) => (
-                            <ProductsList products={resolved} limit={8} name="Latest products" />
+                            <ProductsList products={resolved} limit={8} name={t("home.latestProducts")} />
                         )}
                     </Await>
                 </Suspense>

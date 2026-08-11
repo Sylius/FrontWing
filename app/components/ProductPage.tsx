@@ -4,6 +4,7 @@ import React, {
     useEffect,
     useCallback,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams, useNavigationType } from 'react-router';
 import { useOrder } from '~/context/OrderContext';
 import { useFlashMessages } from '~/context/FlashMessagesContext';
@@ -47,6 +48,7 @@ const ProductPage: React.FC<Props> = ({
                                           reviews,
                                           associations,
                                       }) => {
+    const { t } = useTranslation(['product', 'common']);
     const { code } = useParams();
     const { orderToken, fetchOrder } = useOrder();
     const { addMessage } = useFlashMessages();
@@ -140,10 +142,10 @@ const ProductPage: React.FC<Props> = ({
                 throw new Error(`add to cart failed: ${text}`);
             }
             fetchOrder();
-            addMessage('success', 'Product added to cart');
+            addMessage('success', t('detail.flash.added'));
         } catch (e: any) {
             console.error(e);
-            addMessage('error', e?.message ?? 'Failed to add product to cart');
+            addMessage('error', e?.message ?? t('detail.flash.addFailed'));
         } finally {
             setIsAddToCartLoading(false);
         }
@@ -156,8 +158,8 @@ const ProductPage: React.FC<Props> = ({
 
         const buildBreadcrumbs = async () => {
             const breadcrumbPaths: { label: string; url: string }[] = [
-                { label: 'Home', url: '/' },
-                { label: 'Category', url: '#' },
+                { label: t('common:nav.home'), url: '/' },
+                { label: t('breadcrumb.category'), url: '#' },
             ];
 
             const visited = new Set<string>();
@@ -193,9 +195,9 @@ const ProductPage: React.FC<Props> = ({
     }, [product.productTaxons, product.code, product.name, API_URL]);
 
     const accordionItems = useMemo(() => [
-        { title: 'Details', content: <p>{product.description}</p> },
+        { title: t('detail.tabs.details'), content: <p>{product.description}</p> },
         {
-            title: 'Attributes',
+            title: t('detail.tabs.attributes'),
             content: attributes.length ? (
                 <table className="table table-lg table-list">
                     <tbody>
@@ -208,26 +210,26 @@ const ProductPage: React.FC<Props> = ({
                     </tbody>
                 </table>
             ) : (
-                <p>No attributes available.</p>
+                <p>{t('detail.noAttributes')}</p>
             ),
         },
         {
-            title: `Reviews (${reviews.length})`,
+            title: t('detail.tabs.reviews', { count: reviews.length }),
             content: reviews.length ? (
                 <>
                     <ReviewList reviews={reviews} />
                     <div className="d-flex flex-wrap gap-3">
                         <a href={`/product/${code}/review/new`} className="btn btn-success px-4 py-2">
-                            Add your review
+                            {t('detail.addYourReview')}
                         </a>
                         <a href={`/product/${code}/reviews`} className="btn btn-link">
-                            View more
+                            {t('detail.viewMore')}
                         </a>
                     </div>
                 </>
             ) : (
                 <div className="alert alert-info">
-                    <div className="fw-bold">Info</div>There are no reviews
+                    <div className="fw-bold">{t('detail.info')}</div>{t('detail.noReviews')}
                 </div>
             ),
         },
@@ -256,7 +258,7 @@ const ProductPage: React.FC<Props> = ({
                             <h1 className="h2 text-wrap mb-4">{product?.name}</h1>
                             <ReviewSummary reviews={reviews} productCode={product.code} allReviewCount={reviews.length} />
                             <div className="fs-3 mb-3">
-                                {currentVariant?.price != null ? `$${(currentVariant.price / 100).toFixed(2)}` : 'No price available'}
+                                {currentVariant?.price != null ? `$${(currentVariant.price / 100).toFixed(2)}` : t('detail.noPrice')}
                             </div>
 
                             {options.map((opt) => (
@@ -277,7 +279,7 @@ const ProductPage: React.FC<Props> = ({
                             ))}
 
                             <div className="my-4">
-                                <label className="form-label">Quantity</label>
+                                <label className="form-label">{t('detail.quantity')}</label>
                                 <input
                                     type="number"
                                     className="form-control"
@@ -290,11 +292,11 @@ const ProductPage: React.FC<Props> = ({
                                     onClick={handleAddToCart}
                                     disabled={isAddToCartLoading}
                                 >
-                                    {isAddToCartLoading ? 'Adding...' : 'Add to cart'}
+                                    {isAddToCartLoading ? t('detail.adding') : t('detail.addToCart')}
                                 </button>
                             </div>
 
-                            <div className="mb-3">{product?.shortDescription ?? 'No short description'}</div>
+                            <div className="mb-3">{product?.shortDescription ?? t('detail.noShortDescription')}</div>
                             <small className="text-body-tertiary">{product?.name.replace(/\s+/g, '_')}</small>
                         </div>
                     </div>

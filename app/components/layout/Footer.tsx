@@ -1,8 +1,10 @@
 import React from 'react';
+import { useTranslation } from "react-i18next";
 import {IconBrandFacebook, IconBrandInstagram, IconBrandX} from "@tabler/icons-react";
 
 
 const Footer: React.FC =  () => {
+const { t } = useTranslation();
 return (
     <div className="mt-auto border-top mt-5 py-5">
         <footer className="container">
@@ -11,18 +13,18 @@ return (
                     <div className="row">
                         <div className="col-12 col-sm-6">
                             <nav className="nav flex-column">
-                                <a className="nav-link" href="#">About</a>
-                                <a className="nav-link" href="#">Terms and Conditions</a>
-                                <a className="nav-link" href="#">Privacy Policy</a>
-                                <a className="nav-link" href="/en_US/contact/">Contact us</a>
+                                <a className="nav-link" href="#">{t("footer.about")}</a>
+                                <a className="nav-link" href="#">{t("footer.terms")}</a>
+                                <a className="nav-link" href="#">{t("footer.privacy")}</a>
+                                <a className="nav-link" href="/en_US/contact/">{t("footer.contact")}</a>
                             </nav>
                         </div>
 
                         <div className="col-12 col-sm-6">
                             <nav className="nav flex-column mb-5">
-                                <a className="nav-link" href="#">FAQ</a>
-                                <a className="nav-link" href="#">Delivery &amp; Shipping</a>
-                                <a className="nav-link" href="#">Returns Policy</a>
+                                <a className="nav-link" href="#">{t("footer.faq")}</a>
+                                <a className="nav-link" href="#">{t("footer.delivery")}</a>
+                                <a className="nav-link" href="#">{t("footer.returns")}</a>
                             </nav>
                         </div>
                     </div>
@@ -30,7 +32,7 @@ return (
 
                 <div
                     className="col-12 text-center col-md-6 order-md-4 text-md-start col-lg-3 order-lg-4 text-lg-center">
-                    <div className="mb-3 fw-medium">Payment methods:</div>
+                    <div className="mb-3 fw-medium">{t("footer.paymentMethods")}</div>
 
                     <div className="row g-2 mb-4">
                         <div className="col-4">
@@ -62,21 +64,21 @@ return (
                     <div
                         className="d-flex justify-content-center justify-content-md-start justify-content-lg-center gap-3 mb-5">
                         <a className="link-reset" href="https://www.instagram.com/sylius.team/" target="_blank"
-                           aria-label="instagram logo">
+                           aria-label={t("footer.social.instagram")}>
                             <IconBrandInstagram stroke={2} />
                         </a>
                         <a className="link-reset" href="https://www.facebook.com/SyliusEcommerce/" target="_blank"
-                           aria-label="facebook logo">
+                           aria-label={t("footer.social.facebook")}>
                             <IconBrandFacebook stroke={2} />
                         </a>
-                        <a className="link-reset" href="https://x.com/Sylius" target="_blank" aria-label="x logo">
+                        <a className="link-reset" href="https://x.com/Sylius" target="_blank" aria-label={t("footer.social.x")}>
                             <IconBrandX stroke={2} />
                         </a>
                     </div>
                 </div>
 
                 <div className="col-12 text-center col-md-6 order-md-3 text-md-start col-lg-3 order-lg-1">
-                    <a href="/en_US/" className="d-inline-block mb-4" aria-label="sylius logo">
+                    <a href="/en_US/" className="d-inline-block mb-4" aria-label={t("aria.logo")}>
                         <div style={{ width: '10rem' }}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 3512 1033"
                                  fillRule="evenodd" strokeLinejoin="round" strokeMiterlimit="2">
@@ -96,7 +98,7 @@ return (
                     </a>
 
                     <div className="mb-3">
-                        © Your Store, Powered by
+                        {t("footer.copyright")}
                         <a href="https://sylius.com" target="_blank">Sylius</a>
                     </div>
                 </div>

@@ -1,18 +1,24 @@
+export const handle = { i18n: ["common","cart","account"] };
+
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
+import { useParams } from "react-router";
+import { useLocalizedNavigate } from "~/hooks/useLocalizedNavigate";
 import Default from "~/layouts/Default";
 import AccountLayout from "~/layouts/Account";
 import Address from "~/components/Address";
 import PaymentsCard from "~/components/order/PaymentsCard";
 import ProductRow from "~/components/order/ProductRow";
 import { OrderItem, Order } from "~/types/Order";
-import { formatPrice } from "~/utils/price";
+import { useCurrency } from "~/context/ChannelContext";
 import Skeleton from "react-loading-skeleton";
 import { IconCreditCard } from "@tabler/icons-react";
 
 export default function OrderDetailsPage() {
+    const { t } = useTranslation(["account", "common"]);
+    const { formatPrice } = useCurrency();
     const { token } = useParams<{ token: string }>();
-    const navigate = useNavigate();
+    const navigate = useLocalizedNavigate();
     const [order, setOrder] = useState<Order | null>(null);
     const [loading, setLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState<string>("");
@@ -23,7 +29,7 @@ export default function OrderDetailsPage() {
             try {
                 const jwt = localStorage.getItem("jwtToken");
                 if (!jwt || !token) {
-                    setErrorMessage("Missing credentials or order token.");
+                    setErrorMessage(t("orders.details.missingCredentials"));
                     return;
                 }
 
@@ -33,7 +39,7 @@ export default function OrderDetailsPage() {
                     headers: { Authorization: `Bearer ${jwt}` },
                 });
                 if (!res.ok) {
-                    throw new Error("Failed to fetch order details.");
+                    throw new Error(t("orders.details.loadFailed"));
                 }
                 const data: Order = await res.json();
 
@@ -72,7 +78,7 @@ export default function OrderDetailsPage() {
                 setErrorMessage(
                     e instanceof Error
                         ? e.message
-                        : "An unexpected error occurred while loading the order."
+                        : t("orders.details.unexpectedError")
                 );
             } finally {
                 setLoading(false);
@@ -115,14 +121,14 @@ export default function OrderDetailsPage() {
         <Default>
             <AccountLayout
                 breadcrumbs={[
-                    { label: "Home", url: "/" },
-                    { label: "My account", url: "/account/dashboard" },
-                    { label: "Order History", url: "/account/order-history" },
+                    { label: t("common:nav.home"), url: "/" },
+                    { label: t("common:nav.account"), url: "/account/dashboard" },
+                    { label: t("orders.breadcrumb"), url: "/account/order-history" },
                     { label: `#${order.number}`, url: `/account/orders/${order.tokenValue}` },
                 ]}
             >
                 <div className="col-12 col-md-9 pt-4">
-                    <h1 className="h5 mb-4">Order #{order.number}</h1>
+                    <h1 className="h5 mb-4">{t("orders.details.title", { number: order.number })}</h1>
 
                     {order.paymentState === "awaiting_payment" && (
                         <div className="d-flex justify-content-end align-items-center mb-3">
@@ -131,7 +137,7 @@ export default function OrderDetailsPage() {
                                 onClick={() => navigate(`/account/orders/${order.tokenValue}/pay`)}
                             >
                                 <IconCreditCard size={20} className="me-2" />
-                                Pay
+                                {t("orders.details.pay")}
                             </button>
                         </div>
                     )}
@@ -139,11 +145,11 @@ export default function OrderDetailsPage() {
                     <div className="card border-0 bg-body-tertiary mb-3">
                         <div className="card-body d-flex flex-column gap-1">
                             <div className="row">
-                                <div className="col-12 col-sm-4">Status</div>
+                                <div className="col-12 col-sm-4">{t("orders.details.status")}</div>
                                 <div className="col">{order.state}</div>
                             </div>
                             <div className="row">
-                                <div className="col-12 col-sm-4">Completed at</div>
+                                <div className="col-12 col-sm-4">{t("orders.details.completedAt")}</div>
                                 <div className="col">
                                     {order.checkoutCompletedAt
                                         ? new Date(order.checkoutCompletedAt).toLocaleString("en-GB", {
@@ -157,7 +163,7 @@ export default function OrderDetailsPage() {
                                 </div>
                             </div>
                             <div className="row">
-                                <div className="col-12 col-sm-4">Currency</div>
+                                <div className="col-12 col-sm-4">{t("orders.details.currency")}</div>
                                 <div className="col">{order.currencyCode}</div>
                             </div>
                         </div>
@@ -167,12 +173,12 @@ export default function OrderDetailsPage() {
                         <div className="row">
                             <div className="col-md-6 mb-3">
                                 {order.billingAddress && (
-                                    <Address sectionName="Billing address" address={order.billingAddress} />
+                                    <Address sectionName={t("orders.details.billingAddress")} address={order.billingAddress} />
                                 )}
                             </div>
                             <div className="col-md-6 mb-3">
                                 {order.shippingAddress && (
-                                    <Address sectionName="Shipping address" address={order.shippingAddress} />
+                                    <Address sectionName={t("orders.details.shippingAddress")} address={order.shippingAddress} />
                                 )}
                             </div>
                         </div>
@@ -188,7 +194,7 @@ export default function OrderDetailsPage() {
 
                     <div className="card border-0 bg-body-tertiary mb-3">
                         <div className="card-header d-flex align-items-center justify-content-between">
-                            <div>Shipments</div>
+                            <div>{t("orders.details.shipments")}</div>
                             <div>
                                 {order.shippingState}
                             </div>
@@ -215,10 +221,10 @@ export default function OrderDetailsPage() {
                         <table className="table table-borderless align-middle">
                             <thead>
                             <tr>
-                                <th>Item</th>
-                                <th className="text-end">Unit price</th>
-                                <th className="text-end">Qty</th>
-                                <th className="text-end">Subtotal</th>
+                                <th>{t("orders.items.item")}</th>
+                                <th className="text-end">{t("orders.items.unitPrice")}</th>
+                                <th className="text-end">{t("orders.items.qty")}</th>
+                                <th className="text-end">{t("orders.items.subtotal")}</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -232,24 +238,24 @@ export default function OrderDetailsPage() {
                     <table className="table table-borderless align-middle ms-auto w-auto">
                         <tbody>
                         <tr>
-                            <td className="text-end">Items total:</td>
-                            <td className="text-end">${formatPrice(order.itemsSubtotal ?? 0)}</td>
+                            <td className="text-end">{t("orders.items.itemsTotal")}</td>
+                            <td className="text-end">{formatPrice(order.itemsSubtotal ?? 0)}</td>
                         </tr>
                         <tr>
-                            <td className="text-end">Tax total:</td>
-                            <td className="text-end">${formatPrice(order.taxTotal ?? 0)}</td>
+                            <td className="text-end">{t("orders.items.taxTotal")}</td>
+                            <td className="text-end">{formatPrice(order.taxTotal ?? 0)}</td>
                         </tr>
                         <tr>
-                            <td className="text-end">Discount:</td>
-                            <td className="text-end">${formatPrice(order.orderPromotionTotal ?? 0)}</td>
+                            <td className="text-end">{t("orders.items.discount")}</td>
+                            <td className="text-end">{formatPrice(order.orderPromotionTotal ?? 0)}</td>
                         </tr>
                         <tr>
-                            <td className="text-end">Shipping total:</td>
-                            <td className="text-end">${formatPrice(order.shippingTotal ?? 0)}</td>
+                            <td className="text-end">{t("orders.items.shippingTotal")}</td>
+                            <td className="text-end">{formatPrice(order.shippingTotal ?? 0)}</td>
                         </tr>
                         <tr>
-                            <td className="text-end fw-bold">Total:</td>
-                            <td className="text-end fw-bold">${formatPrice(order.total ?? 0)}</td>
+                            <td className="text-end fw-bold">{t("orders.items.total")}</td>
+                            <td className="text-end fw-bold">{formatPrice(order.total ?? 0)}</td>
                         </tr>
                         </tbody>
                     </table>

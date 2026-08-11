@@ -1,0 +1,237 @@
+{
+  "auth": {
+    "login": {
+      "title": "Login",
+      "errorTitle": "Error",
+      "username": "Username",
+      "password": "Password",
+      "rememberMe": "Remember me",
+      "submit": "Login",
+      "submitting": "Logging in...",
+      "forgot": "Forgot password?",
+      "apiNotConfigured": "API URL is not configured",
+      "invalidCredentials": "Invalid credentials",
+      "unexpectedError": "Unexpected error occurred"
+    },
+    "register": {
+      "title": "Create a new customer account",
+      "haveAccount": "Have an account already?",
+      "signIn": "Sign in here.",
+      "personalInfo": "Personal information",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "phone": "Phone number",
+      "newsletter": "Subscribe to the newsletter",
+      "credentials": "Account credentials",
+      "password": "Password",
+      "verifyPassword": "Verify password",
+      "submit": "Create an account",
+      "errors": {
+        "firstName": "First name required",
+        "lastName": "Last name required",
+        "email": "Invalid email",
+        "password": "Password ≥6 chars",
+        "confirmPassword": "Passwords must match"
+      },
+      "correctErrors": "Please correct the errors in the form.",
+      "apiNotConfigured": "API URL not configured.",
+      "registrationFailed": "Registration failed. Please fix the highlighted errors.",
+      "registrationError": "Registration error.",
+      "success": "Thank you for registering! Check your email to verify your account.",
+      "unexpectedError": "Unexpected error during registration."
+    },
+    "forgotten": {
+      "title": "Reset password",
+      "subtitle": "Set a new password for your account",
+      "email": "Email",
+      "submit": "Reset",
+      "submitting": "Sending..."
+    },
+    "reset": {
+      "title": "Reset your password",
+      "newPassword": "New password",
+      "confirmPassword": "Repeat new password",
+      "submit": "Reset Password",
+      "submitting": "Resetting..."
+    },
+    "verification": {
+      "noToken": "No verification token found in the URL. Please ensure you clicked the correct link.",
+      "verifying": "Verifying your email address...",
+      "configError": "Configuration error: API URL not set.",
+      "successMessage": "Your email has been successfully verified!",
+      "flashSuccess": "Email verified. You can now log in or continue using your account.",
+      "failedFallback": "Email verification failed. The link might be expired or invalid.",
+      "unexpectedError": "An unexpected error occurred during verification. Please try again.",
+      "pendingTitle": "Verifying your email...",
+      "pendingText": "Please wait while we confirm your email address.",
+      "loading": "Loading...",
+      "successTitle": "Email Verified!",
+      "accountActive": "Your account is now active.",
+      "goToLogin": "Go to Login",
+      "failedTitle": "Verification Failed",
+      "errorHelpBefore": "Please ensure you clicked the correct link. The link may have expired or been used. If you have an account, you can try",
+      "errorHelpLink": "logging in",
+      "errorHelpAfter": "and requesting a new verification email from your dashboard."
+    },
+    "thankYou": {
+      "title": "Thank you for your registration!",
+      "subtitle": "We've sent a verification email to your inbox.",
+      "instructions": "Please check your email and click the verification link to activate your account. If you don’t receive it within a few minutes, please check your spam folder.",
+      "goToLogin": "Go to Login"
+    },
+    "flash": {
+      "resetRequested": "If the email you specified exists, instructions to reset your password have been sent.",
+      "resetSuccessful": "Your password has been reset successfully! You can now log in."
+    },
+    "panel": {
+      "noAccount": "Don't have an account?",
+      "registerHere": "Register here"
+    }
+  },
+  "panel": {
+    "title": "Your account",
+    "dashboard": "Dashboard",
+    "personalInfo": "Personal information",
+    "changePassword": "Change password",
+    "addressBook": "Address book",
+    "orderHistory": "Order history"
+  },
+  "dashboard": {
+    "title": "My account",
+    "subtitle": "Manage your personal information and preferences",
+    "verified": "Verified",
+    "notVerified": "Not verified",
+    "edit": "Edit",
+    "changePassword": "Change password",
+    "verify": "Verify",
+    "sending": "Sending..."
+  },
+  "orders": {
+    "breadcrumb": "Order History",
+    "history": {
+      "title": "Order history",
+      "subtitle": "Browse your past orders",
+      "empty": "You have no orders yet.",
+      "errorTitle": "Error",
+      "loadError": "Failed to load orders. Please try again later.",
+      "infoTitle": "Info"
+    },
+    "table": {
+      "number": "Number",
+      "date": "Date",
+      "shipTo": "Ship to",
+      "total": "Total",
+      "state": "State",
+      "actions": "Actions",
+      "show": "Show",
+      "pay": "Pay"
+    },
+    "details": {
+      "title": "Order #{{number}}",
+      "pay": "Pay",
+      "status": "Status",
+      "completedAt": "Completed at",
+      "currency": "Currency",
+      "billingAddress": "Billing address",
+      "shippingAddress": "Shipping address",
+      "shipments": "Shipments",
+      "payments": "Payments",
+      "missingCredentials": "Missing credentials or order token.",
+      "loadFailed": "Failed to fetch order details.",
+      "unexpectedError": "An unexpected error occurred while loading the order."
+    },
+    "items": {
+      "item": "Item",
+      "unitPrice": "Unit price",
+      "qty": "Qty",
+      "subtotal": "Subtotal",
+      "itemsTotal": "Items total:",
+      "taxTotal": "Tax total:",
+      "discount": "Discount:",
+      "shippingTotal": "Shipping total:",
+      "total": "Total:"
+    }
+  },
+  "addresses": {
+    "breadcrumb": "Address book",
+    "book": {
+      "title": "Address book",
+      "subtitle": "Manage your saved addresses",
+      "add": "Add address",
+      "infoTitle": "Info",
+      "empty": "You have no addresses defined",
+      "loadError": "Failed to load addresses",
+      "deleteSuccess": "Address deleted",
+      "deleteError": "Failed to delete address"
+    },
+    "add": {
+      "breadcrumb": "Create",
+      "title": "Address book",
+      "subtitle": "Add address",
+      "submit": "Add",
+      "submitting": "Adding...",
+      "cancel": "Cancel",
+      "addSuccess": "Address added successfully",
+      "addError": "Failed to add address"
+    },
+    "edit": {
+      "breadcrumb": "Edit",
+      "title": "Address book",
+      "subtitle": "Edit my address",
+      "submit": "Save changes",
+      "submitting": "Saving...",
+      "cancel": "Cancel",
+      "loadError": "Failed to load address",
+      "updateSuccess": "Address updated successfully",
+      "updateError": "Failed to update address"
+    },
+    "card": {
+      "default": "Your default address",
+      "edit": "Edit",
+      "delete": "Delete",
+      "setDefault": "Set as default",
+      "setDefaultSuccess": "Default address updated",
+      "setDefaultError": "Failed to update default address"
+    },
+    "form": {
+      "firstName": "First name *",
+      "lastName": "Last name *",
+      "company": "Company",
+      "street": "Street address *",
+      "country": "Country *",
+      "select": "Select",
+      "province": "Province",
+      "city": "City *",
+      "postcode": "Postcode *",
+      "phoneNumber": "Phone number"
+    }
+  },
+  "changePassword": {
+    "title": "Change password",
+    "subtitle": "Set a new password for your account",
+    "current": "Current password",
+    "new": "New password",
+    "confirmation": "Confirmation",
+    "submit": "Save changes",
+    "success": "Password changed successfully"
+  },
+  "profile": {
+    "breadcrumb": "Personal information",
+    "title": "Your profile",
+    "subtitle": "Edit your personal information",
+    "firstName": "First name *",
+    "lastName": "Last name *",
+    "email": "Email *",
+    "birthday": "Birthday *",
+    "gender": "Gender *",
+    "genderMale": "Male",
+    "genderFemale": "Female",
+    "genderUnknown": "Unknown",
+    "phoneNumber": "Phone number",
+    "newsletter": "Subscribe to the newsletter",
+    "submit": "Save changes",
+    "updateSuccess": "Profile updated successfully",
+    "updateError": "Error updating profile"
+  }
+}

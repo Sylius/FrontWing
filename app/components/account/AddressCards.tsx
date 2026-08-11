@@ -1,5 +1,6 @@
 import React from "react";
-import { Link } from "react-router";
+import { useTranslation } from "react-i18next";
+import { LocalizedLink } from "~/components/LocalizedLink";
 import { IconPencil, IconTrash } from "@tabler/icons-react";
 
 import { Address } from "../../types/Address";
@@ -17,6 +18,7 @@ const AddressCards: React.FC<AddressCardsProps> = ({
                                                        onDelete,
                                                        refetchAddresses,
                                                    }) => {
+    const { t } = useTranslation("account");
     const { customer, refetchCustomer } = useCustomer();
     const { addMessage } = useFlashMessages();
 
@@ -42,12 +44,12 @@ const AddressCards: React.FC<AddressCardsProps> = ({
 
             if (!response.ok) throw new Error("Failed to set default address");
 
-            addMessage("success", "Default address updated");
+            addMessage("success", t("addresses.card.setDefaultSuccess"));
             refetchCustomer();
             refetchAddresses();
         } catch (err) {
             console.error(err);
-            addMessage("error", "Failed to update default address");
+            addMessage("error", t("addresses.card.setDefaultError"));
         }
     };
 
@@ -67,7 +69,7 @@ const AddressCards: React.FC<AddressCardsProps> = ({
                     <div className="card-body">
                         {String(address.id) === defaultId && (
                             <div className="badge bg-primary text-white mb-3">
-                                Your default address
+                                {t("addresses.card.default")}
                             </div>
                         )}
 
@@ -85,20 +87,20 @@ const AddressCards: React.FC<AddressCardsProps> = ({
                         </div>
 
                         <div className="d-flex flex-column flex-sm-row gap-2">
-                            <Link
+                            <LocalizedLink
                                 to={`/account/address-book/edit/${address.id}`}
                                 className="btn btn-sm btn-icon btn-outline-gray"
                             >
                                 <IconPencil stroke={2} size={16} />
-                                Edit
-                            </Link>
+                                {t("addresses.card.edit")}
+                            </LocalizedLink>
 
                             <button
                                 className="btn btn-sm btn-icon btn-outline-danger w-full"
                                 onClick={() => onDelete(address.id!)}
                             >
                                 <IconTrash stroke={2} size={16} />
-                                Delete
+                                {t("addresses.card.delete")}
                             </button>
 
                             {String(address.id) !== defaultId && (
@@ -106,7 +108,7 @@ const AddressCards: React.FC<AddressCardsProps> = ({
                                     className="btn btn-sm btn-icon btn-outline-gray w-full"
                                     onClick={() => handleSetDefault(address.id!)}
                                 >
-                                    Set as default
+                                    {t("addresses.card.setDefault")}
                                 </button>
                             )}
                         </div>

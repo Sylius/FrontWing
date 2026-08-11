@@ -1,0 +1,92 @@
+{
+  "home": {
+    "bannerAlt": "Home",
+    "bannerLogoAlt": "New collection",
+    "latestDeals": "Latest deals",
+    "newCollection": "New collection",
+    "newCollectionAlt": "New collection",
+    "latestProducts": "Latest products"
+  },
+  "list": {
+    "errorMissingCode": "Missing taxon code",
+    "errorLoadFailed": "Failed to load category",
+    "goLevelUp": "Go level up"
+  },
+  "card": {
+    "noPrice": "No price"
+  },
+  "gallery": {
+    "thumbnailAlt": "thumbnail",
+    "mainAlt": "Main product"
+  },
+  "breadcrumb": {
+    "category": "Category",
+    "reviews": "Reviews",
+    "add": "Add"
+  },
+  "detail": {
+    "noPrice": "No price available",
+    "quantity": "Quantity",
+    "adding": "Adding...",
+    "addToCart": "Add to cart",
+    "noShortDescription": "No short description",
+    "addYourReview": "Add your review",
+    "viewMore": "View more",
+    "info": "Info",
+    "noReviews": "There are no reviews",
+    "noAttributes": "No attributes available.",
+    "tabs": {
+      "details": "Details",
+      "attributes": "Attributes",
+      "reviews": "Reviews ({{count}})"
+    },
+    "flash": {
+      "added": "Product added to cart",
+      "addFailed": "Failed to add product to cart"
+    }
+  },
+  "reviews": {
+    "title": "Reviews",
+    "addYourReview": "Add your review",
+    "count_one": "{{count}} review",
+    "count_few": "{{count}} reviews",
+    "count_many": "{{count}} reviews",
+    "count_other": "{{count}} reviews",
+    "voteCount_one": "{{count}} vote",
+    "voteCount_few": "{{count}} votes",
+    "voteCount_many": "{{count}} votes",
+    "voteCount_other": "{{count}} votes"
+  },
+  "addReview": {
+    "title": "Add Your Review",
+    "flash": {
+      "success": "Success — Your review is waiting for the acceptation.",
+      "error": "Failed to submit your review"
+    },
+    "form": {
+      "rating": "Rating",
+      "ariaRating": "Rating",
+      "star_one": "{{count}} star",
+      "star_few": "{{count}} stars",
+      "star_many": "{{count}} stars",
+      "star_other": "{{count}} stars",
+      "title": "Title",
+      "comment": "Comment",
+      "email": "Email",
+      "submit": "Add"
+    }
+  },
+  "toolbar": {
+    "searchPlaceholder": "Value",
+    "sortLabel": "Sort:",
+    "sort": {
+      "position": "By position",
+      "nameAsc": "From A to Z",
+      "nameDesc": "From Z to A",
+      "newest": "Newest first",
+      "oldest": "Oldest first",
+      "cheapest": "Cheapest first",
+      "expensive": "Most expensive first"
+    }
+  }
+}

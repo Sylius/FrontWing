@@ -1,0 +1,88 @@
+{
+  "header": {
+    "checkingOutAs": "Checking out as"
+  },
+  "steps": {
+    "address": "Address",
+    "shipping": "Shipping",
+    "payment": "Payment",
+    "complete": "Complete"
+  },
+  "address": {
+    "loading": "Loading...",
+    "title": "Address",
+    "email": "Email",
+    "billingAddress": "Billing address",
+    "shippingAddress": "Shipping address",
+    "useDifferentShipping": "Use different address for shipping?",
+    "selectFromBook": "Select address from my book",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "company": "Company",
+    "street": "Street",
+    "country": "Country",
+    "selectCountry": "Select",
+    "province": "Province / State",
+    "city": "City",
+    "postcode": "Postcode",
+    "phone": "Phone",
+    "backToCart": "Back to cart",
+    "next": "Next"
+  },
+  "shipping": {
+    "shipmentTitle": "Shipment #{{number}}",
+    "noMethods": "No shipping methods available. Check your address.",
+    "changeAddress": "Change address",
+    "next": "Next"
+  },
+  "payment": {
+    "paymentTitle": "Payment #{{number}}",
+    "selectError": "Please select a payment method.",
+    "warning": "Warning",
+    "noMethods": "No payment methods available for your order.",
+    "changeShipping": "Change shipping method",
+    "next": "Next"
+  },
+  "summary": {
+    "orderNumber": "Order #{{number}}",
+    "billingAddress": "Billing address",
+    "shippingAddress": "Shipping address",
+    "item": "Item",
+    "unitPrice": "Unit price",
+    "qty": "Qty",
+    "subtotal": "Subtotal",
+    "itemsTotal": "Items total:",
+    "taxesTotal": "Taxes total:",
+    "includedInPrice": "Included in price",
+    "discount": "Discount:",
+    "shippingTotal": "Shipping total:",
+    "total": "Total:",
+    "extraNotes": "Extra notes",
+    "placingOrder": "Placing order...",
+    "placeOrder": "Place order",
+    "checkoutError": "Order checkout error:"
+  },
+  "thankYou": {
+    "title": "Thank you!",
+    "message": "You have successfully placed an order.",
+    "viewOrder": "View order",
+    "changePayment": "Change payment method",
+    "createAccount": "Create an account"
+  },
+  "sidebar": {
+    "summary": "Summary",
+    "itemsTotal": "Items total:",
+    "discount": "Discount:",
+    "estimatedShipping": "Estimated shipping cost:",
+    "taxesTotal": "Taxes total:",
+    "orderTotal": "Order total:"
+  },
+  "pay": {
+    "orderSummary": "Summary of your order #{{number}}",
+    "itemSingular": "item",
+    "itemPlural": "items",
+    "paymentTitle": "Payment #{{number}}",
+    "noMethods": "No payment methods available.",
+    "pay": "Pay"
+  }
+}

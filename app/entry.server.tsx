@@ -13,78 +13,61 @@ import { ServerRouter } from "react-router";
 import { createReadableStreamFromReadable } from "@react-router/node";
 import { isbot } from "isbot";
 import { renderToPipeableStream } from "react-dom/server";
+import { I18nextProvider } from "react-i18next";
+import type { i18n } from "i18next";
+
+import { fetchChannel } from "~/api/channel.server";
+import { createI18nInstance, resolveLocale } from "~/i18n.server";
+import { createLocaleMapper } from "~/utils/locale";
+import { collectNamespaces } from "~/i18n";
 
 const ABORT_DELAY = 5_000;
 
-export default function handleRequest(
+export default async function handleRequest(
     request: Request,
     responseStatusCode: number,
     responseHeaders: Headers,
     routerContext: EntryContext,
     loadContext: RouterContextProvider
 ) {
-  return isbot(request.headers.get("user-agent") || "")
-      ? handleBotRequest(request, responseStatusCode, responseHeaders, routerContext)
-      : handleBrowserRequest(request, responseStatusCode, responseHeaders, routerContext);
-}
+  const channel = await fetchChannel();
+  const mapper = createLocaleMapper(channel.locales);
+  const { urlLocale } = resolveLocale(request, channel);
 
-function handleBotRequest(
-    request: Request,
-    responseStatusCode: number,
-    responseHeaders: Headers,
-    routerContext: EntryContext
-) {
-  return new Promise((resolve, reject) => {
-    let shellRendered = false;
+  const namespaces = collectNamespaces(routerContext.staticHandlerContext.matches);
 
-    const { pipe, abort } = renderToPipeableStream(
-        <ServerRouter context={routerContext} url={request.url} />,
-        {
-          onAllReady() {
-            shellRendered = true;
-            const body = new PassThrough();
-            const stream = createReadableStreamFromReadable(body);
-
-            responseHeaders.set("Content-Type", "text/html");
-
-            resolve(
-                new Response(stream, {
-                  headers: responseHeaders,
-                  status: responseStatusCode,
-                })
-            );
-
-            pipe(body);
-          },
-          onShellError(error: unknown) {
-            reject(error);
-          },
-          onError(error: unknown) {
-            responseStatusCode = 500;
-            if (shellRendered) {
-              console.error(error);
-            }
-          },
-        }
-    );
-
-    setTimeout(abort, ABORT_DELAY);
+  const { instance } = await createI18nInstance({
+    lng: urlLocale,
+    supportedLngs: mapper.urlSegments,
+    fallbackLng: mapper.toUrl(channel.defaultLocale),
+    namespaces,
   });
+
+  const readyEvent = isbot(request.headers.get("user-agent") || "")
+      ? "onAllReady"
+      : "onShellReady";
+
+  return renderToStream(request, responseStatusCode, responseHeaders, routerContext, instance, readyEvent);
 }
 
-function handleBrowserRequest(
+function renderToStream(
     request: Request,
     responseStatusCode: number,
     responseHeaders: Headers,
-    routerContext: EntryContext
+    routerContext: EntryContext,
+    i18nInstance: i18n,
+    readyEvent: "onAllReady" | "onShellReady"
 ) {
   return new Promise((resolve, reject) => {
     let shellRendered = false;
+    let status = responseStatusCode;
 
     const { pipe, abort } = renderToPipeableStream(
-        <ServerRouter context={routerContext} url={request.url} />,
+        <I18nextProvider i18n={i18nInstance}>
+          <ServerRouter context={routerContext} url={request.url} />
+        </I18nextProvider>,
         {
-          onShellReady() {
+          [readyEvent]() {
             shellRendered = true;
             const body = new PassThrough();
             const stream = createReadableStreamFromReadable(body);
@@ -94,7 +77,7 @@ function handleBrowserRequest(
             resolve(
                 new Response(stream, {
                   headers: responseHeaders,
-                  status: responseStatusCode,
+                  status,
                 })
             );
 
@@ -104,7 +87,7 @@ function handleBrowserRequest(
             reject(error);
           },
           onError(error: unknown) {
-            responseStatusCode = 500;
+            status = 500;
             if (shellRendered) {
               console.error(error);
             }

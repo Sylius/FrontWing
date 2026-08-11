@@ -1,5 +1,9 @@
+export const handle = { i18n: ["common","cart","product"] };
+
 import React, { useEffect, useState, useCallback } from 'react';
-import { useParams, useSearchParams, Link } from 'react-router';
+import { useTranslation } from 'react-i18next';
+import { useParams, useSearchParams } from 'react-router';
+import { LocalizedLink } from '~/components/LocalizedLink';
 import Layout from '~/layouts/Default';
 import { Product } from '~/types/Product';
 import Breadcrumbs from '~/components/Breadcrumbs';
@@ -18,6 +22,7 @@ interface TaxonDetails {
 }
 
 const ProductList: React.FC = () => {
+    const { t } = useTranslation(['product', 'common']);
     const { code, parentCode, childCode } = useParams<{
         code?: string;
         parentCode?: string;
@@ -97,7 +102,7 @@ const ProductList: React.FC = () => {
     useEffect(() => {
         const loadData = async () => {
             if (!taxonCode) {
-                setError('Missing taxon code');
+                setError(t('list.errorMissingCode'));
                 return;
             }
             setLoading(true);
@@ -112,7 +117,7 @@ const ProductList: React.FC = () => {
                 setBreadcrumbPath(path);
                 setCurrentPage(1);
             } catch (err) {
-                setError('Failed to load category');
+                setError(t('list.errorLoadFailed'));
                 console.error('[load error]', err);
             } finally {
                 setLoading(false);
@@ -156,8 +161,8 @@ const ProductList: React.FC = () => {
         return <div className="text-danger text-center">{error}</div>;
 
     const breadcrumbs = [
-        { label: 'Home', url: '/' },
-        { label: 'Category', url: '' },
+        { label: t('common:nav.home'), url: '/' },
+        { label: t('breadcrumb.category'), url: '' },
         ...breadcrumbPath.map((p) => ({
             label: p.name,
             url: `/category/${p.code}`,
@@ -183,21 +188,21 @@ const ProductList: React.FC = () => {
                     <div className="col-12 col-lg-3">
                         {isInLeaf && parentLink && (
                             <div className="mb-3">
-                                <Link to={parentLink} className="text-decoration-none">
-                                    Go level up
-                                </Link>
+                                <LocalizedLink to={parentLink} className="text-decoration-none">
+                                    {t('list.goLevelUp')}
+                                </LocalizedLink>
                             </div>
                         )}
                         {taxon && Array.isArray(taxon.children) && taxon.children.length > 0 && (
                             <div className="mb-4">
                                 {taxon.children.map((child) => (
                                     <div key={child.code}>
-                                        <Link
+                                        <LocalizedLink
                                             to={`/category/${taxon.code}/${child.code}`}
                                             className="text-decoration-none d-block mb-1"
                                         >
                                             {child.name}
-                                        </Link>
+                                        </LocalizedLink>
                                     </div>
                                 ))}
                             </div>

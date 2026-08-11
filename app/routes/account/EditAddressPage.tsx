@@ -1,5 +1,9 @@
+export const handle = { i18n: ["common","cart","account"] };
+
 import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router";
+import { useTranslation } from "react-i18next";
+import { useParams } from "react-router";
+import { useLocalizedNavigate } from "~/hooks/useLocalizedNavigate";
 import Default from "../../layouts/Default";
 import AccountLayout from "../../layouts/Account";
 import Skeleton from "react-loading-skeleton";
@@ -12,7 +16,8 @@ interface Country {
 }
 
 const EditAddressPage: React.FC = () => {
-    const navigate = useNavigate();
+    const { t } = useTranslation(["account", "common"]);
+    const navigate = useLocalizedNavigate();
     const { id } = useParams<{ id: string }>();
     const { addMessage } = useFlashMessages();
 
@@ -70,7 +75,7 @@ const EditAddressPage: React.FC = () => {
                 });
             } catch (err) {
                 console.error("Error loading address", err);
-                addMessage("error", "Failed to load address");
+                addMessage("error", t("addresses.edit.loadError"));
             } finally {
                 setLoadingAddress(false);
             }
@@ -105,11 +110,11 @@ const EditAddressPage: React.FC = () => {
 
             if (!res.ok) throw new Error("Failed to update address");
 
-            addMessage("success", "Address updated successfully");
+            addMessage("success", t("addresses.edit.updateSuccess"));
             navigate("/account/address-book");
         } catch (error) {
             console.error("Error updating address", error);
-            addMessage("error", "Failed to update address");
+            addMessage("error", t("addresses.edit.updateError"));
         } finally {
             setSubmitting(false);
         }
@@ -119,16 +124,16 @@ const EditAddressPage: React.FC = () => {
         <Default>
             <AccountLayout
                 breadcrumbs={[
-                    { label: "Home", url: "/" },
-                    { label: "My account", url: "/account/dashboard" },
-                    { label: "Address book", url: "/account/address-book" },
-                    { label: "Edit", url: `/account/address-book/edit/${id}` },
+                    { label: t("common:nav.home"), url: "/" },
+                    { label: t("common:nav.account"), url: "/account/dashboard" },
+                    { label: t("addresses.breadcrumb"), url: "/account/address-book" },
+                    { label: t("addresses.edit.breadcrumb"), url: `/account/address-book/edit/${id}` },
                 ]}
             >
                 <div className="col-12 col-md-9">
                     <div className="mb-4">
-                        <h1>Address book</h1>
-                        <p>Edit my address</p>
+                        <h1>{t("addresses.edit.title")}</h1>
+                        <p>{t("addresses.edit.subtitle")}</p>
                     </div>
 
                     {loadingAddress ? (
@@ -146,14 +151,14 @@ const EditAddressPage: React.FC = () => {
 
                             <div className="d-flex gap-2">
                                 <button type="submit" className="btn btn-primary" disabled={submitting}>
-                                    {submitting ? "Saving..." : "Save changes"}
+                                    {submitting ? t("addresses.edit.submitting") : t("addresses.edit.submit")}
                                 </button>
                                 <button
                                     type="button"
                                     className="btn btn-outline-gray"
                                     onClick={() => navigate("/account/address-book")}
                                 >
-                                    Cancel
+                                    {t("addresses.edit.cancel")}
                                 </button>
                             </div>
                         </form>

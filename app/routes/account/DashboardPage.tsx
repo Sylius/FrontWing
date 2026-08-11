@@ -1,5 +1,10 @@
+export const handle = { i18n: ["common","cart","account"] };
+
 import { useEffect, useState, useRef } from "react";
-import { Link, useSearchParams, useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router";
+import { LocalizedLink } from "~/components/LocalizedLink";
+import { useLocalizedNavigate } from "~/hooks/useLocalizedNavigate";
 import Default from "~/layouts/Default";
 import AccountLayout from "~/layouts/Account";
 import { useCustomer } from "~/context/CustomerContext";
@@ -9,10 +14,11 @@ import Skeleton from "react-loading-skeleton";
 import { sendVerificationEmail, verifyToken } from "~/services/customerVerification";
 
 export default function DashboardPage() {
+    const { t } = useTranslation("account");
     const { customer, refetchCustomer } = useCustomer();
     const { addMessage } = useFlashMessages();
     const [searchParams] = useSearchParams();
-    const navigate = useNavigate();
+    const navigate = useLocalizedNavigate();
 
     const [isVerifying, setIsVerifying] = useState(false);
     const verificationAttempted = useRef(false);
@@ -69,8 +75,8 @@ export default function DashboardPage() {
             <AccountLayout>
                 <div className="col-12 col-md-9">
                     <div className="mb-4">
-                        <h1>My account</h1>
-                        Manage your personal information and preferences
+                        <h1>{t("dashboard.title")}</h1>
+                        {t("dashboard.subtitle")}
                     </div>
 
                     <div className="card border-0 bg-body-tertiary">
@@ -80,9 +86,9 @@ export default function DashboardPage() {
                                     {!customer?.user ? (
                                         <Skeleton width={80} height={26} borderRadius={20} />
                                     ) : customer.user.verified ? (
-                                        <span className="badge text-bg-success">Verified</span>
+                                        <span className="badge text-bg-success">{t("dashboard.verified")}</span>
                                     ) : (
-                                        <span className="badge text-bg-danger">Not verified</span>
+                                        <span className="badge text-bg-danger">{t("dashboard.notVerified")}</span>
                                     )}
                                 </div>
 
@@ -101,15 +107,15 @@ export default function DashboardPage() {
                                     </>
                                 ) : (
                                     <>
-                                        <Link to="/account/profile/edit" className="btn btn-sm btn-icon btn-outline-gray">
+                                        <LocalizedLink to="/account/profile/edit" className="btn btn-sm btn-icon btn-outline-gray">
                                             <IconPencil stroke={2} size={16} />
-                                            Edit
-                                        </Link>
+                                            {t("dashboard.edit")}
+                                        </LocalizedLink>
 
-                                        <Link to="/account/change-password" className="btn btn-sm btn-icon btn-outline-gray">
+                                        <LocalizedLink to="/account/change-password" className="btn btn-sm btn-icon btn-outline-gray">
                                             <IconLock stroke={2} size={16} />
-                                            Change password
-                                        </Link>
+                                            {t("dashboard.changePassword")}
+                                        </LocalizedLink>
 
                                         {!customer.user.verified && (
                                             <button
@@ -125,12 +131,12 @@ export default function DashboardPage() {
                                 role="status"
                                 aria-hidden="true"
                             ></span>
-                                                        Sending...
+                                                        {t("dashboard.sending")}
                                                     </>
                                                 ) : (
                                                     <>
                                                         <IconCheck stroke={2} size={16} />
-                                                        Verify
+                                                        {t("dashboard.verify")}
                                                     </>
                                                 )}
                                             </button>

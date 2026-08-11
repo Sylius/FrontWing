@@ -1,5 +1,9 @@
+export const handle = { i18n: ["common","cart","product"] };
+
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router';
+import { useLocalizedNavigate } from '~/hooks/useLocalizedNavigate';
 import ProductCard from '~/components/ProductCard';
 import { useFlashMessages } from '~/context/FlashMessagesContext';
 import Breadcrumbs from '~/components/Breadcrumbs';
@@ -9,8 +13,9 @@ import { Product } from '~/types/Product';
 import { IconStar } from '@tabler/icons-react';
 
 const AddReviewPage: React.FC = () => {
+    const { t } = useTranslation(['product', 'common']);
     const { code } = useParams<{ code: string }>();
-    const navigate = useNavigate();
+    const navigate = useLocalizedNavigate();
     const { addMessage } = useFlashMessages();
 
     const [product, setProduct] = useState<Product | null>(null);
@@ -40,8 +45,8 @@ const AddReviewPage: React.FC = () => {
                 setProduct(data);
 
                 const breadcrumbPaths: { label: string; url: string }[] = [
-                    { label: 'Home', url: '/' },
-                    { label: 'Category', url: '#' },
+                    { label: t('common:nav.home'), url: '/' },
+                    { label: t('breadcrumb.category'), url: '#' },
                 ];
 
                 if (data.productTaxons?.length) {
@@ -72,8 +77,8 @@ const AddReviewPage: React.FC = () => {
                 }
 
                 breadcrumbPaths.push({ label: data.name, url: `/product/${data.code}` });
-                breadcrumbPaths.push({ label: 'Reviews', url: `/product/${data.code}/reviews` });
-                breadcrumbPaths.push({ label: 'Add', url: '#' });
+                breadcrumbPaths.push({ label: t('breadcrumb.reviews'), url: `/product/${data.code}/reviews` });
+                breadcrumbPaths.push({ label: t('breadcrumb.add'), url: '#' });
                 setBreadcrumbs(breadcrumbPaths);
             } catch (err) {
                 console.error('Error loading product:', err);
@@ -104,11 +109,11 @@ const AddReviewPage: React.FC = () => {
 
             if (!res.ok) throw new Error('Failed to submit review');
 
-            addMessage('success', 'Success — Your review is waiting for the acceptation.');
+            addMessage('success', t('addReview.flash.success'));
             navigate(`/product/${code}`);
         } catch (err) {
             console.error('Error submitting review:', err);
-            addMessage('error', 'Failed to submit your review');
+            addMessage('error', t('addReview.flash.error'));
         }
     };
 
@@ -148,18 +153,18 @@ const AddReviewPage: React.FC = () => {
                     </div>
 
                     <div className="col-12 col-md-7 col-lg-8">
-                        <h1>Add Your Review</h1>
+                        <h1>{t('addReview.title')}</h1>
                         <form onSubmit={handleSubmit}>
                             <div className="mb-3">
-                                <label className="form-label d-block">Rating <span className="text-danger">*</span></label>
-                                <div className="d-flex gap-2" role="radiogroup" aria-label="Rating">
+                                <label className="form-label d-block">{t('addReview.form.rating')} <span className="text-danger">*</span></label>
+                                <div className="d-flex gap-2" role="radiogroup" aria-label={t('addReview.form.ariaRating')}>
                                     {[1, 2, 3, 4, 5].map((value) => (
                                         <button
                                             type="button"
                                             key={value}
                                             className="border-0 bg-transparent p-0"
                                             onClick={() => setRating(value)}
-                                            aria-label={`${value} star`}
+                                            aria-label={t('addReview.form.star', { count: value })}
                                         >
                                             <IconStar
                                                 className="review-stars"
@@ -173,7 +178,7 @@ const AddReviewPage: React.FC = () => {
                             </div>
 
                             <div className="mb-3">
-                                <label className="form-label">Title <span className="text-danger">*</span></label>
+                                <label className="form-label">{t('addReview.form.title')} <span className="text-danger">*</span></label>
                                 <input
                                     type="text"
                                     className="form-control"
@@ -184,7 +189,7 @@ const AddReviewPage: React.FC = () => {
                             </div>
 
                             <div className="mb-3">
-                                <label className="form-label">Comment <span className="text-danger">*</span></label>
+                                <label className="form-label">{t('addReview.form.comment')} <span className="text-danger">*</span></label>
                                 <textarea
                                     className="form-control"
                                     rows={4}
@@ -195,7 +200,7 @@ const AddReviewPage: React.FC = () => {
                             </div>
 
                             <div className="mb-4">
-                                <label className="form-label">Email <span className="text-danger">*</span></label>
+                                <label className="form-label">{t('addReview.form.email')} <span className="text-danger">*</span></label>
                                 <input
                                     type="email"
                                     className="form-control"
@@ -206,7 +211,7 @@ const AddReviewPage: React.FC = () => {
                             </div>
 
                             <button type="submit" className="btn btn-primary px-4">
-                                Add
+                                {t('addReview.form.submit')}
                             </button>
                         </form>
                     </div>

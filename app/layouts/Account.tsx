@@ -1,6 +1,8 @@
 import React, { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import Breadcrumbs from "../components/Breadcrumbs";
-import { Link, useNavigate } from "react-router";
+import { LocalizedLink } from "~/components/LocalizedLink";
+import { useLocalizedNavigate } from "~/hooks/useLocalizedNavigate";
 import {
     IconBook,
     IconHome,
@@ -16,8 +18,9 @@ interface AccountLayoutProps {
 }
 
 const AccountLayout: React.FC<AccountLayoutProps> = ({ children, breadcrumbs }) => {
+    const { t } = useTranslation(["account", "common"]);
     const { customer, loading } = useCustomer();
-    const navigate = useNavigate();
+    const navigate = useLocalizedNavigate();
 
     useEffect(() => {
         if (!loading && !customer) {
@@ -26,8 +29,8 @@ const AccountLayout: React.FC<AccountLayoutProps> = ({ children, breadcrumbs }) 
     }, [customer, loading, navigate]);
 
     const defaultBreadcrumbs = [
-        { label: "Home", url: "/" },
-        { label: "My account", url: "/account/dashboard" },
+        { label: t("common:nav.home"), url: "/" },
+        { label: t("common:nav.account"), url: "/account/dashboard" },
     ];
 
     return (
@@ -39,47 +42,47 @@ const AccountLayout: React.FC<AccountLayoutProps> = ({ children, breadcrumbs }) 
 
                 <div className="col-12 col-md-3 mb-4 mb-md-0">
                     <div className="mb-3">
-                        <div className="h3 mb-4">Your account</div>
+                        <div className="h3 mb-4">{t("panel.title")}</div>
                         <div className="d-inline-flex flex-column">
-                            <Link
+                            <LocalizedLink
                                 className="d-flex align-items-center gap-2 py-1 link-reset"
                                 to="/account/dashboard"
                             >
                                 <IconHome stroke={1.25} size={28} />
-                                Dashboard
-                            </Link>
+                                {t("panel.dashboard")}
+                            </LocalizedLink>
 
-                            <Link
+                            <LocalizedLink
                                 className="d-flex align-items-center gap-2 py-1 link-reset"
                                 to="/account/profile/edit"
                             >
                                 <IconUser stroke={1.25} size={28} />
-                                Personal information
-                            </Link>
+                                {t("panel.personalInfo")}
+                            </LocalizedLink>
 
-                            <Link
+                            <LocalizedLink
                                 className="d-flex align-items-center gap-2 py-1 link-reset"
                                 to="/account/change-password"
                             >
                                 <IconLock stroke={1.25} size={28} />
-                                Change password
-                            </Link>
+                                {t("panel.changePassword")}
+                            </LocalizedLink>
 
-                            <Link
+                            <LocalizedLink
                                 className="d-flex align-items-center gap-2 py-1 link-reset"
                                 to="/account/address-book/"
                             >
                                 <IconBook stroke={1.25} size={28} />
-                                Address book
-                            </Link>
+                                {t("panel.addressBook")}
+                            </LocalizedLink>
 
-                            <Link
+                            <LocalizedLink
                                 className="d-flex align-items-center gap-2 py-1 link-reset"
                                 to="/account/order-history"
                             >
                                 <IconShoppingCart stroke={1.25} size={28} />
-                                Order history
-                            </Link>
+                                {t("panel.orderHistory")}
+                            </LocalizedLink>
                         </div>
                     </div>
                 </div>

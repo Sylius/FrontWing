@@ -1,6 +1,10 @@
+export const handle = { i18n: ["common","checkout"] };
+
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import CheckoutLayout from '../../layouts/Checkout';
-import { Link, useNavigate } from 'react-router';
+import { LocalizedLink } from '~/components/LocalizedLink';
+import { useLocalizedNavigate } from '~/hooks/useLocalizedNavigate';
 import { useOrder } from '../../context/OrderContext';
 import { useQuery } from '@tanstack/react-query';
 import Steps from '../../components/checkout/Steps';
@@ -14,8 +18,9 @@ interface PaymentMethod {
 }
 
 const PaymentPage: React.FC = () => {
+  const { t } = useTranslation('checkout');
   const { order, fetchOrder, orderToken } = useOrder();
-  const navigate = useNavigate();
+  const navigate = useLocalizedNavigate();
 
   const fetchPaymentMethodsFromAPI = async (): Promise<PaymentMethod[]> => {
     if (!order || !orderToken || !order.payments?.[0]?.id) throw new Error("Missing order info");
@@ -83,20 +88,20 @@ const PaymentPage: React.FC = () => {
 
             <form name="sylius_shop_checkout_select_payment" method="post" onSubmit={handleSubmit} noValidate>
               <input type="hidden" name="_method" value="PUT" />
-              <h5 className="mb-4">Payment #1</h5>
+              <h5 className="mb-4">{t("payment.paymentTitle", { number: 1 })}</h5>
 
               <div className="mb-5">
                 {hasErrors && (
                     <div className="invalid-feedback d-block">
-                      Please select a payment method.
+                      {t("payment.selectError")}
                     </div>
                 )}
 
                 {paymentMethods?.length === 0 && (
                     <div className="card bg-body-tertiary border-0 mb-3">
                       <div className="card-body">
-                        <h6 className="text-danger mb-1">Warning</h6>
-                        <p className="mb-0">No payment methods available for your order.</p>
+                        <h6 className="text-danger mb-1">{t("payment.warning")}</h6>
+                        <p className="mb-0">{t("payment.noMethods")}</p>
                       </div>
                     </div>
                 )}
@@ -128,13 +133,13 @@ const PaymentPage: React.FC = () => {
               </div>
 
               <div className="d-flex justify-content-between flex-column flex-sm-row gap-2">
-                <Link className="btn btn-light btn-icon" to="/checkout/select-shipping">
+                <LocalizedLink className="btn btn-light btn-icon" to="/checkout/select-shipping">
                   <IconChevronLeft stroke={2} />
-                  Change shipping method
-                </Link>
+                  {t("payment.changeShipping")}
+                </LocalizedLink>
 
                 <button type="submit" className="btn btn-primary btn-icon" disabled={isSubmitting}>
-                  Next
+                  {t("payment.next")}
                   <IconChevronRight stroke={2} />
                 </button>
               </div>

@@ -1,3 +1,5 @@
+export const handle = { i18n: ["common","checkout"] };
+
 import {
     type LoaderFunctionArgs,
     type ActionFunctionArgs,
@@ -9,12 +11,14 @@ import {
     useNavigation,
 } from "react-router";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import CheckoutLayout from "~/layouts/Checkout";
 import Steps from "~/components/checkout/Steps";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import { useCustomer } from "~/context/CustomerContext";
 import { useOrder } from "~/context/OrderContext";
-import { Link } from "react-router";
+import { LocalizedLink } from "~/components/LocalizedLink";
+import { localizePath } from "~/utils/localizedPath";
 import { orderTokenCookie } from "~/utils/cookies.server";
 import { fetchOrderFromAPI } from "~/api/order.server";
 import type { AddressInterface, Order } from "~/types/Order";
@@ -36,16 +40,16 @@ const emptyAddress: AddressInterface = {
     phoneNumber: "",
 };
 
-export async function loader({ request }: LoaderFunctionArgs) {
+export async function loader({ request, params }: LoaderFunctionArgs) {
     const cookie = request.headers.get("Cookie");
     const token = await orderTokenCookie.parse(cookie);
-    if (!token) return redirect("/cart");
+    if (!token) return redirect(localizePath(params.lang!, "/cart"));
 
     const order = await fetchOrderFromAPI(token, true);
     return { order, token };
 }
 
-export async function action({ request }: ActionFunctionArgs) {
+export async function action({ request, params }: ActionFunctionArgs) {
     const form = await request.formData();
     const email = form.get("email")?.toString() ?? "";
     const token = form.get("token")?.toString() ?? "";
@@ -81,13 +85,14 @@ export async function action({ request }: ActionFunctionArgs) {
     });
 
     if (!res.ok) {
-        return redirect("/checkout/address?error=1");
+        return redirect(localizePath(params.lang!, "/checkout/address?error=1"));
     }
 
-    return redirect("/checkout/select-shipping");
+    return redirect(localizePath(params.lang!, "/checkout/select-shipping"));
 }
 
 export default function AddressPage() {
+    const { t } = useTranslation("checkout");
     const { order, token } = useLoaderData<{ order: Order; token: string }>();
     const { customer } = useCustomer();
     const { activeCouponCode } = useOrder();
@@ -170,7 +175,7 @@ export default function AddressPage() {
                             }
                         }}
                     >
-                        <option value="">Select address from my book</option>
+                        <option value="">{t("address.selectFromBook")}</option>
                         {addressBook.map((a) => (
                             <option key={a.id} value={a.id}>
                                 {a.firstName} {a.lastName} — {a.street}, {a.city}
@@ -181,27 +186,27 @@ export default function AddressPage() {
             )}
             <div className="row">
                 <div className="col-md-6 mb-3">
-                    <label className="form-label">First name</label>
+                    <label className="form-label">{t("address.firstName")}</label>
                     <input name={`${prefix}_firstName`} className="form-control" required value={address.firstName} onChange={handleChange(setAddress)} />
                 </div>
                 <div className="col-md-6 mb-3">
-                    <label className="form-label">Last name</label>
+                    <label className="form-label">{t("address.lastName")}</label>
                     <input name={`${prefix}_lastName`} className="form-control" required value={address.lastName} onChange={handleChange(setAddress)} />
                 </div>
             </div>
             <div className="mb-3">
-                <label className="form-label">Company</label>
+                <label className="form-label">{t("address.company")}</label>
                 <input name={`${prefix}_company`} className="form-control" value={address.company ?? ""} onChange={handleChange(setAddress)} />
             </div>
             <div className="mb-3">
-                <label className="form-label">Street</label>
+                <label className="form-label">{t("address.street")}</label>
                 <input name={`${prefix}_street`} className="form-control" required value={address.street} onChange={handleChange(setAddress)} />
             </div>
             <div className="mb-3">
-                <label className="form-label">Country</label>
+                <label className="form-label">{t("address.country")}</label>
                 <select name={`${prefix}_countryCode`} className="form-select" required value={address.countryCode}
                         onChange={handleChange(setAddress)}>
-                    <option value="">Select</option>
+                    <option value="">{t("address.selectCountry")}</option>
                     {countries.map((c) => (
                         <option key={c.code} value={c.code}>
                             {c.name}
@@ -211,7 +216,7 @@ export default function AddressPage() {
             </div>
 
             <div className="mb-3">
-                <label className="form-label">Province / State</label>
+                <label className="form-label">{t("address.province")}</label>
                 <input
                     name={`${prefix}_provinceName`}
                     className="form-control"
@@ -220,16 +225,16 @@ export default function AddressPage() {
                 />
             </div>
             <div className="mb-3">
-                <label className="form-label">City</label>
+                <label className="form-label">{t("address.city")}</label>
                 <input name={`${prefix}_city`} className="form-control" required value={address.city}
                        onChange={handleChange(setAddress)}/>
             </div>
             <div className="mb-3">
-                <label className="form-label">Postcode</label>
+                <label className="form-label">{t("address.postcode")}</label>
                 <input name={`${prefix}_postcode`} className="form-control" required value={address.postcode} onChange={handleChange(setAddress)} />
             </div>
             <div className="mb-4">
-                <label className="form-label">Phone</label>
+                <label className="form-label">{t("address.phone")}</label>
                 <input name={`${prefix}_phoneNumber`} className="form-control" value={address.phoneNumber ?? ""} onChange={handleChange(setAddress)} />
             </div>
         </>
@@ -240,18 +245,18 @@ export default function AddressPage() {
             <div className="col pt-4 pb-5">
                 <Steps activeStep="address" />
                 {loading ? (
-                    <div className="text-center py-5">Loading...</div>
+                    <div className="text-center py-5">{t("address.loading")}</div>
                 ) : (
                     <Form method="post" replace={false}>
                         <input type="hidden" name="token" value={token} />
                         <input type="hidden" name="couponCode" value={activeCouponCode ?? ""} />
                         <input type="hidden" name="email" value={email} />
 
-                        <div className="mb-4 h2">Address</div>
+                        <div className="mb-4 h2">{t("address.title")}</div>
 
                         {!customer && (
                             <div className="mb-4">
-                                <label className="form-label required">Email</label>
+                                <label className="form-label required">{t("address.email")}</label>
                                 <input
                                     type="email"
                                     name="email"
@@ -264,7 +269,7 @@ export default function AddressPage() {
                         )}
 
                         <div className="mb-4">
-                            <div className="h4 mb-4">Billing address</div>
+                            <div className="h4 mb-4">{t("address.billingAddress")}</div>
                             {renderAddressForm("billing", billingAddress, setBillingAddress, selectedBillingId, setSelectedBillingId)}
                         </div>
 
@@ -284,24 +289,24 @@ export default function AddressPage() {
                                 id="differentShipping"
                             />
                             <label className="form-check-label" htmlFor="differentShipping">
-                                Use different address for shipping?
+                                {t("address.useDifferentShipping")}
                             </label>
                         </div>
 
                         {useDifferentShipping && (
                             <div className="mb-4">
-                                <div className="h4 mb-4">Shipping address</div>
+                                <div className="h4 mb-4">{t("address.shippingAddress")}</div>
                                 {renderAddressForm("shipping", shippingAddress, setShippingAddress, selectedShippingId, setSelectedShippingId)}
                             </div>
                         )}
 
                         <div className="d-flex justify-content-between flex-column flex-sm-row gap-2">
-                            <Link className="btn btn-light btn-icon" to="/cart">
+                            <LocalizedLink className="btn btn-light btn-icon" to="/cart">
                                 <IconChevronLeft stroke={2} />
-                                Back to cart
-                            </Link>
+                                {t("address.backToCart")}
+                            </LocalizedLink>
                             <button type="submit" className="btn btn-primary btn-icon" disabled={isSubmitting}>
-                                Next
+                                {t("address.next")}
                                 <IconChevronRight stroke={2} />
                             </button>
                         </div>

@@ -1,7 +1,11 @@
+export const handle = { i18n: ["common","cart","account"] };
+
 import type { ActionFunction } from "react-router";
 import { data as routerData, redirect } from "react-router";
 import { Form, useActionData, useNavigation, useSearchParams } from "react-router";
+import { useTranslation } from "react-i18next";
 import Default from "~/layouts/Default";
+import { localizePath } from "~/utils/localizedPath";
 
 interface ActionData {
     errors?: {
@@ -17,14 +21,14 @@ interface ActionData {
 
 const API_URL = process.env.PUBLIC_API_URL;
 
-export const action: ActionFunction = async ({ request }) => {
+export const action: ActionFunction = async ({ request, params }) => {
     const form = await request.formData();
     const token = form.get("token");
     const newPassword = form.get("newPassword");
     const confirmNewPassword = form.get("confirmNewPassword");
 
     if (typeof token !== "string" || !token) {
-        return redirect("/forgotten-password");
+        return redirect(localizePath(params.lang!, "/forgotten-password"));
     }
 
     const errors: ActionData["errors"] = {};
@@ -64,7 +68,7 @@ export const action: ActionFunction = async ({ request }) => {
             return routerData({ formError: message }, { status: 400 });
         }
 
-        return redirect("/login?resetSuccessful=true");
+        return redirect(localizePath(params.lang!, "/login?resetSuccessful=true"));
     } catch (error) {
         console.error("Reset password error:", error);
         return routerData({ formError: "Unexpected error occurred." }, { status: 500 });
@@ -72,6 +76,7 @@ export const action: ActionFunction = async ({ request }) => {
 };
 
 export default function ResetPasswordPage() {
+    const { t } = useTranslation("account");
     const actionData = useActionData<ActionData>();
     const navigation = useNavigation();
     const [searchParams] = useSearchParams();
@@ -83,7 +88,7 @@ export default function ResetPasswordPage() {
             <div className="container my-auto">
                 <div className="row justify-content-center my-5">
                     <div className="col-12 col-md-8 col-lg-6">
-                        <h1 className="h2 mb-4">Reset your password</h1>
+                        <h1 className="h2 mb-4">{t("auth.reset.title")}</h1>
 
                         {actionData?.formError && (
                             <div className="alert alert-danger">{actionData.formError}</div>
@@ -94,7 +99,7 @@ export default function ResetPasswordPage() {
 
                             <div className="mb-3">
                                 <label htmlFor="newPassword" className="form-label required">
-                                    New password
+                                    {t("auth.reset.newPassword")}
                                 </label>
                                 <input
                                     id="newPassword"
@@ -112,7 +117,7 @@ export default function ResetPasswordPage() {
 
                             <div className="mb-4">
                                 <label htmlFor="confirmNewPassword" className="form-label required">
-                                    Repeat new password
+                                    {t("auth.reset.confirmPassword")}
                                 </label>
                                 <input
                                     id="confirmNewPassword"
@@ -130,7 +135,7 @@ export default function ResetPasswordPage() {
 
                             <div className="d-grid">
                                 <button type="submit" className="btn btn-primary" disabled={busy}>
-                                    {busy ? "Resetting..." : "Reset Password"}
+                                    {busy ? t("auth.reset.submitting") : t("auth.reset.submit")}
                                 </button>
                             </div>
                         </Form>

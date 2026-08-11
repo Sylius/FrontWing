@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { ProductReview } from '../../types/Product';
 import { IconStar } from '@tabler/icons-react';
 
@@ -9,6 +10,7 @@ interface ReviewSummaryProps {
 }
 
 const ReviewSummary: React.FC<ReviewSummaryProps> = ({ reviews, productCode, allReviewCount }) => {
+    const { t } = useTranslation('product');
     const averageRating =
         reviews.length > 0
             ? Math.round(reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length)
@@ -31,18 +33,18 @@ const ReviewSummary: React.FC<ReviewSummaryProps> = ({ reviews, productCode, all
         <div className="row mb-2">
             <div className="col-md-auto">{renderStars(averageRating)}</div>
             <div className="col-md-auto">
-                {allReviewCount} review{allReviewCount !== 1 && 's'}
+                {t('reviews.count', { count: allReviewCount })}
             </div>
             <a href={`/product/${productCode}/review/new`} className="col-md-auto">
-                Add your review
+                {t('reviews.addYourReview')}
             </a>
         </div>
     ) : (
         <div className="row mb-2">
             <div className="col-md-auto">{renderStars(0)}</div>
-            <div className="col-md-auto">0 reviews</div>
+            <div className="col-md-auto">{t('reviews.count', { count: 0 })}</div>
             <a href={`/product/${productCode}/review/new`} className="col-md-auto">
-                Add your review
+                {t('reviews.addYourReview')}
             </a>
         </div>
     );

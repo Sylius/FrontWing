@@ -1,5 +1,8 @@
+export const handle = { i18n: ["common","cart","account"] };
+
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
+import { useLocalizedNavigate } from "~/hooks/useLocalizedNavigate";
 import Default from "../../layouts/Default";
 import AccountLayout from "../../layouts/Account";
 import { useFlashMessages } from "../../context/FlashMessagesContext";
@@ -11,7 +14,8 @@ interface Country {
 }
 
 const AddAddressPage: React.FC = () => {
-    const navigate = useNavigate();
+    const { t } = useTranslation(["account", "common"]);
+    const navigate = useLocalizedNavigate();
     const { addMessage } = useFlashMessages();
 
     const [countries, setCountries] = useState<Country[]>([]);
@@ -69,11 +73,11 @@ const AddAddressPage: React.FC = () => {
 
             if (!res.ok) throw new Error("Failed to add address");
 
-            addMessage("success", "Address added successfully");
+            addMessage("success", t("addresses.add.addSuccess"));
             navigate("/account/address-book");
         } catch (error) {
             console.error("Error submitting address", error);
-            addMessage("error", "Failed to add address");
+            addMessage("error", t("addresses.add.addError"));
         } finally {
             setSubmitting(false);
         }
@@ -83,16 +87,16 @@ const AddAddressPage: React.FC = () => {
         <Default>
             <AccountLayout
                 breadcrumbs={[
-                    { label: "Home", url: "/" },
-                    { label: "My account", url: "/account/dashboard" },
-                    { label: "Address book", url: "/account/address-book" },
-                    { label: "Create", url: "/account/address-book/create" },
+                    { label: t("common:nav.home"), url: "/" },
+                    { label: t("common:nav.account"), url: "/account/dashboard" },
+                    { label: t("addresses.breadcrumb"), url: "/account/address-book" },
+                    { label: t("addresses.add.breadcrumb"), url: "/account/address-book/create" },
                 ]}
             >
                 <div className="col-12 col-md-9">
                     <div className="mb-4">
-                        <h1>Address book</h1>
-                        <p>Add address</p>
+                        <h1>{t("addresses.add.title")}</h1>
+                        <p>{t("addresses.add.subtitle")}</p>
                     </div>
 
                     <form onSubmit={handleSubmit}>
@@ -107,10 +111,10 @@ const AddAddressPage: React.FC = () => {
 
                         <div className="d-flex gap-2">
                             <button type="submit" className="btn btn-primary" disabled={submitting}>
-                                {submitting ? "Adding..." : "Add"}
+                                {submitting ? t("addresses.add.submitting") : t("addresses.add.submit")}
                             </button>
                             <button type="button" className="btn btn-outline-gray" onClick={() => navigate("/account/address-book")}>
-                                Cancel
+                                {t("addresses.add.cancel")}
                             </button>
                         </div>
                     </form>

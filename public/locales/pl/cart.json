@@ -1,0 +1,40 @@
+{
+  "page": {
+    "title": "Twój koszyk",
+    "subtitle": "Edytuj produkty, użyj kuponu lub przejdź do kasy",
+    "checkout": "Przejdź do kasy",
+    "clearCart": "Wyczyść koszyk",
+    "suggestions": "Może Ci się spodobać"
+  },
+  "table": {
+    "item": "Produkt",
+    "unitPrice": "Cena jednostkowa",
+    "quantity": "Ilość",
+    "total": "Razem"
+  },
+  "row": {
+    "unnamedProduct": "Produkt bez nazwy"
+  },
+  "coupon": {
+    "applied": "Zastosowany kupon:",
+    "remove": "Usuń kupon",
+    "placeholder": "Wpisz kod...",
+    "label": "Kod kuponu",
+    "apply": "Zastosuj kupon"
+  },
+  "summary": {
+    "title": "Podsumowanie",
+    "itemsTotal": "Wartość produktów:",
+    "discount": "Rabat:",
+    "shipping": "Szacowany koszt dostawy:",
+    "taxes": "Podatki:",
+    "orderTotal": "Razem do zapłaty:"
+  },
+  "empty": {
+    "info": "Informacja",
+    "message": "Twój koszyk jest pusty"
+  },
+  "miniCart": {
+    "ariaLabel": "przycisk koszyka"
+  }
+}
