@@ -19,10 +19,9 @@ import { useCustomer } from "~/context/CustomerContext";
 import { useOrder } from "~/context/OrderContext";
 import { LocalizedLink } from "~/components/LocalizedLink";
 import { localizePath } from "~/utils/localizedPath";
-import { orderTokenCookie } from "~/utils/cookies.server";
+import { readOrderToken } from "~/utils/orderTokenCookie";
 import { fetchOrderFromAPI } from "~/api/order.server";
 import type { AddressInterface, Order } from "~/types/Order";
-import type { Customer } from "~/types/Customer";
 
 interface Country {
     code: string;
@@ -42,7 +41,7 @@ const emptyAddress: AddressInterface = {
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
     const cookie = request.headers.get("Cookie");
-    const token = await orderTokenCookie.parse(cookie);
+    const token = readOrderToken(cookie);
     if (!token) return redirect(localizePath(params.lang!, "/cart"));
 
     const order = await fetchOrderFromAPI(token, true);

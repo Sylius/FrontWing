@@ -1,3 +1,12 @@
+import { serializeOrderToken } from "~/utils/orderTokenCookie";
+
+export class OrderFetchError extends Error {
+    constructor(readonly status: number) {
+        super(`Failed to fetch order (${status})`);
+        this.name = "OrderFetchError";
+    }
+}
+
 export async function pickupCartClient(): Promise<string> {
     const API_URL = window?.ENV?.API_URL || "";
 
@@ -11,7 +20,7 @@ export async function pickupCartClient(): Promise<string> {
 
     const data = await response.json();
 
-    document.cookie = `orderToken=${data.tokenValue}; path=/; max-age=2592000; SameSite=Lax`;
+    document.cookie = serializeOrderToken(data.tokenValue);
 
     return data.tokenValue;
 }
@@ -21,7 +30,7 @@ export async function fetchOrderFromAPIClient(token: string, throwOnFail = false
 
     const response = await fetch(`${API_URL}/api/v2/shop/orders/${token}`);
     if (!response.ok) {
-        if (throwOnFail) throw new Error("Failed to fetch order");
+        if (throwOnFail) throw new OrderFetchError(response.status);
         return null;
     }
 

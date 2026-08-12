@@ -22,7 +22,7 @@ import { ChannelProvider } from "~/context/ChannelContext";
 import bootstrapStylesHref from "bootstrap/dist/css/bootstrap.css?url";
 import mainStylesHref from "./assets/scss/main.scss?url";
 
-import { orderTokenCookie } from "~/utils/cookies.server";
+import { readOrderToken } from "~/utils/orderTokenCookie";
 import type { Taxon } from "~/types/Taxon";
 import type { Channel } from "~/types/Channel";
 import { fetchChannel } from "~/api/channel.server";
@@ -62,8 +62,7 @@ export const loader: LoaderFunction = async ({ request }) => {
     ];
 
     const cookieHeader = request.headers.get("Cookie");
-    const parsed = await orderTokenCookie.parse(cookieHeader);
-    const token = typeof parsed === "string" ? parsed : parsed?.token ?? "";
+    const token = readOrderToken(cookieHeader) ?? "";
 
     const API_URL = process.env.PUBLIC_API_URL!;
     const taxonTreeData = await fetch(
@@ -202,13 +201,7 @@ export default function App() {
                 __html: `
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', function () {
-          navigator.serviceWorker.register('/service-worker.js')
-            .then(function (registration) {
-              console.log('ServiceWorker registered: ', registration);
-            })
-            .catch(function (error) {
-              console.log('ServiceWorker registration failed: ', error);
-            });
+          navigator.serviceWorker.register('/service-worker.js');
         });
       }
     `,

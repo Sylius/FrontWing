@@ -16,7 +16,7 @@ import { useOrder } from "~/context/OrderContext";
 import Steps from "~/components/checkout/Steps";
 import { useCurrency } from "~/context/ChannelContext";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
-import { orderTokenCookie } from "~/utils/cookies.server";
+import { readOrderToken } from "~/utils/orderTokenCookie";
 import { fetchOrderFromAPI } from "~/api/order.server";
 import { LocalizedLink } from "~/components/LocalizedLink";
 import { localizePath } from "~/utils/localizedPath";
@@ -31,7 +31,7 @@ interface ShippingMethod {
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const cookieHeader = request.headers.get("Cookie");
-  const token = await orderTokenCookie.parse(cookieHeader);
+  const token = readOrderToken(cookieHeader);
 
   if (!token) return redirect(localizePath(params.lang!, "/cart"));
 

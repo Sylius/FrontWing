@@ -1,17 +1,16 @@
 export const handle = { i18n: ["common","cart","checkout"] };
 
-import React, { useEffect } from "react";
+import React from "react";
 import { useTranslation } from "react-i18next";
 import Layout from "~/layouts/Default";
 import { useCustomer } from "~/context/CustomerContext";
 import { useSearchParams, useLocation } from "react-router";
 import { LocalizedLink } from "~/components/LocalizedLink";
-import { useOrder } from "~/context/OrderContext";
+import { readOrderToken } from "~/utils/orderTokenCookie";
 
 export default function ThankYouPage() {
     const { t } = useTranslation("checkout");
     const { customer } = useCustomer();
-    const { resetCart } = useOrder();
     const [searchParams] = useSearchParams();
     const location = useLocation();
 
@@ -21,16 +20,7 @@ export default function ThankYouPage() {
     const token =
         tokenFromState ||
         tokenFromQuery ||
-        (typeof document !== "undefined"
-            ? document.cookie
-                .split("; ")
-                .find((row) => row.startsWith("orderToken="))
-                ?.split("=")[1]
-            : null);
-
-    useEffect(() => {
-        resetCart();
-    }, []);
+        (typeof document !== "undefined" ? readOrderToken(document.cookie) : null);
 
     return (
         <Layout>
