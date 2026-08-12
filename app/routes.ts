@@ -19,11 +19,9 @@ const checkoutRoutes: RouteConfig = onePageCheckoutEnabled
     ];
 
 export default [
-  // API (no language prefix)
   route("/api/sync-cart", "routes/api.sync-cart.tsx"),
 
   ...prefix(":lang", [
-    // Core
     index("routes/Homepage.tsx"),
     route("login", "routes/LoginPage.tsx"),
     route("register", "routes/RegisterPage.tsx"),
@@ -33,12 +31,10 @@ export default [
     route("verify", "routes/VerificationPage.tsx"),
     route("cart", "routes/CartPage.tsx"),
 
-    // Product
     route("product/:code/review/new", "routes/Product/AddReviewPage.tsx"),
     route("product/:code/reviews", "routes/Product/ReviewsListPage.tsx"),
     route("product/:code", "routes/Product/ProductPage.tsx"),
 
-    // Taxon routes
     route("category/:code", "routes/Product/ProductList.tsx"),
     route("category/:parentCode/:childCode", "routes/Product/ProductList.tsx", {
       id: "routes/Product/ProductListChild",
@@ -50,11 +46,9 @@ export default [
       id: "routes/Product/ProductListRootLegacy",
     }),
 
-    // Checkout
     ...checkoutRoutes,
     route("order/thank-you", "routes/Checkout/ThankYouPage.tsx"),
 
-    // Account
     route("account/dashboard", "routes/account/DashboardPage.tsx"),
     route("account/profile/edit", "routes/account/ProfilePage.tsx"),
     route("account/change-password", "routes/account/ChangePasswordPage.tsx"),

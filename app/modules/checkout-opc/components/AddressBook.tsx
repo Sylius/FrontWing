@@ -21,16 +21,13 @@ const AddressBook: React.FC<Props> = ({
     onSelect,
     onChange,
 }) => {
-    const { t } = useTranslation("checkout");
+    const { t } = useTranslation("checkout-opc");
 
     const matchesBook = (candidate: AddressInterface): boolean =>
         addresses.some((entry) => entry.id === candidate.id);
 
-    // Start in manual mode whenever the current address isn't a book entry —
-    // e.g. an empty shipping address or a restored custom-typed one.
     const [editing, setEditing] = useState(() => !matchesBook(address));
 
-    // No saved addresses: nothing to pick from, go straight to the form.
     if (addresses.length === 0) {
         return (
             <AddressFields
@@ -77,13 +74,11 @@ const AddressBook: React.FC<Props> = ({
                     onChange={(event) => {
                         const enabled = event.target.checked;
                         setEditing(enabled);
-                        // Leaving manual mode with a custom-typed address: fall
-                        // back to the first saved entry so a radio stays selected.
                         if (!enabled && !matchesBook(address)) onSelect(addresses[0]);
                     }}
                 />
                 <label className="form-check-label" htmlFor={`${idPrefix}-manual`}>
-                    {t("opc.address.enterManually")}
+                    {t("address.enterManually")}
                 </label>
             </div>
 

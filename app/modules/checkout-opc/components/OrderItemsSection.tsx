@@ -9,12 +9,12 @@ interface Props {
 }
 
 const OrderItemsSection: React.FC<Props> = ({ items, currencyCode }) => {
-    const { t } = useTranslation("checkout");
+    const { t } = useTranslation("checkout-opc");
 
     return (
-        <section aria-label={t("opc.items.ariaLabel")}>
+        <section aria-label={t("items.ariaLabel")}>
             {items.length === 0 ? (
-                <p className="text-body-tertiary mb-0">{t("opc.items.empty")}</p>
+                <p className="text-body-tertiary mb-0">{t("items.empty")}</p>
             ) : (
                 <div className="overflow-y-auto" style={{ maxHeight: "24rem" }}>
                     {items.map((item, index) => (

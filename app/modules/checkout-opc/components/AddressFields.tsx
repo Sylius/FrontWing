@@ -11,14 +11,14 @@ interface Props {
 }
 
 const AddressFields: React.FC<Props> = ({ idPrefix, address, countries, onChange }) => {
-    const { t } = useTranslation("checkout");
+    const { t } = useTranslation("checkout-opc");
 
     return (
         <>
             <div className="row">
                 <div className="col-md-6 mb-3">
                     <label className="form-label" htmlFor={`${idPrefix}-firstName`}>
-                        {t("opc.address.firstName")}
+                        {t("address.firstName")}
                     </label>
                     <input
                         id={`${idPrefix}-firstName`}
@@ -29,7 +29,7 @@ const AddressFields: React.FC<Props> = ({ idPrefix, address, countries, onChange
                 </div>
                 <div className="col-md-6 mb-3">
                     <label className="form-label" htmlFor={`${idPrefix}-lastName`}>
-                        {t("opc.address.lastName")}
+                        {t("address.lastName")}
                     </label>
                     <input
                         id={`${idPrefix}-lastName`}
@@ -42,7 +42,7 @@ const AddressFields: React.FC<Props> = ({ idPrefix, address, countries, onChange
 
             <div className="mb-3">
                 <label className="form-label" htmlFor={`${idPrefix}-company`}>
-                    {t("opc.address.company")}
+                    {t("address.company")}
                 </label>
                 <input
                     id={`${idPrefix}-company`}
@@ -54,7 +54,7 @@ const AddressFields: React.FC<Props> = ({ idPrefix, address, countries, onChange
 
             <div className="mb-3">
                 <label className="form-label" htmlFor={`${idPrefix}-street`}>
-                    {t("opc.address.street")}
+                    {t("address.street")}
                 </label>
                 <input
                     id={`${idPrefix}-street`}
@@ -67,7 +67,7 @@ const AddressFields: React.FC<Props> = ({ idPrefix, address, countries, onChange
             <div className="row">
                 <div className="col-md-6 mb-3">
                     <label className="form-label" htmlFor={`${idPrefix}-countryCode`}>
-                        {t("opc.address.country")}
+                        {t("address.country")}
                     </label>
                     <select
                         id={`${idPrefix}-countryCode`}
@@ -75,7 +75,7 @@ const AddressFields: React.FC<Props> = ({ idPrefix, address, countries, onChange
                         value={address.countryCode ?? ""}
                         onChange={(event) => onChange("countryCode", event.target.value)}
                     >
-                        <option value="">{t("opc.address.selectCountry")}</option>
+                        <option value="">{t("address.selectCountry")}</option>
                         {countries.map((country) => (
                             <option key={country.code} value={country.code}>
                                 {country.name}
@@ -85,7 +85,7 @@ const AddressFields: React.FC<Props> = ({ idPrefix, address, countries, onChange
                 </div>
                 <div className="col-md-6 mb-3">
                     <label className="form-label" htmlFor={`${idPrefix}-postcode`}>
-                        {t("opc.address.postcode")}
+                        {t("address.postcode")}
                     </label>
                     <input
                         id={`${idPrefix}-postcode`}
@@ -98,7 +98,7 @@ const AddressFields: React.FC<Props> = ({ idPrefix, address, countries, onChange
 
             <div className="mb-3">
                 <label className="form-label" htmlFor={`${idPrefix}-provinceName`}>
-                    {t("opc.address.province")}
+                    {t("address.province")}
                 </label>
                 <input
                     id={`${idPrefix}-provinceName`}
@@ -110,7 +110,7 @@ const AddressFields: React.FC<Props> = ({ idPrefix, address, countries, onChange
 
             <div className="mb-3">
                 <label className="form-label" htmlFor={`${idPrefix}-city`}>
-                    {t("opc.address.city")}
+                    {t("address.city")}
                 </label>
                 <input
                     id={`${idPrefix}-city`}
@@ -122,7 +122,7 @@ const AddressFields: React.FC<Props> = ({ idPrefix, address, countries, onChange
 
             <div className="mb-3">
                 <label className="form-label" htmlFor={`${idPrefix}-phoneNumber`}>
-                    {t("opc.address.phone")}
+                    {t("address.phone")}
                 </label>
                 <input
                     id={`${idPrefix}-phoneNumber`}

@@ -7,7 +7,7 @@ const COUPON_COLLAPSE_ID = "opc-coupon-collapse";
 
 const CouponRow: React.FC = () => {
     const { state, setCoupon } = useCheckout();
-    const { t } = useTranslation("checkout");
+    const { t } = useTranslation("checkout-opc");
     const [value, setValue] = useState("");
 
     const apply = () => {
@@ -27,7 +27,7 @@ const CouponRow: React.FC = () => {
                 <span className="d-flex align-items-center gap-2">
                     <IconPercentage className="icon icon-sm" stroke={2} />
                     <Trans
-                        i18nKey="opc.coupon.applied"
+                        i18nKey="coupon.applied"
                         t={t}
                         values={{ code: state.couponCode }}
                         components={{ strong: <strong /> }}
@@ -37,7 +37,7 @@ const CouponRow: React.FC = () => {
                 <button
                     type="button"
                     className="btn btn-sm btn-transparent px-2"
-                    aria-label={t("opc.coupon.remove")}
+                    aria-label={t("coupon.remove")}
                     onClick={remove}
                 >
                     <IconX className="icon icon-sm" stroke={2} />
@@ -58,7 +58,7 @@ const CouponRow: React.FC = () => {
             >
                 <span className="d-flex align-items-center gap-2">
                     <IconPercentage className="icon icon-sm" stroke={2} />
-                    {t("opc.coupon.apply")}
+                    {t("coupon.apply")}
                 </span>
 
                 <IconChevronDown className="icon icon-sm coupon-chevron" stroke={2} />
@@ -69,8 +69,8 @@ const CouponRow: React.FC = () => {
                     <input
                         type="text"
                         className="form-control"
-                        placeholder={t("opc.coupon.placeholder")}
-                        aria-label={t("opc.coupon.placeholder")}
+                        placeholder={t("coupon.placeholder")}
+                        aria-label={t("coupon.placeholder")}
                         value={value}
                         onChange={(event) => setValue(event.target.value)}
                         onKeyDown={(event) => {
@@ -86,7 +86,7 @@ const CouponRow: React.FC = () => {
                         onClick={apply}
                         disabled={value.trim() === ""}
                     >
-                        {t("opc.coupon.applyButton")}
+                        {t("coupon.applyButton")}
                     </button>
                 </div>
             </div>

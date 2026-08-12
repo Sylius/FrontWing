@@ -123,8 +123,6 @@ const toPricing = (item: PreviewItem): OrderItemPricing => ({
     discountedUnitPrice: item.discountedUnitPrice,
 });
 
-// Port of Sylius' sylius_order_item_original_price_to_display: the struck-through
-// "before" price, or null when there is nothing to cross out.
 export const originalPriceToDisplay = (pricing: OrderItemPricing): number | null => {
     const { originalUnitPrice, unitPrice, discountedUnitPrice } = pricing;
 
@@ -142,8 +140,6 @@ export const originalPriceToDisplay = (pricing: OrderItemPricing): number | null
     return null;
 };
 
-// Overlay preview pricing onto the order-derived display items: the discounted
-// unit price is what the customer pays, with the original price struck through.
 export const applyItemPricing = (
     items: OrderLineItem[],
     pricing: OrderItemPricing[],

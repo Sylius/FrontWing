@@ -5,10 +5,10 @@ import { CheckoutProvider } from "~/modules/checkout-opc/context/CheckoutContext
 import { useCheckoutInitialData } from "~/modules/checkout-opc/hooks/useCheckoutInitialData";
 import CheckoutContent from "~/modules/checkout-opc/components/CheckoutContent";
 
-export const handle = { i18n: ["common", "checkout"] };
+export const handle = { i18n: ["common", "checkout", "checkout-opc"] };
 
 const OnePageCheckoutPage: React.FC = () => {
-    const { t } = useTranslation("checkout");
+    const { t } = useTranslation("checkout-opc");
     const {
         token,
         isPending,
@@ -26,13 +26,13 @@ const OnePageCheckoutPage: React.FC = () => {
     return (
         <CheckoutLayout sidebarOn={false}>
             <div className="col-12 pt-4 pb-5">
-                <h1 className="h2 mb-4">{t("opc.title")}</h1>
+                <h1 className="h2 mb-4">{t("title")}</h1>
 
                 {(isPending || isEmptyOrder) && (
-                    <div className="text-center py-5">{t("opc.loading")}</div>
+                    <div className="text-center py-5">{t("loading")}</div>
                 )}
 
-                {isError && <div className="text-danger py-5">{t("opc.loadError")}</div>}
+                {isError && <div className="text-danger py-5">{t("loadError")}</div>}
 
                 {!isEmptyOrder &&
                     isReady &&

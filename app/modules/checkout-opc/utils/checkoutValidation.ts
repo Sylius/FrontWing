@@ -21,9 +21,6 @@ export const isAddressComplete = (address: AddressInterface): boolean =>
 
 export const isEmailValid = (email: string): boolean => EMAIL_PATTERN.test(email.trim());
 
-// "Pay now securely" is enabled only when the order is actually payable: a valid email,
-// a complete billing address (and shipping address when it differs), both methods chosen,
-// at least one item, and no recalculation in flight (§10 pkt 5).
 export const canSubmitCheckout = (state: CheckoutState, isRecalculating: boolean): boolean => {
     if (isRecalculating) return false;
     if (!isEmailValid(state.email)) return false;

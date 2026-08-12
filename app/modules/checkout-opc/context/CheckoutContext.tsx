@@ -81,7 +81,6 @@ export const checkoutReducer = (state: CheckoutState, action: CheckoutAction): C
                 ...getAddress(state, action.scope),
                 [action.field]: action.value,
             };
-            // An edited address is no longer the address book entry it came from.
             delete next.id;
             return withAddress(state, action.scope, next);
         }

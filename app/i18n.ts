@@ -1,6 +1,6 @@
 import type { InitOptions, Resource } from "i18next";
 
-export const NAMESPACES = ["common", "product", "cart", "checkout", "account"] as const;
+export const NAMESPACES = ["common", "product", "cart", "checkout", "checkout-opc", "account"] as const;
 export type Namespace = (typeof NAMESPACES)[number];
 
 export const DEFAULT_NS: Namespace = "common";

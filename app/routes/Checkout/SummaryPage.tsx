@@ -27,7 +27,6 @@ const SummaryPage: React.FC = () => {
     setIsSubmitting(true);
 
     if (!order?.tokenValue) {
-      console.warn("Missing order token");
       setIsSubmitting(false);
       return;
     }

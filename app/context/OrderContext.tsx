@@ -38,7 +38,6 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const createNewOrder = async (reason?: string) => {
         if (creatingRef.current) return;
         creatingRef.current = true;
-        console.warn("[cart] creating a new order", { reason, previousToken: orderToken });
 
         try {
             const response = await fetch(`${window.ENV?.API_URL}/api/v2/shop/orders`, {
@@ -122,7 +121,6 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     useEffect(() => {
         if (orderQuery.data?.checkoutState === "completed") {
-            console.warn("[cart] order is completed — recreating", { token: orderToken });
             createNewOrder("order completed");
         }
     }, [orderQuery.data]);
@@ -131,9 +129,7 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const error = orderQuery.error;
         if (!error) return;
         const status = error instanceof OrderFetchError ? error.status : null;
-        console.warn("[cart] order query error", { token: orderToken, status, error });
         if (status === 404) {
-            console.warn("[cart] order token lost (404) — recreating", { token: orderToken });
             createNewOrder("order fetch 404");
         }
     }, [orderQuery.error]);

@@ -15,21 +15,21 @@ interface Props {
 
 const ShippingMethodSection: React.FC<Props> = ({ methods, currencyCode, changedNotice }) => {
     const { state, setShippingMethod } = useCheckout();
-    const { t } = useTranslation("checkout");
+    const { t } = useTranslation("checkout-opc");
 
     return (
         <fieldset className="mb-5">
-            <legend className="h5 mb-4">{t("opc.shipping.legend")}</legend>
+            <legend className="h5 mb-4">{t("shipping.legend")}</legend>
 
             {changedNotice && (
                 <div className="alert alert-warning d-flex align-items-center gap-2" role="alert">
                     <IconAlertTriangle className="icon icon-sm flex-shrink-0" stroke={2} />
-                    <span>{t("opc.shipping.methodsChanged")}</span>
+                    <span>{t("shipping.methodsChanged")}</span>
                 </div>
             )}
 
             {methods.length === 0 ? (
-                <div className="text-danger">{t("opc.shipping.noMethods")}</div>
+                <div className="text-danger">{t("shipping.noMethods")}</div>
             ) : (
                 methods.map((method, index) => (
                     <div key={method.code} className={index > 0 ? "border-top" : undefined}>
@@ -52,7 +52,7 @@ const ShippingMethodSection: React.FC<Props> = ({ methods, currencyCode, changed
                                 {method.estimatedDelivery && (
                                     <div className="d-flex align-items-center gap-1 text-body-tertiary small">
                                         <IconCalendarMonth className="icon icon-xs" stroke={2} />
-                                        {t("opc.shipping.estimatedDelivery", {
+                                        {t("shipping.estimatedDelivery", {
                                             range: formatDeliveryRange(method.estimatedDelivery),
                                         })}
                                     </div>

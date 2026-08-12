@@ -40,8 +40,6 @@ const CheckoutContent: React.FC<Props> = ({
     const { submit, isSubmitting, errorMessage } = useCheckoutSubmit(token);
     const { shippingSectionRef, shippingMethodsChanged } = useMethodReconciliation(summary);
 
-    // Prices shown per line come from the preview (reflects coupons/promotions),
-    // while the order supplies the display metadata (name, image, variant).
     const displayItems = useMemo(
         () => applyItemPricing(items, summary.items),
         [items, summary.items],
@@ -51,7 +49,6 @@ const CheckoutContent: React.FC<Props> = ({
         savePersistedCheckoutState(token, state);
     }, [state, token]);
 
-    // The live order owns items; mirror it so the recalculation reflects removals.
     useEffect(() => {
         setItems(items.map(({ id, quantity }) => ({ id, quantity })));
     }, [items, setItems]);

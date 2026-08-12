@@ -10,14 +10,14 @@ interface Props {
 
 const PaymentMethodSection: React.FC<Props> = ({ methods }) => {
     const { state, setPaymentMethod } = useCheckout();
-    const { t } = useTranslation("checkout");
+    const { t } = useTranslation("checkout-opc");
 
     return (
         <fieldset className="mb-5">
-            <legend className="h5 mb-4">{t("opc.payment.legend")}</legend>
+            <legend className="h5 mb-4">{t("payment.legend")}</legend>
 
             {methods.length === 0 ? (
-                <div className="text-danger">{t("opc.payment.noMethods")}</div>
+                <div className="text-danger">{t("payment.noMethods")}</div>
             ) : (
                 methods.map((method, index) => (
                     <div key={method.code} className={index > 0 ? "border-top" : undefined}>
